@@ -1,0 +1,828 @@
+,TSS Code,Source Site,Study Name,BCR,Study Abbreviation
+0,01,International Genomics Consortium,Ovarian serous cystadenocarcinoma,IGC,OV
+1,04,Gynecologic Oncology Group,Ovarian serous cystadenocarcinoma,IGC,OV
+2,09,UCSF,Ovarian serous cystadenocarcinoma,IGC,OV
+3,10,MD Anderson Cancer Center,Ovarian serous cystadenocarcinoma,IGC,OV
+4,13,Memorial Sloan Kettering,Ovarian serous cystadenocarcinoma,IGC,OV
+5,20,Fox Chase Cancer Center,Ovarian serous cystadenocarcinoma,IGC,OV
+6,23,Cedars Sinai,Ovarian serous cystadenocarcinoma,IGC,OV
+7,24,Washington University,Ovarian serous cystadenocarcinoma,IGC,OV
+8,25,Mayo Clinic - Rochester,Ovarian serous cystadenocarcinoma,IGC,OV
+9,29,Duke,Ovarian serous cystadenocarcinoma,IGC,OV
+10,30,Harvard,Ovarian serous cystadenocarcinoma,IGC,OV
+11,31,Imperial College,Ovarian serous cystadenocarcinoma,IGC,OV
+12,36,BC Cancer Agency,Ovarian serous cystadenocarcinoma,IGC,OV
+13,3P,Greenville Health System,Ovarian serous cystadenocarcinoma,NCH,OV
+14,42,Christiana Healthcare,Ovarian serous cystadenocarcinoma,IGC,OV
+15,4D,Molecular Response,Ovarian serous cystadenocarcinoma,NCH,OV
+16,57,International Genomics Consortium,Ovarian serous cystadenocarcinoma,IGC,OV
+17,59,Roswell Park,Ovarian serous cystadenocarcinoma,IGC,OV
+18,5X,University of Alabama,Ovarian serous cystadenocarcinoma,NCH,OV
+19,61,University of Pittsburgh,Ovarian serous cystadenocarcinoma,IGC,OV
+20,72,NCH,Ovarian serous cystadenocarcinoma,IGC,OV
+21,OY,University of North Carolina,Ovarian serous cystadenocarcinoma,NCH,OV
+22,QJ,Mount Sinai School of Medicine,Ovarian serous cystadenocarcinoma,NCH,OV
+23,R9,Candler,Ovarian serous cystadenocarcinoma,NCH,OV
+24,VG,Institute of Human Virology Nigeria,Ovarian serous cystadenocarcinoma,NCH,OV
+25,WR,University of Kansas,Ovarian serous cystadenocarcinoma,NCH,OV
+26,02,MD Anderson Cancer Center,Glioblastoma multiforme,IGC,GBM
+27,06,Henry Ford Hospital,Glioblastoma multiforme,IGC,GBM
+28,08,UCSF,Glioblastoma multiforme,IGC,GBM
+29,12,Duke,Glioblastoma multiforme,IGC,GBM
+30,14,Emory University,Glioblastoma multiforme,IGC,GBM
+31,15,Mayo Clinic - Rochester,Glioblastoma multiforme,IGC,GBM
+32,16,Toronto Western Hospital,Glioblastoma multiforme,IGC,GBM
+33,19,Case Western,Glioblastoma multiforme,IGC,GBM
+34,26,University of Florida,Glioblastoma multiforme,IGC,GBM
+35,27,"Milan - Italy, Fondazione IRCCS Instituto Neuroligico C. Besta",Glioblastoma multiforme,IGC,GBM
+36,28,Cedars Sinai,Glioblastoma multiforme,IGC,GBM
+37,32,St. Joseph's Hospital (AZ),Glioblastoma multiforme,IGC,GBM
+38,41,Christiana Healthcare,Glioblastoma multiforme,IGC,GBM
+39,4W,University of Miami,Glioblastoma multiforme,NCH,GBM
+40,65,Roswell Park,Glioblastoma multiforme,IGC,GBM
+41,74,Swedish Neurosciences,Glioblastoma multiforme,IGC,GBM
+42,76,Thomas Jefferson University,Glioblastoma multiforme,IGC,GBM
+43,81,CHI-Penrose Colorado,Glioblastoma multiforme,IGC,GBM
+44,87,International Genomics Consortium,Glioblastoma multiforme,IGC,GBM
+45,OX,University of North Carolina,Glioblastoma multiforme,NCH,GBM
+46,RR,St. Joseph's Hospital AZ,Glioblastoma multiforme,NCH,GBM
+47,05,Indivumed,Lung adenocarcinoma,IGC,LUAD
+48,17,Washington University,Lung adenocarcinoma,IGC,LUAD
+49,35,Cureline,Lung adenocarcinoma,IGC,LUAD
+50,38,UNC,Lung adenocarcinoma,IGC,LUAD
+51,44,Christiana Healthcare,Lung adenocarcinoma,IGC,LUAD
+52,49,Johns Hopkins,Lung adenocarcinoma,IGC,LUAD
+53,4B,Mary Bird Perkins Cancer Center - Our Lady of the Lake,Lung adenocarcinoma,NCH,LUAD
+54,50,University of Pittsburgh,Lung adenocarcinoma,IGC,LUAD
+55,53,University of Miami,Lung adenocarcinoma,IGC,LUAD
+56,55,International Genomics Consortium,Lung adenocarcinoma,IGC,LUAD
+57,62,Thoraxklinik at University Hospital Heidelberg,Lung adenocarcinoma,IGC,LUAD
+58,64,Fox Chase,Lung adenocarcinoma,IGC,LUAD
+59,67,St Joseph's Medical Center (MD),Lung adenocarcinoma,IGC,LUAD
+60,69,Washington University - Cleveland Clinic,Lung adenocarcinoma,IGC,LUAD
+61,71,ILSBio,Lung adenocarcinoma,IGC,LUAD
+62,73,Roswell Park,Lung adenocarcinoma,IGC,LUAD
+63,75,Ontario Institute for Cancer Research (OICR),Lung adenocarcinoma,IGC,LUAD
+64,78,Prince Charles Hospital,Lung adenocarcinoma,IGC,LUAD
+65,80,Ontario Institute for Cancer Research (OICR)/Ottawa,Lung adenocarcinoma,IGC,LUAD
+66,83,CHI-Penrose Colorado,Lung adenocarcinoma,IGC,LUAD
+67,86,Asterand,Lung adenocarcinoma,IGC,LUAD
+68,91,ABS - IUPUI,Lung adenocarcinoma,IGC,LUAD
+69,93,Washington University - St. Louis,Lung adenocarcinoma,IGC,LUAD
+70,95,Washington University - Emory,Lung adenocarcinoma,IGC,LUAD
+71,97,Washington University - NYU,Lung adenocarcinoma,IGC,LUAD
+72,99,Washington University - Alabama,Lung adenocarcinoma,IGC,LUAD
+73,J2,ABS - Lahey Clinic,Lung adenocarcinoma,IGC,LUAD
+74,L4,Gundersen Lutheran Health System,Lung adenocarcinoma,IGC,LUAD
+75,L9,Candler,Lung adenocarcinoma,IGC,LUAD
+76,ME,University of Minnesota,Lung adenocarcinoma,NCH,LUAD
+77,MN,BLN - Baylor,Lung adenocarcinoma,NCH,LUAD
+78,MP,Washington University - Mayo Clinic,Lung adenocarcinoma,NCH,LUAD
+79,NB,Washington University - CHUV,Lung adenocarcinoma,NCH,LUAD
+80,NJ,Washington University - Rush University,Lung adenocarcinoma,NCH,LUAD
+81,O1,Washington University - CALGB,Lung adenocarcinoma,NCH,LUAD
+82,S2,Albert Einstein Medical Center,Lung adenocarcinoma,NCH,LUAD
+83,T6,Molecular Response,Lung adenocarcinoma,NCH,LUAD
+86,11,MD Anderson Cancer Center,Lung squamous cell carcinoma,IGC,LUSC
+87,18,Princess Margaret Hospital (Canada),Lung squamous cell carcinoma,IGC,LUSC
+88,21,Fox Chase Cancer Center,Lung squamous cell carcinoma,IGC,LUSC
+89,22,Mayo Clinic - Rochester,Lung squamous cell carcinoma,IGC,LUSC
+90,33,Johns Hopkins,Lung squamous cell carcinoma,IGC,LUSC
+91,34,University of Pittsburgh,Lung squamous cell carcinoma,IGC,LUSC
+92,37,Cureline,Lung squamous cell carcinoma,IGC,LUSC
+93,39,MSKCC,Lung squamous cell carcinoma,IGC,LUSC
+94,43,Christiana Healthcare,Lung squamous cell carcinoma,IGC,LUSC
+95,46,St. Joseph's Medical Center (MD),Lung squamous cell carcinoma,IGC,LUSC
+96,51,UNC,Lung squamous cell carcinoma,IGC,LUSC
+97,52,University of Miami,Lung squamous cell carcinoma,IGC,LUSC
+98,56,International Genomics Consortium,Lung squamous cell carcinoma,IGC,LUSC
+99,58,Thoraxklinik at University Hospital Heidelberg,Lung squamous cell carcinoma,IGC,LUSC
+100,60,Roswell Park,Lung squamous cell carcinoma,IGC,LUSC
+101,63,Ontario Institute for Cancer Research,Lung squamous cell carcinoma,IGC,LUSC
+102,66,Indivumed,Lung squamous cell carcinoma,IGC,LUSC
+103,68,Washington University - Cleveland Clinic,Lung squamous cell carcinoma,IGC,LUSC
+104,6A,University of Kansas,Lung squamous cell carcinoma,NCH,LUSC
+105,70,ILSBio,Lung squamous cell carcinoma,IGC,LUSC
+106,77,Prince Charles Hospital,Lung squamous cell carcinoma,IGC,LUSC
+107,79,Ontario Institute for Cancer Research (OICR)/Ottawa,Lung squamous cell carcinoma,IGC,LUSC
+108,82,CHI-Penrose Colorado,Lung squamous cell carcinoma,IGC,LUSC
+109,85,Asterand,Lung squamous cell carcinoma,IGC,LUSC
+110,90,ABS - IUPUI,Lung squamous cell carcinoma,IGC,LUSC
+111,92,Washington University - St. Louis,Lung squamous cell carcinoma,IGC,LUSC
+112,94,Washington University - Emory,Lung squamous cell carcinoma,IGC,LUSC
+113,96,Washington University - NYU,Lung squamous cell carcinoma,IGC,LUSC
+114,98,Washington University - Alabama,Lung squamous cell carcinoma,IGC,LUSC
+115,J1,ABS - Lahey Clinic,Lung squamous cell carcinoma,IGC,LUSC
+116,L3,Gundersen Lutheran Health System,Lung squamous cell carcinoma,IGC,LUSC
+117,LA,Candler,Lung squamous cell carcinoma,IGC,LUSC
+118,MF,University of Minnesota,Lung squamous cell carcinoma,NCH,LUSC
+119,ML,BLN - Baylor,Lung squamous cell carcinoma,NCH,LUSC
+120,NC,Washington University - CHUV,Lung squamous cell carcinoma,NCH,LUSC
+121,NK,Washington University - Rush University,Lung squamous cell carcinoma,NCH,LUSC
+122,O2,Washington University - CALGB,Lung squamous cell carcinoma,NCH,LUSC
+123,OC,Saint Mary's Health Care,Lung squamous cell carcinoma,NCH,LUSC
+124,UJ, Boston Medical Center,Lung squamous cell carcinoma,NCH,LUSC
+125,WG,Greenville Health System,Lung squamous cell carcinoma,NCH,LUSC
+126,XC,Albert Einstein Medical Center,Lung squamous cell carcinoma,NCH,LUSC
+127,ZE,Spectrum Health,Lung squamous cell carcinoma,NCH,LUSC
+128,1Z,Johns Hopkins,Thymoma,NCH,THYM
+129,3G,MD Anderson Cancer Center,Thymoma,NCH,THYM
+130,3Q,Greenville Health Systems,Thymoma,NCH,THYM
+131,3S,University of New Mexico,Thymoma,NCH,THYM
+132,3T,Emory University,Thymoma,NCH,THYM
+133,4V,Hospital Louis Pradel,Thymoma,NCH,THYM
+134,4X,Yale University,Thymoma,NCH,THYM
+135,5G,Cleveland Clinic Foundation,Thymoma,NCH,THYM
+136,5K,St. Joseph's Hospital AZ,Thymoma,NCH,THYM
+137,5U,Regina Elena National Cancer Institute,Thymoma,NCH,THYM
+138,5V,Roswell Park,Thymoma,NCH,THYM
+139,X7,ABS IUPUI,Thymoma,NCH,THYM
+140,XH,BLN Baylor,Thymoma,NCH,THYM
+141,XM,MSKCC,Thymoma,NCH,THYM
+142,XU,University Health Network,Thymoma,NCH,THYM
+143,YT,Barretos Cancer Hospital,Thymoma,NCH,THYM
+144,ZB,Thoraxklinik,Thymoma,NCH,THYM
+145,ZC, University of Mannheim,Thymoma,NCH,THYM
+146,ZL,Valley Hospital,Thymoma,NCH,THYM
+147,ZT, International Genomics Consortium,Thymoma,NCH,THYM
+148,2A,Memorial Sloan Kettering Cancer Center,Prostate adenocarcinoma,NCH,PRAD
+149,4L,"Proteogenex, Inc.",Prostate adenocarcinoma,NCH,PRAD
+150,4S,Duke University,Prostate adenocarcinoma,NCH,PRAD
+151,CH,Indivumed,Prostate adenocarcinoma,IGC,PRAD
+152,EJ,University of Pittsburgh,Prostate adenocarcinoma,IGC,PRAD
+153,FC,Asterand,Prostate adenocarcinoma,IGC,PRAD
+154,G9,Roswell Park,Prostate adenocarcinoma,IGC,PRAD
+155,H9,ABS - IUPUI,Prostate adenocarcinoma,IGC,PRAD
+156,HC,International Genomics Consortium,Prostate adenocarcinoma,IGC,PRAD
+157,HI,Fox Chase,Prostate adenocarcinoma,IGC,PRAD
+158,J4,ABS - Lahey Clinic,Prostate adenocarcinoma,IGC,PRAD
+159,J9,Melbourne Health,Prostate adenocarcinoma,IGC,PRAD
+160,KC,Cornell Medical College,Prostate adenocarcinoma,IGC,PRAD
+161,KK,MD Anderson Cancer Center,Prostate adenocarcinoma,IGC,PRAD
+162,M7,University of North Carolina,Prostate adenocarcinoma,NCH,PRAD
+163,MG,BLN - Baylor,Prostate adenocarcinoma,NCH,PRAD
+164,QU,Harvard Beth Israel,Prostate adenocarcinoma,NCH,PRAD
+165,SU,Global Bioclinical-Moldova,Prostate adenocarcinoma,NCH,PRAD
+166,TK,Global BioClinical - Georgia,Prostate adenocarcinoma,NCH,PRAD
+167,TP,Maine Medical Center,Prostate adenocarcinoma,NCH,PRAD
+168,UR, Boston Medical Center,Prostate adenocarcinoma,NCH,PRAD
+169,V1,University of California San Francisco,Prostate adenocarcinoma,NCH,PRAD
+170,V2,Cleveland Clinic Foundation,Prostate adenocarcinoma,NCH,PRAD
+171,VN,NCI Urologic Oncology Branch,Prostate adenocarcinoma,NCH,PRAD
+172,VP,Washington University,Prostate adenocarcinoma,NCH,PRAD
+173,WW,Wake Forest University,Prostate adenocarcinoma,NCH,PRAD
+174,X4,Institute for Medical Research,Prostate adenocarcinoma,NCH,PRAD
+175,XA, University of Minnesota,Prostate adenocarcinoma,NCH,PRAD
+176,XJ,University of Kansas,Prostate adenocarcinoma,NCH,PRAD
+177,XK,Mayo Clinic Arizona,Prostate adenocarcinoma,NCH,PRAD
+178,XQ,University of Sao Paulo,Prostate adenocarcinoma,NCH,PRAD
+179,Y6,University of Arizona,Prostate adenocarcinoma,NCH,PRAD
+180,YJ,Stanford University,Prostate adenocarcinoma,NCH,PRAD
+181,YL,PROCURE Biobank,Prostate adenocarcinoma,NCH,PRAD
+182,ZG,University Medical Center Hamburg-Eppendorf,Prostate adenocarcinoma,NCH,PRAD
+183,2E,University of Kansas Medical Center,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+184,4E,Molecular Response,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+185,5B,Medical College of Wisconsin,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+186,5S,Holy Cross,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+187,5W,University of Alabama,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+188,A5,Cedars Sinai,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+189,AJ,International Genomics Conosrtium,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+190,AP,MSKCC,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+191,AW,Cureline,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+192,AX,Gynecologic Oncology Group,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+193,B5,Duke,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+194,BG,University of Pittsburgh,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+195,BK,Christiana Healthcare,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+196,BS,University of Hawaii,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+197,D1,Mayo Clinic,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+198,DF,Ontario Institute for Cancer Research,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+199,DI,MD Anderson,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+200,E6,Roswell Park,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+201,EC,Asterand,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+202,EO,University Health Network,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+203,EY,University of North Carolina,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+204,FI,Washington University,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+205,FL,University of Hawaii - Normal Study,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+206,GG,ABS - IUPUI,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+207,H5,Medical College of Georgia,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+208,JU,BLN - Baylor,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+209,K6,ABS - Lahey Clinic,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+210,KE,Mount Sinai School of Medicine,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+211,KJ,University of Miami,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+212,KP,British Columbia Cancer Agency,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+213,PG,Montefiore Medical Center,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+214,QF,BLN - Baylor,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+215,QS,Candler,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+216,SJ,Albert Einstein Medical Center,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+217,SL,St. Joseph's Hospital AZ,Uterine Corpus Endometrial Carcinoma,NCH,UCEC
+218,2F,Erasmus MC,Bladder Urothelial Carcinoma,NCH,BLCA
+219,4Z,Barretos Cancer Hospital,Bladder Urothelial Carcinoma,NCH,BLCA
+220,5N,University Hospital Erlangen,Bladder Urothelial Carcinoma,NCH,BLCA
+221,BL,Christiana Healthcare,Bladder Urothelial Carcinoma,NCH,BLCA
+222,BT,University of Pittsburgh,Bladder Urothelial Carcinoma,NCH,BLCA
+223,C4,Indivumed,Bladder Urothelial Carcinoma,NCH,BLCA
+224,CF,ILSBio,Bladder Urothelial Carcinoma,NCH,BLCA
+225,CU,UNC,Bladder Urothelial Carcinoma,NCH,BLCA
+226,DK,Memorial Sloan Kettering,Bladder Urothelial Carcinoma,NCH,BLCA
+227,E5,Roswell Park,Bladder Urothelial Carcinoma,NCH,BLCA
+228,E7,Asterand,Bladder Urothelial Carcinoma,NCH,BLCA
+229,FD,BLN - University Of Chicago,Bladder Urothelial Carcinoma,NCH,BLCA
+230,FJ,BLN - Baylor,Bladder Urothelial Carcinoma,NCH,BLCA
+231,FT,BLN - University of Miami,Bladder Urothelial Carcinoma,NCH,BLCA
+232,G2,MD Anderson,Bladder Urothelial Carcinoma,NCH,BLCA
+233,GC,International Genomics Consortium,Bladder Urothelial Carcinoma,NCH,BLCA
+234,GD,ABS - IUPUI,Bladder Urothelial Carcinoma,NCH,BLCA
+235,GU,BLN - UT Southwestern Medical Center at Dallas,Bladder Urothelial Carcinoma,NCH,BLCA
+236,GV,BLN - Cleveland Clinic,Bladder Urothelial Carcinoma,NCH,BLCA
+237,H4,Medical College of Georgia,Bladder Urothelial Carcinoma,NCH,BLCA
+238,HQ,Ontario Institute for Cancer Research (OICR),Bladder Urothelial Carcinoma,NCH,BLCA
+239,K4,ABS - Lahey Clinic,Bladder Urothelial Carcinoma,NCH,BLCA
+240,KQ,Cornell Medical College,Bladder Urothelial Carcinoma,NCH,BLCA
+241,LC,Hartford Hospital,Bladder Urothelial Carcinoma,NCH,BLCA
+242,LT,Gundersen Lutheran Health System,Bladder Urothelial Carcinoma,NCH,BLCA
+243,MV,University of Minnesota,Bladder Urothelial Carcinoma,NCH,BLCA
+244,PQ,University of Colorado Denver,Bladder Urothelial Carcinoma,NCH,BLCA
+245,R3,CHI-Penrose Colorado,Bladder Urothelial Carcinoma,NCH,BLCA
+246,S5, University of Oklahoma HSC,Bladder Urothelial Carcinoma,NCH,BLCA
+247,SY,Mayo Clinic Arizona,Bladder Urothelial Carcinoma,NCH,BLCA
+248,UY,University of California San Francisco,Bladder Urothelial Carcinoma,NCH,BLCA
+249,X5,Institute of Human Virology Nigeria,Bladder Urothelial Carcinoma,NCH,BLCA
+250,XF,University of Southern California,Bladder Urothelial Carcinoma,NCH,BLCA
+251,YC,Spectrum Health,Bladder Urothelial Carcinoma,NCH,BLCA
+252,YF,University of Puerto Rico,Bladder Urothelial Carcinoma,NCH,BLCA
+253,ZF,University of Sheffield,Bladder Urothelial Carcinoma,NCH,BLCA
+254,2G,Erasmus MC,Testicular Germ Cell Tumors,NCH,TGCT
+255,2X,ABS IUPUI,Testicular Germ Cell Tumors,NCH,TGCT
+256,4K,"Proteogenex, Inc.",Testicular Germ Cell Tumors,NCH,TGCT
+257,S6,Gundersen Lutheran Health System,Testicular Germ Cell Tumors,NCH,TGCT
+258,SB,Baylor College of Medicine,Testicular Germ Cell Tumors,NCH,TGCT
+259,SN,BLN - Baylor,Testicular Germ Cell Tumors,NCH,TGCT
+260,SO,University of Minnesota,Testicular Germ Cell Tumors,NCH,TGCT
+261,VF,University of Pennsylvania,Testicular Germ Cell Tumors,NCH,TGCT
+262,W4,University of North Carolina,Testicular Germ Cell Tumors,NCH,TGCT
+263,WZ, International Genomics Consortium,Testicular Germ Cell Tumors,NCH,TGCT
+264,X3,Cleveland Clinic Foundation,Testicular Germ Cell Tumors,NCH,TGCT
+265,XE,University of Southern California,Testicular Germ Cell Tumors,NCH,TGCT
+266,XY,Spectrum Health,Testicular Germ Cell Tumors,NCH,TGCT
+267,YU,Barretos Cancer Hospital,Testicular Germ Cell Tumors,NCH,TGCT
+268,ZM,University of Ulm,Testicular Germ Cell Tumors,NCH,TGCT
+269,2H,Erasmus MC,Esophageal carcinoma ,NCH,ESCA
+270,2M,Technical University of Munich,Esophageal carcinoma ,NCH,ESCA
+271,IC,University of Pittsburgh,Esophageal carcinoma ,NCH,ESCA
+272,IG,Asterand,Esophageal carcinoma ,NCH,ESCA
+273,JY,University Health Network,Esophageal carcinoma ,NCH,ESCA
+274,JZ,University of Rochester,Esophageal carcinoma ,NCH,ESCA
+275,KA,ABS - Lahey Clinic,Esophageal carcinoma ,NCH,ESCA
+276,KH,Memorial Sloan Kettering,Esophageal carcinoma ,NCH,ESCA
+277,L5,University of Michigan,Esophageal carcinoma ,NCH,ESCA
+278,L7,Christiana Care,Esophageal carcinoma ,NCH,ESCA
+279,LN,ILSBIO,Esophageal carcinoma ,NCH,ESCA
+280,M9,Ontario Institute for Cancer Research (OICR),Esophageal carcinoma ,NCH,ESCA
+281,Q9,Emory University,Esophageal carcinoma ,NCH,ESCA
+282,R6,MD Anderson Cancer Center,Esophageal carcinoma ,NCH,ESCA
+283,RE,Peter MacCallum Cancer Center,Esophageal carcinoma ,NCH,ESCA
+284,S8,ABS - IUPUI,Esophageal carcinoma ,NCH,ESCA
+285,V5,Duke University,Esophageal carcinoma ,NCH,ESCA
+286,VR,Barretos Cancer Hospital,Esophageal carcinoma ,NCH,ESCA
+287,X8,St. Joseph's Hospital Arizona,Esophageal carcinoma ,NCH,ESCA
+288,XB,Albert Einstein Medical Center,Esophageal carcinoma ,NCH,ESCA
+289,XP,University of Sao Paulo,Esophageal carcinoma ,NCH,ESCA
+290,Z6,Cureline,Esophageal carcinoma ,NCH,ESCA
+291,ZR,Tayside Tissue Bank,Esophageal carcinoma ,NCH,ESCA
+292,2J,Mayo Clinic,Pancreatic adenocarcinoma,NCH,PAAD
+293,2L,Technical University of Munich,Pancreatic adenocarcinoma,NCH,PAAD
+294,2P,University of California San Diego,Pancreatic adenocarcinoma,NCH,PAAD
+295,3A,Moffitt Cancer Center,Pancreatic adenocarcinoma,NCH,PAAD
+296,3E,Columbia University,Pancreatic adenocarcinoma,NCH,PAAD
+297,5Q,"Proteogenex, Inc",Pancreatic adenocarcinoma,NCH,PAAD
+298,F2,UNC,Pancreatic adenocarcinoma,IGC,PAAD
+299,FB,Asterand,Pancreatic adenocarcinoma,IGC,PAAD
+300,FQ,Johns Hopkins,Pancreatic adenocarcinoma,IGC,PAAD
+301,FZ,University of Pittsburgh,Pancreatic adenocarcinoma,IGC,PAAD
+302,H6,Christiana Healthcare,Pancreatic adenocarcinoma,IGC,PAAD
+303,H8,ABS - IUPUI,Pancreatic adenocarcinoma,IGC,PAAD
+304,HV,National Cancer Center Korea,Pancreatic adenocarcinoma,IGC,PAAD
+305,HZ,International Genomics Consortium,Pancreatic adenocarcinoma,IGC,PAAD
+306,IB,Alberta Health Services,Pancreatic adenocarcinoma,IGC,PAAD
+307,KG,Baylor Network,Pancreatic adenocarcinoma,IGC,PAAD
+308,L1,Hartford,Pancreatic adenocarcinoma,IGC,PAAD
+309,LB,Candler,Pancreatic adenocarcinoma,IGC,PAAD
+310,M8,Ontario Institute for Cancer Research (OICR),Pancreatic adenocarcinoma,NCH,PAAD
+311,OE,Saint Mary's Health Care,Pancreatic adenocarcinoma,NCH,PAAD
+312,P9,University of Minnesota,Pancreatic adenocarcinoma,NCH,PAAD
+313,PZ, ABS - Lahey Clinic,Pancreatic adenocarcinoma,NCH,PAAD
+314,Q3,University of Oklahoma HSC,Pancreatic adenocarcinoma,NCH,PAAD
+315,RB,Emory University,Pancreatic adenocarcinoma,NCH,PAAD
+316,RL,St. Joseph's Hospital AZ,Pancreatic adenocarcinoma,NCH,PAAD
+317,RV,Northwestern University,Pancreatic adenocarcinoma,NCH,PAAD
+318,S4,University of Chicago,Pancreatic adenocarcinoma,NCH,PAAD
+319,SD,MD Anderson,Pancreatic adenocarcinoma,NCH,PAAD
+320,US,Garvan Institute of Medical Research,Pancreatic adenocarcinoma,NCH,PAAD
+321,WF,Greenville Health System,Pancreatic adenocarcinoma,NCH,PAAD
+322,XD,Providence Portland Medical Center,Pancreatic adenocarcinoma,NCH,PAAD
+323,XN,University of Sao Paulo,Pancreatic adenocarcinoma,NCH,PAAD
+324,YB,Spectrum Health,Pancreatic adenocarcinoma,NCH,PAAD
+325,YH,Stanford University,Pancreatic adenocarcinoma,NCH,PAAD
+326,YY,Roswell Park,Pancreatic adenocarcinoma,NCH,PAAD
+327,Z5,Cureline,Pancreatic adenocarcinoma,NCH,PAAD
+328,Z8,John Wayne Cancer Center,Pancreatic adenocarcinoma,NCH,PAAD
+329,ZW,University of Alabama,Pancreatic adenocarcinoma,NCH,PAAD
+330,2K,Greenville Health System,Kidney renal papillary cell carcinoma,NCH,KIRP
+331,2Z,Moffitt Cancer Center,Kidney renal papillary cell carcinoma,NCH,KIRP
+332,4A,Mary Bird Perkins Cancer Center - Our Lady of the Lake,Kidney renal papillary cell carcinoma,NCH,KIRP
+333,5P,University Hospital Erlangen,Kidney renal papillary cell carcinoma,NCH,KIRP
+334,A4,International Genomics Consortium,Kidney renal papillary cell carcinoma,IGC,KIRP
+335,AL,Fox Chase,Kidney renal papillary cell carcinoma,IGC,KIRP
+336,AT,St. Joseph's Medical Center-(MD),Kidney renal papillary cell carcinoma,IGC,KIRP
+337,B1,University of Pittsburgh,Kidney renal papillary cell carcinoma,IGC,KIRP
+338,B3,Christiana Healthcare,Kidney renal papillary cell carcinoma,IGC,KIRP
+339,B9,UNC,Kidney renal papillary cell carcinoma,IGC,KIRP
+340,BQ,MSKCC,Kidney renal papillary cell carcinoma,IGC,KIRP
+341,DW,NCI Urologic Oncology Branch,Kidney renal papillary cell carcinoma,IGC,KIRP
+342,DZ,Mayo Clinic - Rochester,Kidney renal papillary cell carcinoma,IGC,KIRP
+343,EV,CHI-Penrose Colorado,Kidney renal papillary cell carcinoma,IGC,KIRP
+344,F9,Asterand,Kidney renal papillary cell carcinoma,IGC,KIRP
+345,G7,Roswell Park,Kidney renal papillary cell carcinoma,IGC,KIRP
+346,GL,ABS - IUPUI,Kidney renal papillary cell carcinoma,IGC,KIRP
+347,HE,Ontario Institute for Cancer Research (OICR),Kidney renal papillary cell carcinoma,IGC,KIRP
+348,IA,Cleveland Clinic,Kidney renal papillary cell carcinoma,IGC,KIRP
+349,IZ,ABS - Lahey Clinic,Kidney renal papillary cell carcinoma,IGC,KIRP
+350,J7,ILSBio,Kidney renal papillary cell carcinoma,IGC,KIRP
+351,KV,Hartford,Kidney renal papillary cell carcinoma,IGC,KIRP
+352,L8,University of Miami,Kidney renal papillary cell carcinoma,NCH,KIRP
+353,MH,BLN - Baylor,Kidney renal papillary cell carcinoma,NCH,KIRP
+354,O9,Saint Mary's Health Care,Kidney renal papillary cell carcinoma,NCH,KIRP
+355,P4, MD Anderson Cancer Center,Kidney renal papillary cell carcinoma,NCH,KIRP
+356,PJ,Gundersen Lutheran,Kidney renal papillary cell carcinoma,NCH,KIRP
+357,Q2,University of Oklahoma HSC,Kidney renal papillary cell carcinoma,NCH,KIRP
+358,SX,Mayo Clinic Arizona,Kidney renal papillary cell carcinoma,NCH,KIRP
+359,UN, Boston Medical Center,Kidney renal papillary cell carcinoma,NCH,KIRP
+360,UZ,University of California San Francisco,Kidney renal papillary cell carcinoma,NCH,KIRP
+361,V9,Medical College of Georgia,Kidney renal papillary cell carcinoma,NCH,KIRP
+362,WN,University of Kansas,Kidney renal papillary cell carcinoma,NCH,KIRP
+363,Y8,Spectrum Health,Kidney renal papillary cell carcinoma,NCH,KIRP
+364,2N,Technical University of Munich,Stomach adenocarcinoma,NCH,STAD
+365,3M,University of Kansas Medical Center,Stomach adenocarcinoma,NCH,STAD
+366,B7,Cureline,Stomach adenocarcinoma,IGC,STAD
+367,BR,Asterand,Stomach adenocarcinoma,IGC,STAD
+368,CD,ILSBio,Stomach adenocarcinoma,IGC,STAD
+369,CG,Indivumed,Stomach adenocarcinoma,IGC,STAD
+370,D7,Greater Poland Cancer Center,Stomach adenocarcinoma,IGC,STAD
+371,EQ,Christiana Healthcare,Stomach adenocarcinoma,IGC,STAD
+372,F1,UNC,Stomach adenocarcinoma,IGC,STAD
+373,FP,International Genomics Consortium,Stomach adenocarcinoma,IGC,STAD
+374,H1,Medical College of Georgia,Stomach adenocarcinoma,IGC,STAD
+375,HA,Alberta Health Services,Stomach adenocarcinoma,IGC,STAD
+376,HF,Ontario Institute for Cancer Research (OICR),Stomach adenocarcinoma,IGC,STAD
+377,HH,Fox Chase,Stomach adenocarcinoma,IGC,STAD
+378,HJ,Fox Chase,Stomach adenocarcinoma,IGC,STAD
+379,HU,National Cancer Center Korea,Stomach adenocarcinoma,IGC,STAD
+380,IN,University of Pittsburgh,Stomach adenocarcinoma,IGC,STAD
+381,IP,ABS - IUPUI,Stomach adenocarcinoma,IGC,STAD
+382,KB,"University Health Network, Toronto",Stomach adenocarcinoma,IGC,STAD
+383,KZ,Hartford,Stomach adenocarcinoma,IGC,STAD
+384,MX,MSKCC,Stomach adenocarcinoma,NCH,STAD
+385,QW,Instituto Nacional de Cancerologia,Stomach adenocarcinoma,NCH,STAD
+386,R5,MD Anderson Cancer Center,Stomach adenocarcinoma,NCH,STAD
+387,RD,Peter MacCallum Cancer Center,Stomach adenocarcinoma,NCH,STAD
+388,SW,Global Bioclinical-Moldova,Stomach adenocarcinoma,NCH,STAD
+389,TL,Global BioClinical - Georgia,Stomach adenocarcinoma,NCH,STAD
+390,V6,Duke University,Stomach adenocarcinoma,NCH,STAD
+391,VA,Alliance,Stomach adenocarcinoma,NCH,STAD
+392,VQ,Barretos Cancer Hospital,Stomach adenocarcinoma,NCH,STAD
+393,VX,Northwestern University,Stomach adenocarcinoma,NCH,STAD
+394,YX,Emory University,Stomach adenocarcinoma,NCH,STAD
+395,ZA,Candler,Stomach adenocarcinoma,NCH,STAD
+396,ZQ,Tayside Tissue Bank,Stomach adenocarcinoma,NCH,STAD
+397,2V,University of California San Diego,Liver hepatocellular carcinoma,NCH,LIHC
+398,2Y,Moffitt Cancer Center,Liver hepatocellular carcinoma,NCH,LIHC
+399,3K,Boston Medical Center,Liver hepatocellular carcinoma,NCH,LIHC
+400,4R,Duke University,Liver hepatocellular carcinoma,NCH,LIHC
+401,5C,Cureline,Liver hepatocellular carcinoma,NCH,LIHC
+402,5R,"Proteogenex, Inc",Liver hepatocellular carcinoma,NCH,LIHC
+403,BC,UNC,Liver hepatocellular carcinoma,NCH,LIHC
+404,BD,University of Pittsburgh,Liver hepatocellular carcinoma,NCH,LIHC
+405,BW,St. Joseph's Medical Center-(MD),Liver hepatocellular carcinoma,NCH,LIHC
+406,CC,ILSBio,Liver hepatocellular carcinoma,NCH,LIHC
+407,DD,Mayo Clinic - Rochester,Liver hepatocellular carcinoma,NCH,LIHC
+408,ED,Asterand,Liver hepatocellular carcinoma,NCH,LIHC
+409,EP,Christiana Healthcare,Liver hepatocellular carcinoma,NCH,LIHC
+410,ES,University of Florida,Liver hepatocellular carcinoma,NCH,LIHC
+411,FV,International Genomics Consortium,Liver hepatocellular carcinoma,NCH,LIHC
+412,G3,Alberta Health Services,Liver hepatocellular carcinoma,NCH,LIHC
+413,GJ,ABS - IUPUI,Liver hepatocellular carcinoma,NCH,LIHC
+414,HP,Ontario Institute for Cancer Research (OICR),Liver hepatocellular carcinoma,NCH,LIHC
+415,K7,ABS - Lahey Clinic,Liver hepatocellular carcinoma,NCH,LIHC
+416,KR,University Of Michigan,Liver hepatocellular carcinoma,NCH,LIHC
+417,LG,Hartford Hospital,Liver hepatocellular carcinoma,NCH,LIHC
+418,MI,BLN - Baylor,Liver hepatocellular carcinoma,NCH,LIHC
+419,MR,University of Minnesota,Liver hepatocellular carcinoma,NCH,LIHC
+420,NI,Roswell Park,Liver hepatocellular carcinoma,NCH,LIHC
+421,O8,Saint Mary's Health Care,Liver hepatocellular carcinoma,NCH,LIHC
+422,PD,Fox Chase,Liver hepatocellular carcinoma,NCH,LIHC
+423,QA,Emory University,Liver hepatocellular carcinoma,NCH,LIHC
+424,RC,University of Utah,Liver hepatocellular carcinoma,NCH,LIHC
+425,RG,Montefiore Medical Center,Liver hepatocellular carcinoma,NCH,LIHC
+426,T1,St. Joseph's Hospital Arizona,Liver hepatocellular carcinoma,NCH,LIHC
+427,UB,UCSF,Liver hepatocellular carcinoma,NCH,LIHC
+428,UV,Capital Biosciences,Liver hepatocellular carcinoma,NCH,LIHC
+429,WJ,Greenville Health System,Liver hepatocellular carcinoma,NCH,LIHC
+430,WQ,University of Kansas,Liver hepatocellular carcinoma,NCH,LIHC
+431,WX,Yale University,Liver hepatocellular carcinoma,NCH,LIHC
+432,XR,University of Sao Paulo,Liver hepatocellular carcinoma,NCH,LIHC
+433,YA,Spectrum Health,Liver hepatocellular carcinoma,NCH,LIHC
+434,ZP,Medical College of Wisconsin,Liver hepatocellular carcinoma,NCH,LIHC
+435,ZS,Tayside Tissue Bank,Liver hepatocellular carcinoma,NCH,LIHC
+436,2W,University of New Mexico,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+437,4J,"Proteogenex, Inc.",Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+438,BI,University of Pittsburgh,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+439,C5,Medical College of Wisconsin,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+440,DG,Ontario Institute for Cancer Research,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+441,DR,University of Hawaii,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+442,DS,Cedars Sinai,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+443,EA,Asterand,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+444,EK,Gynecologic Oncology Group,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+445,EX,University of North Carolina,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+446,FU,International Genomics Consortium,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+447,GH,ABS - IUPUI,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+448,HG,Roswell Park,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+449,HM,Christiana Healthcare,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+450,IR,Memorial Sloan Kettering,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+451,JW,BLN - Baylor,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+452,JX,Washington University,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+453,LP,ILSBIO,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+454,LS,Gundersen Lutheran Health System,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+455,MA,MD Anderson Cancer Center,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+456,MU,University of Minnesota,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+457,MY,Montefiore Medical Center,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+458,PN,Institute of Human Virology Nigeria,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+459,Q1,University of Oklahoma HSC,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+460,QV,Instituto Nacional de Cancerologia,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+461,R2,CHI-Penrose Colorado,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+462,RA,Candler,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+463,UC,University of Washington,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+464,VS,Barretos Cancer Hospital,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+465,WL,University of Kansas,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+466,XS,University of Sao Paulo,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+467,ZJ,NCI HRE Branch,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+468,ZX,University of Alabama,Cervical squamous cell carcinoma and endocervical adenocarcinoma,NCH,CESC
+469,3B,Moffitt Cancer Center,Sarcoma,NCH,SARC
+470,3R,University of New Mexico,Sarcoma,NCH,SARC
+471,3W,University of California San Diego,Sarcoma,NCH,SARC
+472,4Q,Duke University,Sarcoma,NCH,SARC
+473,4Y,Medical College of Wisconsin,Sarcoma,NCH,SARC
+474,5D,University of Miami,Sarcoma,NCH,SARC
+475,DX,Memorial Sloan Kettering,Sarcoma,NCH,SARC
+476,FX,International Genomics Consortium,Sarcoma,NCH,SARC
+477,HB,University of North Carolina,Sarcoma,NCH,SARC
+478,HS,Ontario Institute for Cancer Research (OICR),Sarcoma,NCH,SARC
+479,IE,ABS - IUPUI,Sarcoma,NCH,SARC
+480,IF,University of Texas MD Anderson Cancer Center,Sarcoma,NCH,SARC
+481,IS,Memorial Sloan Kettering,Sarcoma,NCH,SARC
+482,IW,Cedars Sinai,Sarcoma,NCH,SARC
+483,JV,BLN - Baylor,Sarcoma,NCH,SARC
+484,K1,University of Pittsburgh,Sarcoma,NCH,SARC
+485,KD,Mount Sinai School of Medicine,Sarcoma,NCH,SARC
+486,KF,Christiana Healthcare,Sarcoma,NCH,SARC
+487,LI,Hartford Hospital,Sarcoma,NCH,SARC
+488,MB,University of Minnesota,Sarcoma,NCH,SARC
+489,MJ,BLN - Baylor,Sarcoma,NCH,SARC
+490,MO,ILSBio,Sarcoma,NCH,SARC
+491,N1,Montefiore Medical Center,Sarcoma,NCH,SARC
+492,PC,Fox Chase,Sarcoma,NCH,SARC
+493,PT,Maine Medical Center,Sarcoma,NCH,SARC
+494,QC,Emory University,Sarcoma,NCH,SARC
+495,QQ,Roswell Park,Sarcoma,NCH,SARC
+496,RN,St. Joseph's Hospital AZ,Sarcoma,NCH,SARC
+497,SG,Cleveland Clinic Foundation,Sarcoma,NCH,SARC
+498,SI,Washington University St. Louis,Sarcoma,NCH,SARC
+499,UE, Asterand,Sarcoma,NCH,SARC
+500,VT,Vanderbilt,Sarcoma,NCH,SARC
+501,WK,Brigham and Women's Hospital,Sarcoma,NCH,SARC
+502,WP,University of Kansas,Sarcoma,NCH,SARC
+503,X2,University of Washington,Sarcoma,NCH,SARC
+504,X6,University of Iowa,Sarcoma,NCH,SARC
+505,X9,"University of California, Davis",Sarcoma,NCH,SARC
+506,Y5,University of Arizona,Sarcoma,NCH,SARC
+507,YW,Albert Einstein Medical Center,Sarcoma,NCH,SARC
+508,Z3,UCLA,Sarcoma,NCH,SARC
+509,Z4,Cureline,Sarcoma,NCH,SARC
+510,3C,Columbia University,Breast invasive carcinoma,NCH,BRCA
+511,3J,Carle Cancer Center,Breast invasive carcinoma,NCH,BRCA
+512,4H,"Proteogenex, Inc.",Breast invasive carcinoma,NCH,BRCA
+513,5L,University of Sao Paulo,Breast invasive carcinoma,NCH,BRCA
+514,5T,Holy Cross,Breast invasive carcinoma,NCH,BRCA
+515,A1,UCSF,Breast invasive carcinoma,NCH,BRCA
+516,A2,Walter Reed,Breast invasive carcinoma,NCH,BRCA
+517,A7,Christiana Healthcare,Breast invasive carcinoma,NCH,BRCA
+518,A8,Indivumed,Breast invasive carcinoma,NCH,BRCA
+519,AC,International Genomics Consortium,Breast invasive carcinoma,NCH,BRCA
+520,AN,Cureline,Breast invasive carcinoma,NCH,BRCA
+521,AO,MSKCC,Breast invasive carcinoma,NCH,BRCA
+522,AQ,UNC ,Breast invasive carcinoma,NCH,BRCA
+523,AR,Mayo,Breast invasive carcinoma,NCH,BRCA
+524,B6,Duke,Breast invasive carcinoma,NCH,BRCA
+525,BH,University of Pittsburgh,Breast invasive carcinoma,NCH,BRCA
+526,C8,ILSBio,Breast invasive carcinoma,NCH,BRCA
+527,D8,Greater Poland Cancer Center,Breast invasive carcinoma,NCH,BRCA
+528,E2,Roswell Park,Breast invasive carcinoma,NCH,BRCA
+529,E9,Asterand,Breast invasive carcinoma,NCH,BRCA
+530,EW,University of Miami,Breast invasive carcinoma,NCH,BRCA
+531,GI,ABS - IUPUI,Breast invasive carcinoma,NCH,BRCA
+532,GM,MD Anderson,Breast invasive carcinoma,NCH,BRCA
+533,HN,Ontario Institute for Cancer Research (OICR),Breast invasive carcinoma,NCH,BRCA
+534,JL,ABS - Research Metrics Pakistan,Breast invasive carcinoma,NCH,BRCA
+535,LD,Hartford Hospital,Breast invasive carcinoma,NCH,BRCA
+536,LL,Candler,Breast invasive carcinoma,NCH,BRCA
+537,LQ,Gundersen Lutheran Health System,Breast invasive carcinoma,NCH,BRCA
+538,MS,University of Minnesota,Breast invasive carcinoma,NCH,BRCA
+539,OK,Mount Sinai School of Medicine,Breast invasive carcinoma,NCH,BRCA
+540,OL,University of Chicago,Breast invasive carcinoma,NCH,BRCA
+541,PE,Fox Chase,Breast invasive carcinoma,NCH,BRCA
+542,PL,Institute of Human Virology Nigeria,Breast invasive carcinoma,NCH,BRCA
+543,S3,Albert Einstein Medical Center,Breast invasive carcinoma,NCH,BRCA
+544,TV,Wake Forest University,Breast invasive carcinoma,NCH,BRCA
+545,UL, Boston Medical Center,Breast invasive carcinoma,NCH,BRCA
+546,UU,Mary Bird Perkins Cancer Center - Our Lady of the Lake,Breast invasive carcinoma,NCH,BRCA
+547,V7,Medical College of Georgia,Breast invasive carcinoma,NCH,BRCA
+548,W8,Greenville Health System,Breast invasive carcinoma,NCH,BRCA
+549,WT,University of Kansas,Breast invasive carcinoma,NCH,BRCA
+550,XX,Spectrum Health,Breast invasive carcinoma,NCH,BRCA
+551,Z7,John Wayne Cancer Center,Breast invasive carcinoma,NCH,BRCA
+552,3H,MD Anderson Cancer Center,Mesothelioma,NCH,MESO
+553,3U,University of Chicago,Mesothelioma,NCH,MESO
+554,LK,University of Pittsburgh,Mesothelioma,NCH,MESO
+555,MQ,Washington University - NYU,Mesothelioma,NCH,MESO
+556,NQ,International Genomics Consortium,Mesothelioma,NCH,MESO
+557,SC,Memorial Sloan Kettering,Mesothelioma,NCH,MESO
+558,SH,Papworth Hospital,Mesothelioma,NCH,MESO
+559,TS,University of Pennsylvania,Mesothelioma,NCH,MESO
+560,UD, University of Western Australia,Mesothelioma,NCH,MESO
+561,UT,Asbestos Diseases Research Institute,Mesothelioma,NCH,MESO
+562,XT,Johns Hopkins,Mesothelioma,NCH,MESO
+563,YS,Barretos Cancer Hospital,Mesothelioma,NCH,MESO
+564,ZN,Brigham and Women's Hospital Division of Thoracic Surgery,Mesothelioma,NCH,MESO
+565,3L,Albert Einstein Medical Center,Colon adenocarcinoma,NCH,COAD
+566,4N,Mary Bird Perkins Cancer Center - Our Lady of the Lake,Colon adenocarcinoma,NCH,COAD
+567,4T,Duke University,Colon adenocarcinoma,NCH,COAD
+568,5M,University of Sao Paulo,Colon adenocarcinoma,NCH,COAD
+569,A6,Christiana Healthcare,Colon adenocarcinoma,IGC,COAD
+570,AA,Indivumed,Colon adenocarcinoma,IGC,COAD
+571,AD,International Genomics Consortium,Colon adenocarcinoma,IGC,COAD
+572,AM,Cureline,Colon adenocarcinoma,IGC,COAD
+573,AU,St. Joseph's Medical Center-(MD),Colon adenocarcinoma,IGC,COAD
+574,AY,UNC,Colon adenocarcinoma,IGC,COAD
+575,AZ,University of Pittsburgh,Colon adenocarcinoma,IGC,COAD
+576,CA,ILSBio,Colon adenocarcinoma,IGC,COAD
+577,CK,Harvard,Colon adenocarcinoma,IGC,COAD
+578,CM,MSKCC,Colon adenocarcinoma,IGC,COAD
+579,D5,Greater Poland Cancer Center,Colon adenocarcinoma,IGC,COAD
+580,DM,University Of Michigan,Colon adenocarcinoma,NCH,COAD
+581,F4,Asterand,Colon adenocarcinoma,IGC,COAD
+582,G4,Roswell Park,Colon adenocarcinoma,IGC,COAD
+583,NH,Candler,Colon adenocarcinoma,NCH,COAD
+584,QG,BLN - Baylor,Colon adenocarcinoma,NCH,COAD
+585,QL, University of Chicago,Colon adenocarcinoma,NCH,COAD
+586,R1,CHI-Penrose Colorado,Colon adenocarcinoma,NCH,COAD
+587,RU,Northwestern University,Colon adenocarcinoma,NCH,COAD
+588,SK,St. Joseph's Hospital AZ,Colon adenocarcinoma,NCH,COAD
+589,SS, Medical College of Georgia,Colon adenocarcinoma,NCH,COAD
+590,T9,Molecular Response,Colon adenocarcinoma,NCH,COAD
+591,VK,Institute of Human Virology Nigeria,Colon adenocarcinoma,NCH,COAD
+592,WS,University of Kansas,Colon adenocarcinoma,NCH,COAD
+593,WU,Wake Forest University,Colon adenocarcinoma,NCH,COAD
+594,3N,Greenville Health System,Skin Cutaneous Melanoma,NCH,SKCM
+595,BF,Cureline,Skin Cutaneous Melanoma,NCH,SKCM
+596,D3,MD Anderson,Skin Cutaneous Melanoma,NCH,SKCM
+597,D9,Greater Poland Cancer Center,Skin Cutaneous Melanoma,NCH,SKCM
+598,DA,Yale,Skin Cutaneous Melanoma,NCH,SKCM
+599,EB,Asterand,Skin Cutaneous Melanoma,NCH,SKCM
+600,EE,University of Sydney,Skin Cutaneous Melanoma,NCH,SKCM
+601,ER,University of Pittsburgh,Skin Cutaneous Melanoma,NCH,SKCM
+602,FR,University of North Carolina,Skin Cutaneous Melanoma,NCH,SKCM
+603,FS,Essen,Skin Cutaneous Melanoma,NCH,SKCM
+604,FW,International Genomics Consortium,Skin Cutaneous Melanoma,NCH,SKCM
+605,GF,ABS - IUPUI,Skin Cutaneous Melanoma,NCH,SKCM
+606,GN,Roswell,Skin Cutaneous Melanoma,NCH,SKCM
+607,HR,Ontario Institute for Cancer Research (OICR),Skin Cutaneous Melanoma,NCH,SKCM
+608,IH,University of Miami,Skin Cutaneous Melanoma,NCH,SKCM
+609,K8,ABS - Lahey Clinic,Skin Cutaneous Melanoma,NCH,SKCM
+610,LH,Hartford Hospital,Skin Cutaneous Melanoma,NCH,SKCM
+611,NS,Gundersen Lutheran Health System,Skin Cutaneous Melanoma,NCH,SKCM
+612,OD,Saint Mary's Health Care,Skin Cutaneous Melanoma,NCH,SKCM
+613,QB,Emory University,Skin Cutaneous Melanoma,NCH,SKCM
+614,RP,St. Joseph's Hospital AZ,Skin Cutaneous Melanoma,NCH,SKCM
+615,TE,Global BioClinical - Georgia,Skin Cutaneous Melanoma,NCH,SKCM
+616,TR,Global Bioclinical-Moldova,Skin Cutaneous Melanoma,NCH,SKCM
+617,W3, John Wayne Cancer Center,Skin Cutaneous Melanoma,NCH,SKCM
+618,WE, Norfolk and Norwich Hospital,Skin Cutaneous Melanoma,NCH,SKCM
+619,XV, Capital Biosciences,Skin Cutaneous Melanoma,NCH,SKCM
+620,YD,Spectrum Health,Skin Cutaneous Melanoma,NCH,SKCM
+621,YG,University of Puerto Rico,Skin Cutaneous Melanoma,NCH,SKCM
+622,YN,University of Arizona,Skin Cutaneous Melanoma,NCH,SKCM
+623,Z2,IDI-IRCCS,Skin Cutaneous Melanoma,NCH,SKCM
+624,3X,Alberta Health Services,Cholangiocarcinoma,NCH,CHOL
+625,4G,Sapienza University of Rome,Cholangiocarcinoma,NCH,CHOL
+626,5A,Wake Forest University,Cholangiocarcinoma,NCH,CHOL
+627,W5,Mayo Clinic Rochester,Cholangiocarcinoma,NCH,CHOL
+628,W6,UCSF,Cholangiocarcinoma,NCH,CHOL
+629,W7,Garvan Institute of Medical Research,Cholangiocarcinoma,NCH,CHOL
+630,WD, Emory University,Cholangiocarcinoma,NCH,CHOL
+631,YR,Barretos Cancer Hospital,Cholangiocarcinoma,NCH,CHOL
+632,ZD,ILSbio,Cholangiocarcinoma,NCH,CHOL
+633,ZH,University of North Carolina,Cholangiocarcinoma,NCH,CHOL
+634,ZK,University of New Mexico,Cholangiocarcinoma,NCH,CHOL
+635,ZU,Spectrum Health,Cholangiocarcinoma,NCH,CHOL
+636,3Z,Mary Bird Perkins Cancer Center - Our Lady of the Lake,Kidney renal clear cell carcinoma,NCH,KIRC
+637,6D,University of Oklahoma HSC,Kidney renal clear cell carcinoma,NCH,KIRC
+638,A3,International Genomics Consortium,Kidney renal clear cell carcinoma,IGC,KIRC
+639,AK,Fox Chase,Kidney renal clear cell carcinoma,IGC,KIRC
+640,AS,St. Joseph's Medical Center-(MD),Kidney renal clear cell carcinoma,IGC,KIRC
+641,B0,University of Pittsburgh,Kidney renal clear cell carcinoma,IGC,KIRC
+642,B2,Christiana Healthcare,Kidney renal clear cell carcinoma,IGC,KIRC
+643,B4,Cureline,Kidney renal clear cell carcinoma,IGC,KIRC
+644,B8,UNC,Kidney renal clear cell carcinoma,IGC,KIRC
+645,BP,MSKCC,Kidney renal clear cell carcinoma,IGC,KIRC
+646,CB,ILSBio,Kidney renal clear cell carcinoma,IGC,KIRC
+647,CJ,MD Anderson Cancer Center,Kidney renal clear cell carcinoma,IGC,KIRC
+648,CW,Mayo Clinic - Rochester,Kidney renal clear cell carcinoma,IGC,KIRC
+649,CZ,Harvard,Kidney renal clear cell carcinoma,IGC,KIRC
+650,DV,NCI Urologic Oncology Branch,Kidney renal clear cell carcinoma,IGC,KIRC
+651,EU,CHI-Penrose Colorado,Kidney renal clear cell carcinoma,IGC,KIRC
+652,G6,Roswell Park,Kidney renal clear cell carcinoma,IGC,KIRC
+653,GK,ABS - IUPUI,Kidney renal clear cell carcinoma,IGC,KIRC
+654,MM,BLN - Baylor,Kidney renal clear cell carcinoma,NCH,KIRC
+655,MW,University of Miami,Kidney renal clear cell carcinoma,NCH,KIRC
+656,T7,Molecular Response,Kidney renal clear cell carcinoma,NCH,KIRC
+657,V8,Medical College of Georgia,Kidney renal clear cell carcinoma,NCH,KIRC
+658,WM,University of Kansas,Kidney renal clear cell carcinoma,NCH,KIRC
+659,4C,Mary Bird Perkins Cancer Center - Our Lady of the Lake,Thyroid carcinoma,NCH,THCA
+660,5F,Duke University,Thyroid carcinoma,NCH,THCA
+661,BJ,University of Pittsburgh,Thyroid carcinoma,IGC,THCA
+662,CE,ILSBio,Thyroid carcinoma,IGC,THCA
+663,DE,University of North Carolina,Thyroid carcinoma,NCH,THCA
+664,DJ,Memorial Sloan Kettering,Thyroid carcinoma,NCH,THCA
+665,DO,Medical College of Georgia,Thyroid carcinoma,NCH,THCA
+666,E3,Roswell Park,Thyroid carcinoma,NCH,THCA
+667,E8,Asterand,Thyroid carcinoma,NCH,THCA
+668,EL,MD Anderson,Thyroid carcinoma,NCH,THCA
+669,EM,University Health Network,Thyroid carcinoma,NCH,THCA
+670,ET,Johns Hopkins,Thyroid carcinoma,NCH,THCA
+671,FE,Ohio State University,Thyroid carcinoma,NCH,THCA
+672,FH,CHI-Penrose Colorado,Thyroid carcinoma,NCH,THCA
+673,FK,Johns Hopkins,Thyroid carcinoma,NCH,THCA
+674,FY,International Genomics Consortium,Thyroid carcinoma,NCH,THCA
+675,GE,ABS - IUPUI,Thyroid carcinoma,NCH,THCA
+676,H2,Christiana Healthcare,Thyroid carcinoma,NCH,THCA
+677,IM,University of Miami,Thyroid carcinoma,NCH,THCA
+678,J8,Mayo Clinic,Thyroid carcinoma,NCH,THCA
+679,KS,University Of Michigan,Thyroid carcinoma,NCH,THCA
+680,L6,National Institutes of Health,Thyroid carcinoma,NCH,THCA
+681,MK,BLN - Baylor,Thyroid carcinoma,NCH,THCA
+682,OJ,Saint Mary's Health Care,Thyroid carcinoma,NCH,THCA
+683,QD,Emory University,Thyroid carcinoma,NCH,THCA
+684,4P,Duke University,Head and Neck squamous cell carcinoma,NCH,HNSC
+685,BA,UNC,Head and Neck squamous cell carcinoma,IGC,HNSC
+686,BB,Johns Hopkins,Head and Neck squamous cell carcinoma,IGC,HNSC
+687,C9,ILSBio,Head and Neck squamous cell carcinoma,NCH,HNSC
+688,CN,University of Pittsburgh,Head and Neck squamous cell carcinoma,IGC,HNSC
+689,CQ,"University Health Network, Toronto",Head and Neck squamous cell carcinoma,IGC,HNSC
+690,CR,Vanderbilt University,Head and Neck squamous cell carcinoma,IGC,HNSC
+691,CV,MD Anderson Cancer Center,Head and Neck squamous cell carcinoma,IGC,HNSC
+692,CX,Medical College of Georgia,Head and Neck squamous cell carcinoma,IGC,HNSC
+693,D6,Greater Poland Cancer Center,Head and Neck squamous cell carcinoma,IGC,HNSC
+694,DQ,University Of Michigan,Head and Neck squamous cell carcinoma,IGC,HNSC
+695,F7,Asterand,Head and Neck squamous cell carcinoma,IGC,HNSC
+696,H7,ABS - IUPUI,Head and Neck squamous cell carcinoma,IGC,HNSC
+697,HD,International Genomics Consortium,Head and Neck squamous cell carcinoma,IGC,HNSC
+698,HL,Fox Chase,Head and Neck squamous cell carcinoma,IGC,HNSC
+699,IQ,University of Miami,Head and Neck squamous cell carcinoma,IGC,HNSC
+700,JA,ABS - Research Metrics Pakistan,Head and Neck squamous cell carcinoma,IGC,HNSC
+701,KU,Hartford,Head and Neck squamous cell carcinoma,IGC,HNSC
+702,MT,University of Minnesota,Head and Neck squamous cell carcinoma,NCH,HNSC
+703,MZ,Montefiore Medical Center,Head and Neck squamous cell carcinoma,NCH,HNSC
+704,NM,Cambridge BioSource,Head and Neck squamous cell carcinoma,NCH,HNSC
+705,P3, Fred Hutchinson,Head and Neck squamous cell carcinoma,NCH,HNSC
+706,QK,Emory University - Winship Cancer Inst.,Head and Neck squamous cell carcinoma,NCH,HNSC
+707,R7,Gundersen Lutheran Health System,Head and Neck squamous cell carcinoma,NCH,HNSC
+708,RH,BLN - Baylor,Head and Neck squamous cell carcinoma,NCH,HNSC
+709,RS,Memorial Sloan Kettering Cancer Center,Head and Neck squamous cell carcinoma,NCH,HNSC
+710,ST,Global Bioclinical-Moldova,Head and Neck squamous cell carcinoma,NCH,HNSC
+711,T2,St. University of Colorado Denver,Head and Neck squamous cell carcinoma,NCH,HNSC
+712,T3,Molecular Response,Head and Neck squamous cell carcinoma,NCH,HNSC
+713,TG,Global BioClinical - Georgia,Head and Neck squamous cell carcinoma,NCH,HNSC
+714,TN, Ohio State University,Head and Neck squamous cell carcinoma,NCH,HNSC
+715,UF,Barretos Cancer Hospital,Head and Neck squamous cell carcinoma,NCH,HNSC
+716,UP, Boston Medical Center,Head and Neck squamous cell carcinoma,NCH,HNSC
+717,WA,University of Schleswig-Holstein,Head and Neck squamous cell carcinoma,NCH,HNSC
+718,5H,Retina Consultants Houston,Uveal Melanoma,NCH,UVM
+719,RZ,Wills Eye Institute,Uveal Melanoma,NCH,UVM
+720,V3,Cleveland Clinic Foundation,Uveal Melanoma,NCH,UVM
+721,V4,Institut Curie,Uveal Melanoma,NCH,UVM
+722,VD,University of Liverpool,Uveal Melanoma,NCH,UVM
+723,WC,MD Anderson,Uveal Melanoma,NCH,UVM
+724,YV,MSKCC,Uveal Melanoma,NCH,UVM
+725,YZ,The Ohio State University,Uveal Melanoma,NCH,UVM
+726,5J,Cureline,Acute Myeloid Leukemia,NCH,LAML
+727,AB,Washington University,Acute Myeloid Leukemia,NCH,LAML
+728,GP,MD Anderson,Acute Myeloid Leukemia,NCH,LAML
+729,IJ,Christiana Healthcare,Acute Myeloid Leukemia,NCH,LAML
+730,PH,Gundersen Lutheran,Acute Myeloid Leukemia,NCH,LAML
+731,Q4,Emory University,Acute Myeloid Leukemia,NCH,LAML
+732,Y3,University of New Mexico,Acute Myeloid Leukemia,NCH,LAML
+733,6G,University of Sao Paulo,Rectum adenocarcinoma,NCH,READ
+734,AF,Christiana Healthcare,Rectum adenocarcinoma,IGC,READ
+735,AG,Indivumed,Rectum adenocarcinoma,IGC,READ
+736,AH,International Genomics Consortium,Rectum adenocarcinoma,IGC,READ
+737,BM,UNC,Rectum adenocarcinoma,IGC,READ
+738,CI,University of Pittsburgh,Rectum adenocarcinoma,IGC,READ
+739,CL,Harvard,Rectum adenocarcinoma,IGC,READ
+740,DC,MSKCC,Rectum adenocarcinoma,IGC,READ
+741,DT,ILSBio,Rectum adenocarcinoma,IGC,READ
+742,DY,University Of Michigan,Rectum adenocarcinoma,NCH,READ
+743,EF,Cureline,Rectum adenocarcinoma,IGC,READ
+744,EI,Greater Poland Cancer Center,Rectum adenocarcinoma,IGC,READ
+745,F5,Asterand,Rectum adenocarcinoma,IGC,READ
+746,G5,Roswell Park,Rectum adenocarcinoma,IGC,READ
+747,VL,Institute of Human Virology Nigeria,Rectum adenocarcinoma,NCH,READ
+748,6H,Test For lcml,Chronic Myelogenous Leukemia,NCH,LCML
+749,CS,Thomas Jefferson University,Brain Lower Grade Glioma,IGC,LGG
+750,DB,Mayo Clinic - Rochester,Brain Lower Grade Glioma,IGC,LGG
+751,DH,University of Florida,Brain Lower Grade Glioma,IGC,LGG
+752,DU,Henry Ford Hospital,Brain Lower Grade Glioma,IGC,LGG
+753,E1,Duke,Brain Lower Grade Glioma,IGC,LGG
+754,EZ,UNC,Brain Lower Grade Glioma,IGC,LGG
+755,F6,Asterand,Brain Lower Grade Glioma,IGC,LGG
+756,FG,Case Western,Brain Lower Grade Glioma,IGC,LGG
+757,FN,International Genomics Consortium,Brain Lower Grade Glioma,IGC,LGG
+758,HK,Fox Chase,Brain Lower Grade Glioma,IGC,LGG
+759,HT,Case Western - St Joes,Brain Lower Grade Glioma,IGC,LGG
+760,HW,MSKCC,Brain Lower Grade Glioma,IGC,LGG
+761,IK,Christiana Healthcare,Brain Lower Grade Glioma,IGC,LGG
+762,KT,Hartford,Brain Lower Grade Glioma,IGC,LGG
+763,P5,Cureline,Brain Lower Grade Glioma,NCH,LGG
+764,QH,Fondazione-Besta,Brain Lower Grade Glioma,NCH,LGG
+765,R8,MD Anderson,Brain Lower Grade Glioma,NCH,LGG
+766,RY,University of California San Francisco,Brain Lower Grade Glioma,NCH,LGG
+767,S9,Dept of Neurosurgery at University of Heidelberg,Brain Lower Grade Glioma,NCH,LGG
+768,TM,The University of New South Wales,Brain Lower Grade Glioma,NCH,LGG
+769,TQ,University of Sao Paulo,Brain Lower Grade Glioma,NCH,LGG
+770,VM,Huntsman Cancer Institute,Brain Lower Grade Glioma,NCH,LGG
+771,VV, John Wayne Cancer Center,Brain Lower Grade Glioma,NCH,LGG
+772,VW,Northwestern University,Brain Lower Grade Glioma,NCH,LGG
+773,W9,University of Kansas,Brain Lower Grade Glioma,NCH,LGG
+774,WH,Greenville Health System,Brain Lower Grade Glioma,NCH,LGG
+775,WY,Johns Hopkins,Brain Lower Grade Glioma,NCH,LGG
+776,FA,Asterand,Lymphoid Neoplasm Diffuse Large B-cell Lymphoma,IGC,DLBC
+777,FF,SingHealth,Lymphoid Neoplasm Diffuse Large B-cell Lymphoma,IGC,DLBC
+778,FM,International Genomics Consortium,Lymphoid Neoplasm Diffuse Large B-cell Lymphoma,IGC,DLBC
+779,G8,Roswell Park,Lymphoid Neoplasm Diffuse Large B-cell Lymphoma,IGC,DLBC
+780,GR,University of Nebraska Medical Center (UNMC),Lymphoid Neoplasm Diffuse Large B-cell Lymphoma,IGC,DLBC
+781,GS,Fundacio Clinic per a la Recerca Biomedica,Lymphoid Neoplasm Diffuse Large B-cell Lymphoma,IGC,DLBC
+782,GZ,BC Cancer Agency,Lymphoid Neoplasm Diffuse Large B-cell Lymphoma,IGC,DLBC
+783,H3,ABS - IUPUI,Lymphoid Neoplasm Diffuse Large B-cell Lymphoma,IGC,DLBC
+784,PB,University of Minnesota,Lymphoid Neoplasm Diffuse Large B-cell Lymphoma,NCH,DLBC
+785,RQ,St. Joseph's Hospital AZ,Lymphoid Neoplasm Diffuse Large B-cell Lymphoma,NCH,DLBC
+786,VB,Global BioClinical - Georgia,Lymphoid Neoplasm Diffuse Large B-cell Lymphoma,NCH,DLBC
+787,KL,MSKCC,Kidney Chromophobe,IGC,KICH
+788,KM,NCI Urologic Oncology Branch,Kidney Chromophobe,IGC,KICH
+789,KN,Harvard,Kidney Chromophobe,IGC,KICH
+790,KO,MD Anderson Cancer Center,Kidney Chromophobe,IGC,KICH
+791,NP,International Genomics Consortium,Kidney Chromophobe,NCH,KICH
+792,UW,University of North Carolina,Kidney Chromophobe,NCH,KICH
+793,N5,MSKCC,Uterine Carcinosarcoma,NCH,UCS
+794,N6,University of Pittsburgh,Uterine Carcinosarcoma,NCH,UCS
+795,N7,Washington University,Uterine Carcinosarcoma,NCH,UCS
+796,N8,University of North Carolina,Uterine Carcinosarcoma,NCH,UCS
+797,N9,MD Anderson,Uterine Carcinosarcoma,NCH,UCS
+799,ND,Cedars Sinai,Uterine Carcinosarcoma,NCH,UCS
+800,NF,Mayo Clinic - Rochester,Uterine Carcinosarcoma,NCH,UCS
+801,NG,Roswell Park,Uterine Carcinosarcoma,NCH,UCS
+802,QM,University of Oklahoma HSC,Uterine Carcinosarcoma,NCH,UCS
+803,QN,ILSBio,Uterine Carcinosarcoma,NCH,UCS
+804,OR,University of Michigan,Adrenocortical carcinoma,NCH,ACC
+805,OU,Roswell Park,Adrenocortical carcinoma,NCH,ACC
+806,P6,Translational Genomics Research Institute,Adrenocortical carcinoma,NCH,ACC
+807,PA,University of Minnesota,Adrenocortical carcinoma,NCH,ACC
+808,PK,University Health Network,Adrenocortical carcinoma,NCH,ACC
+809,OW,International Genomics Consortium,Miscellaneous,NCH,MISC
+810,P7,Translational Genomics Research Institute,Pheochromocytoma and Paraganglioma,NCH,PCPG
+811,P8,University of Pittsburgh,Pheochromocytoma and Paraganglioma,NCH,PCPG
+812,PR,Roswell Park,Pheochromocytoma and Paraganglioma,NCH,PCPG
+813,QR,National Institutes of Health,Pheochromocytoma and Paraganglioma,NCH,PCPG
+814,QT,University of North Carolina,Pheochromocytoma and Paraganglioma,NCH,PCPG
+815,RM,St. Joseph's Hospital AZ,Pheochromocytoma and Paraganglioma,NCH,PCPG
+816,RT,Cleveland Clinic Foundation,Pheochromocytoma and Paraganglioma,NCH,PCPG
+817,RW,Michigan University,Pheochromocytoma and Paraganglioma,NCH,PCPG
+818,RX,University of Minnesota,Pheochromocytoma and Paraganglioma,NCH,PCPG
+819,S7,University Hospital Motol,Pheochromocytoma and Paraganglioma,NCH,PCPG
+820,SA, ABS - IUPUI,Pheochromocytoma and Paraganglioma,NCH,PCPG
+821,SE,Boston Medical Center,Pheochromocytoma and Paraganglioma,NCH,PCPG
+822,SP,University Health Network,Pheochromocytoma and Paraganglioma,NCH,PCPG
+823,SQ,International Genomics Consortium,Pheochromocytoma and Paraganglioma,NCH,PCPG
+824,SR,Tufts Medical Center,Pheochromocytoma and Paraganglioma,NCH,PCPG
+825,TT,University of Pennsylvania,Pheochromocytoma and Paraganglioma,NCH,PCPG
+826,VZ,Albert Einstein Medical Center,Pheochromocytoma and Paraganglioma,NCH,PCPG
+827,W2,Medical College of Wisconsin,Pheochromocytoma and Paraganglioma,NCH,PCPG
+828,WB,Erasmus MC,Pheochromocytoma and Paraganglioma,NCH,PCPG
+829,XG,BLN UT Southwestern Medical Center at Dallas,Pheochromocytoma and Paraganglioma,NCH,PCPG

@@ -4,3 +4,39 @@ This repository contains the code for the analysis on the expression profile of 
 
 This is a two-step process. The database is queried for information by the script in `src/geneset_maker`. The algorithm generates gene sets ready for use by GSEA. We then generate a series of DEG tables with `src/run_dea` based on the comparison of gene expression from TCGA (cancer) and GTEx (healthy) tissues. Finally, GSEA is called by `src/gsea_runner` in a pre-ranked manner on all the DEG tables with all of the genesets, making enrichment tables.
 The enrichment tables are then processed by a script in `src/gsea_runner` to make enrichment plots.
+
+## Running the analysis
+A docker container is coming soon(tm). For now, follow these steps:
+
+You need some requirements to be installed before you can run the analysis:
+- `R`
+- `Python`
+- A series of R packages that can be installed with `Rscript ./src/install_R_pkgs.R`
+- The `bonsai` python package that can be installed with `pip install git+https://github.com/MrHedmad/bonsai`. I suggest you do this in a virtual environment.
+- The `pandas` and `colorama` Python packages, installed by a simple `pip install pandas colorama`.
+- Quite a bit of RAM.
+- `tectonic`, a modern latex engine (see [this repository - it's awesome](https://github.com/tectonic-typesetting/tectonic)).
+
+If you have all the requirements, you can:
+```bash
+# Clone the repo
+git clone git@github.com:CMA-Lab/transportome_profiler.git
+cd ./transportome_profiler
+# Make housekeeping directories. See the following note.
+./link A_FOLDER_THAT_WILL_CONTAIN_THE_DATA
+# Run the analysis
+make all
+```
+
+The variable `A_FOLDER_THAT_WILL_CONTAIN_THE_DATA` should be the directory where you want the (rather bulky) data to live. The directory can be anywhere you want, but care must be taken that **YOU DO NOT CHOOSE `./transportome_profiler/data`** as a data directory! It is the place where your actual data directory will be linked to. Beware of paradoxes!
+
+### A note for developers
+This is the same workflow you use to start working on the project on a new PC. You can then simply re-run `make all` as you work to regenerate the final paper.
+
+## Other make targets
+There are several make targets if you do not want to rerun all the steps of the analysis (like `all` does):
+- `make all`: Runs the whole analysis - from the retrieval of the data to the generation of the paper.
+- `make retrieve`: Just download the remote data files.
+- `make analyze`: Retrieve + analyze the data, but do not make the latex paper.
+- `make clean`: Cleanup every data file and the output paper.
+- `make scrub`: Cleanup just like `clean`, but also remove the soft links made by `./link` and the corresponding data folders. This should leave your disks squeaky clean.

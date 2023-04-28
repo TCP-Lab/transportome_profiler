@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+if [ $# -lt 1 ]; then
+    echo "Insufficient args. Usage: link DATA_FOLDER"
+fi
+
+# This is ugly but bear with me
+echo "WARNING: This script should be run from the root of the repo (e.g. in transportome_profiler/)"
+echo -n "Linking in 5 seconds"
+sleep 1
+echo -n "."
+sleep 1
+echo -n "."
+sleep 1
+echo -n "."
+sleep 1
+echo -n "."
+sleep 1
+echo "."
+
+real=$(realpath $1)
+
+echo "Linking $real/transportome_profiler to ./data..."
+mkdir -p "$real/transportome_profiler"
+ln -s "$real/transportome_profiler" ./data
+
+echo "Linking $real/transportome_profiler/out/figures to ./paper/resources/images/generated..."
+mkdir -p "$real/transportome_profiler/out/figures"
+ln -s "$real/transportome_profiler/out/figures" ./paper/resources/images/generated
+
+echo "Finished linking!"
+

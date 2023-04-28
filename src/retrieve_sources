@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -e
+
+if [ $# -lt 1 ]; then
+    echo "Insufficient args. Usage: retrieve_sources OUT_DIR"
+fi
+
+# This is to check that we downloaded the right files, and they did not change in a surprising way
+TARGETGTEXSHA="0dc8f6781e0902d4ef20556220e30869558846366e36a85968ce1fc16e4c7aa2"
+
+echo "Making 'in' folder if missing..."
+mkdir -p "$1/in"
+
+echo "Retrieving remote data."
+
+echo "=> TCGA TARGET GTEx from UCSC Xena"
+TCGA_PATH="$1/in/tcga_target_gtex.gz"
+wget -O "$TCGA_PATH" https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TCGA-GTEx-TARGET-gene-exp-counts.deseq2-normalized.log2.gz
+echo "Checking SHA256SUM..."
+echo "$TARGETGTEXSHA $TCGA_PATH" | sha256sum --check --status
+if [ $? -eq 1 ] then
+    echo "Error: Failed to validate downloaded file $TCGA_PATH. Exiting."
+    exit 1
+fi
+echo "Unzipping..."
+gunzip "$TCGA_PATH"
+
+
+echo "=> Latest MTP-DB release"
+# TODO: Update this to the latest release once we have a static name
+# e.g. https://github.com/CMA-Lab/MTP-DB/releases/latest/MTPDB.sqlite.tar.gz
+wget -O "$1/in/MTPDB.sqlite.tar.gz" https://github.com/CMA-Lab/MTP-DB/releases/download/0.23.17-beta/MTPDB_v0.23.17-beta.sqlite.tar.gz
+echo "Unzipping..."
+tar -xvzf "$1/in/MTPDB.sqlite.tar.gz"
+
+
+echo "Finished dowloading resource files."
