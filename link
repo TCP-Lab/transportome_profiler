@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
+set -e
 
 if [ $# -lt 1 ]; then
     echo "Insufficient args. Usage: link DATA_FOLDER"
+    exit 1
 fi
 
 # This is ugly but bear with me
