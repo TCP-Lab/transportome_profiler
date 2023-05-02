@@ -1,6 +1,7 @@
 env/
 data/
 data
+paper/resources/images/generated
 
 ## Python gitignore
 # Byte-compiled / optimized / DLL files
