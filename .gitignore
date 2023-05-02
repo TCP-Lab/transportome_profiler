@@ -1,4 +1,5 @@
 env/
+# Symlinks and/or local data folders
 data/
 data
 paper/resources/images/generated
