@@ -163,8 +163,9 @@ fn cohen(case: Vec<f32>, control: Vec<f32>) -> f32 {
     if pooled_var == 0.0 {
         return 0.0;
     }
-
+    
     (mean(case).unwrap() - mean(control).unwrap()) / pooled_var
+    //(mean(case).unwrap() - mean(control).unwrap()) as f32
 }
 
 

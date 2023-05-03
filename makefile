@@ -16,7 +16,7 @@
 # 7. Compiles the output .tex with `tectonic` from the .tex files in the
 #      ./paper directory with the output plots from the analysis.
 
-.PHONY = all venv make_genesets run_dea
+.PHONY = all venv make_genesets run_dea retrieve_sources
 
 data_dir = ./data/
 expression_matrix = $(data_dir)/in/tcga_target_gtex
@@ -32,21 +32,24 @@ venv/touchfile: requirements.txt
 	. venv/bin/activate; pip install -Ur requirements.txt
 	touch venv/touchfile
 
-## --- 1 ---
-$(expression_matrix) $(local_mtpdb) &: ./src/retrieve_sources
-	./src/retrieve_sources $(data_dir)
+## --- 1 --- Retrieve sources
+$(expression_matrix):
+	mkdir -p "$(data_dir)/in"
 
-## --- 2 ---
-# This makes way too many (variable) files, so I made the target phony.
-make_genesets: \
-		$(local_mtpdb) \
-		./src/geneset_maker/make_genesets.py \
-		./src/geneset_maker/basic_gene_lists.json
+	wget -O "$(expression_matrix).gz" https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGtex_RSEM_Hugo_norm_count.gz --inet4-only
 
-	. venv/bin/activate; python \
-		./src/geneset_maker/make_genesets.py $(local_mtpdb) ./src/geneset_maker/basic_gene_lists.json \
-		--prune_direction "topdown" \
-		--verbose
+	echo "Unzipping..."
+	gunzip "$(expression_matrix).gz"
+
+$(local_mtpdb):
+	mkdir -p "$(data_dir)/in"
+
+	wget -O "$(local_mtpdb).tar.gz" https://github.com/CMA-Lab/MTP-DB/releases/download/0.23.17-beta/MTPDB_v0.23.17-beta.sqlite.tar.gz --inet4-only
+
+	echo "Unzipping..."
+	tar -xvzf "$(local_mtpdb).tar.gz" -C "$(data_dir)/in/"
+	echo "Removing compressed file..."
+	rm "$(local_mtpdb).tar.gz"
 
 ## --- 3 --- Compile the cohen calculator
 ./src/run_dea/cohen_calculator/target/release/cohen_calculator: ./src/run_dea/cohen_calculator/src/main.rs
@@ -54,19 +57,41 @@ make_genesets: \
 
 ## --- 4 --- Calculate the cohen's D matrix
 $(data_dir)/cohen_d_matrix.csv: $(expression_matrix) \
-		./src/run_dea/metadata.csv \
+		$(data_dir)/metadata.csv \
 		./src/run_dea/cohen_calculator/target/release/cohen_calculator \
 
 	./src/run_dea/cohen_calculator/target/release/cohen_calculator \
-		"$(expression_matrix)" ./src/run_dea/metadata.csv ./src/run_dea/tcga_to_gtex_matches.json \
+		"$(expression_matrix)" $(data_dir)/metadata.csv ./src/run_dea/tcga_to_gtex_matches.json \
 		"$(data_dir)/cohen_d_matrix.csv"
 
-./src/run_dea/metadata.csv: \
+$(data_dir)/metadata.csv: \
+		venv/touchfile \
 		./src/run_dea/tcga_metadata.csv \
 		./src/run_dea/GTEX_phenotype.tsv \
-		./src/run_dea/prep_metadata.csv \
+		./src/run_dea/prep_metadata.py \
 		$(expression_matrix)
 	
 	. venv/bin/activate; python ./src/run_dea/prep_metadata.py \
 		"./src/run_dea/GTEX_phenotype.tsv" "$(expression_matrix)" "./src/run_dea/tcga_metadata.csv" \
-		"./src/run_dea/metadata.csv"
+		"$(data_dir)/metadata.csv"
+
+## --- 2 ---
+# The fact that it run is detected in the `run_gsea` step by the `all.txt` file
+$(data_dir)/genesets/all.txt: \
+		venv/touchfile \
+		$(local_mtpdb) \
+		./src/geneset_maker/make_genesets.py \
+		./src/geneset_maker/basic_gene_lists.json
+
+	mkdir -p $(data_dir)/genesets
+
+	. venv/bin/activate; python \
+		./src/geneset_maker/make_genesets.py $(local_mtpdb) ./src/geneset_maker/basic_gene_lists.json \
+		$(data_dir)/genesets \
+		--prune_direction "topdown" \
+		--verbose
+
+## --- 5 --- Run the pre-ranked GSEA
+run_gsea: \
+	$(data_dir)/genesets/all.txt \
+	./src/geneset_maker/run_gsea.R \
