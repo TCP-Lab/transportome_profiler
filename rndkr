@@ -1,0 +1,11 @@
+#!/usr/bin/env zsh
+set -e
+
+## This runs make in the docker container
+if [ $! -eq "--pull" ]; then
+    echo "TBA!"
+else
+
+    docker build . -t transportome_profiler:bleeding
+    docker run -it --rm -v ./data:/data transportome_profiler:bleeding
+fi

@@ -18,21 +18,19 @@
 
 .PHONY = all venv make_genesets run_dea retrieve_sources clean clean_input
 
-data_dir = ./data/
+data_dir = ./data
 expression_matrix = $(data_dir)/in/tcga_target_gtex
 local_mtpdb = $(data_dir)/in/MTPDB.sqlite
 
-all: "$(data_dir)/out/paper/paper.pdf"
+all: "$(data_dir)/out/paper/main.pdf"
 
 # Clean just the intermediary files - this is to re-run the analysis quickly
 clean:
 	rm -f $(data_dir)/cohen_d_matrix.csv
 	rm -f $(data_dir)/metadata.csv
-	# This finds and removes all plain files in the output folder
 	find $(data_dir)/out/ -type f -prune ! -name '.*' -exec rm {} +
 	rm -f ./venv/touchfile
 	rm -rf ./venv
-	rm -rf $(data_dir)/out/
 
 # Clean the input files. This is a harder clean than merely "clean", and to
 # re-run the analysis you'll need to redownload the inputs
@@ -49,7 +47,7 @@ scrub: restart
 venv: venv/touchfile
 
 venv/touchfile: requirements.txt
-	test -d venv || virtualenv venv
+	python3.11 -m venv venv
 	. venv/bin/activate; pip install -Ur requirements.txt
 	touch venv/touchfile
 
@@ -127,7 +125,7 @@ $(data_dir)/genesets/all.txt: \
 
 ## --- 6 --- Generate plots
 "$(data_dir)/out/figures/enrichments/done.flag": \
-		$(data_dir)/out/enrichments/done.flag \
+		"$(data_dir)/out/enrichments/done.flag" \
 		$(data_dir)/genesets/all.txt \
 		./src/gsea_runner/gsea_plotting_graphs.R
 

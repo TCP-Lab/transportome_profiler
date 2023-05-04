@@ -318,14 +318,14 @@ if (sys.nframe() == 0L) {
 
   if (args$low_memory) {
     run_all_gsea(
-      args$input_deg_folder,
+      args$input_expr_matrix,
       args$input_genesets_folder,
       ensg_data,
       output_dir = args$output_dir
     )
   } else {
     results <- run_all_gsea(
-      args$input_deg_folder,
+      args$input_expr_matrix,
       args$input_genesets_folder,
       ensg_data
     )
