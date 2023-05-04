@@ -52,6 +52,10 @@ library(assertthat)
 #' @returns A list with file names as names and tibbles as values.
 read_results <- function(input_dir) {
   files <- list.files(input_dir)
+  
+  # Remove flag files
+  files <- files[! endsWith(files, ".flag")]
+  
   res <- list()
   for (i in seq_along(files)) {
     res[[files[i]]] <- read_csv(file.path(input_dir, files[i]), show_col_types = FALSE)
@@ -322,7 +326,7 @@ plot_all_results <- function(results, out_dir, width=10, height=8, png = TRUE, r
 
 # DEBUGGING ONLY
 if (FALSE) {
-  results <- read_results("/home/hedmad/Files/data/mtpdb/gsea_output/")
+  results <- read_results("/home/hedmad/Files/data/transportome_profiler/out/enrichments/")
 
   plot_all_results(results, "~/Files/data/mtpdb/graphs/")
 }

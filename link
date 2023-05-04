@@ -26,9 +26,9 @@ echo "Linking $real/transportome_profiler to ./data..."
 mkdir -p "$real/transportome_profiler"
 ln -s "$real/transportome_profiler" ./data
 
-echo "Linking $real/transportome_profiler/out/figures to ./paper/resources/images/generated..."
+echo "Relative linking $real/transportome_profiler/out/figures to ./paper/resources/images/generated..."
 mkdir -p "$real/transportome_profiler/out/figures"
-ln -s "$real/transportome_profiler/out/figures" ./paper/resources/images/generated
+# We need to go up back 3 times to go to ., then back in the data directory
+ln -s "../../../data/out/figures" ./paper/resources/images/generated
 
 echo "Finished linking!"
-

@@ -12,7 +12,7 @@ if (sys.nframe() == 0L) {
 
   parser |>
     argparser::add_argument(
-      "input_deg_folder", help="Folder with DEG tables to run GSEA on.", type="character"
+      "input_expr_matrix", help="Expression matrix to run GSEA on.", type="character"
     ) |>
     argparser::add_argument(
       "input_genesets_folder", help = "Folder with input genesets as .txt files",
@@ -150,8 +150,22 @@ run_gsea <- function(genesets, ranks) {
   result <- fgsea::fgsea(
     pathways = genesets,
     stats = ranks,
-    nPermSimple = 1000
+    nPermSimple = 1000,
+    nproc=8
   )
+  
+  ## TODO: FIXME!
+  # For some reason we get NAs if we calculate cohen's D that we did not use to
+  # get with the t-stat. We are not sure why this is.
+  # See the issue: https://github.com/CMA-Lab/transportome_profiler/issues/1
+  
+  # We band-aid fix this by setting all pval and padj that are NA to 1
+  # and all NES and log2err to 0.
+  
+  result[is.na(result$pval), "pval"] <- 1
+  result[is.na(result$padj), "padj"] <- 1
+  result[is.na(result$NES), "NES"] <- 0
+  result[is.na(result$log2err), "log2err"] <- 0
 
   result
 }
@@ -205,7 +219,7 @@ run_all_gsea <- function(input_rank_matrix, genesets_folder_path, biomart_data, 
       cat(paste0("Saving data to ", paste0(file.path(output_dir, fnames(ranks)[i]), ".csv"), "\n"))
       save_result(result, output_dir, current_name)
     } else {
-      results[[current_name]] <- run_gsea(genesets, ranks)
+      results[[current_name]] <- run_gsea(genesets, ranks[[i]])
       results[[paste0("plot_", current_name)]] <- plot_gsea(genesets, ranks[[i]])
     }
   }
@@ -320,10 +334,3 @@ if (sys.nframe() == 0L) {
   }
 }
 # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-
-cohen <- read_csv("/home/hedmad/Files/data/transportome_profiler/cohen_d_matrix.csv")
-
-cohen |> select(-gene_id) |> as.matrix() |> hist(breaks = 50)
-testfn <- \(x) {sum(x > 0)}
-cohen |> select(-gene_id) |> as.matrix() |> testfn()

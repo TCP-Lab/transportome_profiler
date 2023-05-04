@@ -16,13 +16,34 @@
 # 7. Compiles the output .tex with `tectonic` from the .tex files in the
 #      ./paper directory with the output plots from the analysis.
 
-.PHONY = all venv make_genesets run_dea retrieve_sources
+.PHONY = all venv make_genesets run_dea retrieve_sources clean clean_input
 
 data_dir = ./data/
 expression_matrix = $(data_dir)/in/tcga_target_gtex
 local_mtpdb = $(data_dir)/in/MTPDB.sqlite
 
-all: $(data_dir)/cohen_d_matrix.csv
+all: "$(data_dir)/out/paper/paper.pdf"
+
+# Clean just the intermediary files - this is to re-run the analysis quickly
+clean:
+	rm -f $(data_dir)/cohen_d_matrix.csv
+	rm -f $(data_dir)/metadata.csv
+	# This finds and removes all plain files in the output folder
+	find $(data_dir)/out/ -type f -prune ! -name '.*' -exec rm {} +
+	rm -f ./venv/touchfile
+	rm -rf ./venv
+	rm -rf $(data_dir)/out/
+
+# Clean the input files. This is a harder clean than merely "clean", and to
+# re-run the analysis you'll need to redownload the inputs
+restart: clean
+	rm -f $(expression_matrix)
+	rm -f $(local_mtpdb)
+
+# Clean every file made by make and remove the links made by ./link
+scrub: restart
+	rm -f $(data_dir)
+	rm -f ./paper/resources/images/generated
 
 ## --- 0 --- Make the python virtual environment
 venv: venv/touchfile
@@ -36,7 +57,7 @@ venv/touchfile: requirements.txt
 $(expression_matrix):
 	mkdir -p "$(data_dir)/in"
 
-	wget -O "$(expression_matrix).gz" https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGtex_RSEM_Hugo_norm_count.gz --inet4-only
+	wget -4 -O "$(expression_matrix).gz" https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TCGA-GTEx-TARGET-gene-exp-counts.deseq2-normalized.log2.gz --inet4-only
 
 	echo "Unzipping..."
 	gunzip "$(expression_matrix).gz"
@@ -92,6 +113,36 @@ $(data_dir)/genesets/all.txt: \
 		--verbose
 
 ## --- 5 --- Run the pre-ranked GSEA
-run_gsea: \
-	$(data_dir)/genesets/all.txt \
-	./src/geneset_maker/run_gsea.R \
+"$(data_dir)/out/enrichments/done.flag": \
+		$(data_dir)/genesets/all.txt \
+		./src/gsea_runner/run_gsea.R \
+		$(data_dir)/cohen_d_matrix.csv
+
+	mkdir -p $(data_dir)/out/enrichments
+
+	Rscript ./src/gsea_runner/run_gsea.R \
+		"$(data_dir)/cohen_d_matrix.csv" "$(data_dir)/genesets" "$(data_dir)/out/enrichments"
+
+	touch "$(data_dir)/out/enrichments/done.flag"
+
+## --- 6 --- Generate plots
+"$(data_dir)/out/figures/enrichments/done.flag": \
+		$(data_dir)/out/enrichments/done.flag \
+		$(data_dir)/genesets/all.txt \
+		./src/gsea_runner/gsea_plotting_graphs.R
+
+	mkdir -p $(data_dir)/out/figures/enrichments
+
+	Rscript ./src/gsea_runner/gsea_plotting_graphs.R \
+		$(data_dir)/out/enrichments/ \
+		$(data_dir)/out/figures/enrichments
+	
+	touch "$(data_dir)/out/figures/enrichments/done.flag"
+
+## --- 7 --- Generate paper
+"$(data_dir)/out/paper/main.pdf": \
+		"$(data_dir)/out/figures/enrichments/done.flag" \
+		./paper
+
+	mkdir -p $(data_dir)/out/paper/
+	tectonic ./paper/main.tex -o $(data_dir)/out/paper/
