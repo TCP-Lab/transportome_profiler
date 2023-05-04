@@ -1,0 +1,21 @@
+ 
+{
+    "Test One": {
+        "case_variable": "Status",
+        "control_variable": "Status",
+        "case_value": "case",
+        "control_value": "control"
+    },
+    "Test Two": {
+        "case_variable": "Status",
+        "control_variable": "Status",
+        "case_value": "case",
+        "control_value": "control"
+    },
+    "Test Three": {
+        "case_variable": "Status",
+        "control_variable": "Status",
+        "case_value": "control",
+        "control_value": "case"
+    }
+}

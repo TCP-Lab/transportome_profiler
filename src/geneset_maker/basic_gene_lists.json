@@ -29,7 +29,7 @@
         ]
     },
     "queries": {
-        "channels": "SELECT DISTINCT ensg, is_voltage_gated, is_ligand_gated, is_leakage, is_stretch_activated, carried_solute FROM channels;",
+        "channels": "SELECT DISTINCT ensg, gating_mechanism, carried_solute FROM channels;",
         "solute_carriers": "SELECT DISTINCT ensg, carried_solute, net_charge, port_type, direction, is_secondary FROM solute_carriers;"
     },
     "structure": [
