@@ -13,7 +13,8 @@ RUN Rscript \
     -e "install.packages('assertthat')" \
     -e "install.packages('argparser')" \
     -e "install.packages('uuid')" \
-    -e "install.packages('grid')"
+    -e "install.packages('grid')" \
+    -e "BiocManager::install('DESeq2')"
 
 # Install rust and cargo
 RUN curl https://sh.rustup.rs -sSf > rstins && sh rstins -y

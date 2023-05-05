@@ -6,17 +6,19 @@
 #
 # The makefile does the following:
 # 0. Setup a Python venv to use throughout the makefile;
-# 1. Retrieve all the data files through `retrieve_sources`;
+# 1. Retrieve all the data files;
 # 2. Generates the genesets from the MTP-DB with `geneset_maker` (Python)
-# 3. Compiles the `cohen_calculator` executable with `cargo` (Rust);
-# 4. Runs the executable with the TCGA/GTEX data plus some static data files
-#      (see the `run_dea` README) to generate the Cohen's D matrix;
+# 3. Split the GTEX files to single .csv files based on the metadata columns
+# 4. Run the DEA with Deseq2 from the GTEX expression + GTEX metadata +
+#    a TCGA file +   
 # 5. Runs the pre-ranked GSEA with the Cohen's D matrix and the genesets (R);
 # 6. Generates the output plots with the `gsea_plotting_graphs.R` script (R).
 # 7. Compiles the output .tex with `tectonic` from the .tex files in the
 #      ./paper directory with the output plots from the analysis.
 
 .PHONY = all venv make_genesets run_dea retrieve_sources clean clean_input
+
+TCGA_ID = LAML ACC BLCA LGG BRCA CESC CHOL LCML COAD  ESC GBM HNSC KICH KIRC KIRP LIHC LUAD LUSC DLBC MESO OV PAAD PCPG PRAD READ SARC STAD TGCT THYM UCS UCEC UVM
 
 data_dir = ./data
 expression_matrix = $(data_dir)/in/tcga_target_gtex
@@ -52,27 +54,23 @@ venv/touchfile: requirements.txt
 	touch venv/touchfile
 
 ## --- 1 --- Retrieve sources
-$(expression_matrix):
-	mkdir -p "$(data_dir)/in"
+# Retrieve all the TCGA expression files from Xena - the $(@F) variables expands
+# to the filename of the target (TCGA-xxxx in this case)
+$(data_dir)/in/tcga_raw/TCGA-$(TCGA_ID):
+	mkdir -p $(@D)
+	wget -4 --inet4-only -O $@.gz https://gdc-hub.s3.us-east-1.amazonaws.com/download/$(@F).htseq_counts.tsv.gz
+	gunzip $@.gz
 
-	wget -4 -O "$(expression_matrix).gz" https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TCGA-GTEx-TARGET-gene-exp-counts.deseq2-normalized.log2.gz --inet4-only
-
-	echo "Unzipping..."
-	gunzip "$(expression_matrix).gz"
+$(data_dir)/in/gtex_raw_counts:
+	mkdir -p $(@D)
+	wget -4 --inet4-only -O $@.gz https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/gtex_gene_expected_count.gz 
+	gunzip $@.gz
 
 $(local_mtpdb):
-	mkdir -p "$(data_dir)/in"
-
-	wget -O "$(local_mtpdb).tar.gz" https://github.com/CMA-Lab/MTP-DB/releases/download/0.23.17-beta/MTPDB_v0.23.17-beta.sqlite.tar.gz --inet4-only
-
-	echo "Unzipping..."
-	tar -xvzf "$(local_mtpdb).tar.gz" -C "$(data_dir)/in/"
-	echo "Removing compressed file..."
-	rm "$(local_mtpdb).tar.gz"
-
-## --- 3 --- Compile the cohen calculator
-./src/run_dea/cohen_calculator/target/release/cohen_calculator: ./src/run_dea/cohen_calculator/src/main.rs
-	cargo build --release --manifest-path ./src/run_dea/cohen_calculator/Cargo.toml
+	mkdir -p $(@D)
+	wget -O $@.tar.gz https://github.com/CMA-Lab/MTP-DB/releases/download/0.23.17-beta/MTPDB_v0.23.17-beta.sqlite.tar.gz --inet4-only
+	tar -xvzf $@.tar.gz -C $(@D)
+	rm $@.tar.gz
 
 ## --- 4 --- Calculate the cohen's D matrix
 $(data_dir)/cohen_d_matrix.csv: $(expression_matrix) \
@@ -102,7 +100,7 @@ $(data_dir)/genesets/all.txt: \
 		./src/geneset_maker/make_genesets.py \
 		./src/geneset_maker/basic_gene_lists.json
 
-	mkdir -p $(data_dir)/genesets
+	mkdir -p $(@D)
 
 	. venv/bin/activate; python \
 		./src/geneset_maker/make_genesets.py $(local_mtpdb) ./src/geneset_maker/basic_gene_lists.json \
@@ -116,7 +114,7 @@ $(data_dir)/genesets/all.txt: \
 		./src/gsea_runner/run_gsea.R \
 		$(data_dir)/cohen_d_matrix.csv
 
-	mkdir -p $(data_dir)/out/enrichments
+	mkdir -p $(@D)
 
 	Rscript ./src/gsea_runner/run_gsea.R \
 		"$(data_dir)/cohen_d_matrix.csv" "$(data_dir)/genesets" "$(data_dir)/out/enrichments"
@@ -129,7 +127,7 @@ $(data_dir)/genesets/all.txt: \
 		$(data_dir)/genesets/all.txt \
 		./src/gsea_runner/gsea_plotting_graphs.R
 
-	mkdir -p $(data_dir)/out/figures/enrichments
+	mkdir -p $(@D)
 
 	Rscript ./src/gsea_runner/gsea_plotting_graphs.R \
 		$(data_dir)/out/enrichments/ \
@@ -142,5 +140,5 @@ $(data_dir)/genesets/all.txt: \
 		"$(data_dir)/out/figures/enrichments/done.flag" \
 		./paper
 
-	mkdir -p $(data_dir)/out/paper/
+	mkdir -p $(@D)
 	tectonic ./paper/main.tex -o $(data_dir)/out/paper/
