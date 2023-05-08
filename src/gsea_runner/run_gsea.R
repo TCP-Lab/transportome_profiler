@@ -12,7 +12,7 @@ if (sys.nframe() == 0L) {
 
   parser |>
     argparser::add_argument(
-      "input_expr_matrix", help="Expression matrix to run GSEA on.", type="character"
+      "input_deg_folder", help="Folder with DEG tables to run GSEA on.", type="character"
     ) |>
     argparser::add_argument(
       "input_genesets_folder", help = "Folder with input genesets as .txt files",
@@ -45,28 +45,19 @@ options(readr.num_columns = 0)
 load_genesets <- function(folder, biomart_data) {
   #' Load all genesets from FOLDER.
   #'
-  #' Genesets should have been made by make_genesets.py
+  #' Genesets should have been made by make_genests.py
   #'
-  #' @param folder The folder to find files in, all in plain one-record-per-line
-  #'   .txt format.
+  #' @param folder The folder to find files in, all in .csv format.
   #' @param biomart_data A data.frame with at least the "ensembl_gene_id" and
   #'   "hgnc_symbol" columns, with the correspondence from ENSG to symbol.
   #'   Such a table can be retrieved from Biomart with biomaRt.
   #' @returns A list of vectors, each with the gene symbols of that gene set
 
   files <- list.files(folder, full.names = TRUE, recursive = TRUE)
-  
-  # Remove the "all.txt" file
-  files <- files[! endsWith(files, "all.txt")]
 
   data <- list()
   for (file in files) {
-    # We need the "clean" file id,
-    # e.g. '/a/b/whole_transportome/data.txt' -> '/whole_transportome'
-    file |> 
-      str_remove("\\/data\\.txt$") |>
-      str_remove(paste0("^", folder)) -> id
-    
+    file |> str_remove("\\/data\\.txt$") |> str_remove(paste0("^", folder)) -> id
     data[[ id ]] <- read_table(file, col_names = "ensg")[["ensg"]]
   }
 
@@ -87,52 +78,50 @@ load_genesets <- function(folder, biomart_data) {
 }
 
 extract_ranks <- function(deg_file, biomart_data) {
-  #' Make a frame ready for GSEA from a DEG file, made by the cohen's D calculator.
-  #' 
-  #' This will filter out the non-coding genes as well as add the gene symbols
-  #' from BioMart instead of ENSGs.
+  #' Make a frame ready for GSEA from a DEG file, made by BioTEA or DESeq2.
+  #'
+  #' Some compatibility is needed to parse DESeq2 files, as they have no
+  #' "SYMBOL" column.
   #'
   #' @param deg_file (full) Path to the DEG file that needs to be extracted, as .csv.
   #' @param biomart_data A data.frame with at least the "ensembl_gene_id" and
   #'   "gene_biotype" columns.
   #'   Such a table can be retrieved from Biomart with biomaRt.
   #'
-  #' @returns A list of named vector of gene_names : statistic, ready for fgsea::fgsea
+  #' @returns A named vector of gene_names : statistic, ready for fgsea::fgsea
   data <- read_csv(deg_file, show_col_types = FALSE)
 
-  # Assert that we find a gene_id col
-  stopifnot("gene_id" %in% colnames(data))
-
-  # Get rid of the ENSG version -- this causes some rows to collide.
-  # We need to get rid of the collisions in the original data
-  # - Compute the would-be genes
-  data["gene_id"] <- gsub("\\.[0-9]+?$", "", data[["gene_id"]], perl = TRUE)
-  data <- na.omit(data)
-  
-  data |> column_to_rownames("gene_id") -> data
-  
-  # Avoid duplicated row-names
-  biomart_data |> distinct(ensembl_gene_id, .keep_all = TRUE) -> biomart_data
-  biomart_data |> column_to_rownames("ensembl_gene_id") -> biomart_data
-  
-  # Keep only ENSGs that have a gene symbol AND are coding
-  biomart_data |>
-    dplyr::filter(hgnc_symbol != "") |>
-    dplyr::filter(gene_biotype == "protein_coding") -> biomart_data
-  
-  # Drop the lines in the larger data that do not have a match in the biomart data
-  data <- data[rownames(data) %in% rownames(biomart_data), ]
-  
-  # Make a static gene_symbols that we can slap onto every vector
-  gene_symbols <- biomart_data[row.names(data), "hgnc_symbol"]
-  
-  result <- as.list(data)
-  
-  for (i in seq_along(result)) {
-    names(result[[i]]) <- gene_symbols
+  if (! "SYMBOL" %in% colnames(data)) {
+    cat("SYMBOL not found in colnames. Attempting to grab it from ids...\n")
+    if ("id" %in% colnames(data)) {
+      relevant_data <- biomart_data[biomart_data$ensembl_gene_id %in% data$id, c("ensembl_gene_id", "hgnc_symbol")]
+      data <- merge(
+        data, relevant_data, by.y = "ensembl_gene_id", by.x = "id",
+        all.y = FALSE, all.x = TRUE, sort = FALSE
+      )
+      data |> rename(SYMBOL = hgnc_symbol) -> data
+    } else {
+      stop("Cannot find id column. No symbols!")
+    }
   }
 
-  return(result)
+  # Patch to use DESeq2 data
+  if ("stat" %in% colnames(data)) {
+    cat("Converting stat to t - for compatibility...\n")
+    data |> rename(t = stat) -> data
+  }
+
+  data |> select(all_of(c("SYMBOL", "t"))) -> data
+  data <- na.omit(data)
+
+  named_vec <- data$t
+  names(named_vec) <- data$SYMBOL
+
+  coding <- biomart_data$hgnc_symbol[biomart_data$gene_biotype == "protein_coding"]
+
+  named_vec <- named_vec[names(named_vec) %in% coding]
+
+  return(named_vec)
 }
 
 
@@ -143,29 +132,14 @@ extract_ranks <- function(deg_file, biomart_data) {
 #'
 #' @param genesets A list of genesets to check, with each geneset a vector of
 #'   gene names.
-#' @param ranks A list of named vector of gene names: statistic to use as ranked list for gsea.
+#' @param ranks A named list of gene names: statistic to use as ranked list for gsea.
 #'
 #' @returns A table with GSEA results. See fgsea:fgsea for details.
 run_gsea <- function(genesets, ranks) {
   result <- fgsea::fgsea(
     pathways = genesets,
-    stats = ranks,
-    nPermSimple = 1000,
-    nproc=8
+    stats = ranks
   )
-  
-  ## TODO: FIXME!
-  # For some reason we get NAs if we calculate cohen's D that we did not use to
-  # get with the t-stat. We are not sure why this is.
-  # See the issue: https://github.com/CMA-Lab/transportome_profiler/issues/1
-  
-  # We band-aid fix this by setting all pval and padj that are NA to 1
-  # and all NES and log2err to 0.
-  
-  result[is.na(result$pval), "pval"] <- 1
-  result[is.na(result$padj), "padj"] <- 1
-  result[is.na(result$NES), "NES"] <- 0
-  result[is.na(result$log2err), "log2err"] <- 0
 
   result
 }
@@ -190,8 +164,8 @@ plot_gsea <- function(genesets, ranks) {
 
 #' Run GSEA on all DEG tables in a folder, with all genesets from another folder.
 #'
-#' @param input_rank_matrix (Full) path to the input rank matrix made by 
-#'   `cohen_calculator`. Loaded by `extract_ranks`.
+#' @param input_data_folder (Full) path to the input data folder with the DEG
+#'   tables to be loaded with `extract_ranks`.
 #' @param output_dir The output directory to save output files to. If NA, does
 #'   not save files, and instead returns a list of results.
 #' @param genesets_folder_patdh (Full) path to the folder with genesets, as .txt
@@ -201,26 +175,26 @@ plot_gsea <- function(genesets, ranks) {
 #'   Such a table can be retrieved from Biomart with biomaRt.
 #'
 #' @returns A list of values with file names as names and GSEA results as values.
-run_all_gsea <- function(input_rank_matrix, genesets_folder_path, biomart_data, output_dir = NA) {
+run_all_gsea <- function(input_data_folder, genesets_folder_path, biomart_data, output_dir = NA) {
+  file_names <- list.files(input_data_folder)
+  file_paths <- file.path(input_data_folder, file_names)
+
   cat("Loading genesets...\n")
   genesets <- load_genesets(genesets_folder_path, biomart_data = biomart_data)
-  
-  cat("Loading ranks...\n")
-  ranks <- extract_ranks(input_rank_matrix, biomart_data)
 
   results <- list()
-  for (i in seq_along(ranks)) {
-    current_name <- names(ranks)[i]
-    cat(paste0("Running GSEA on ", current_name, "\n"))
+  for (i in seq_along(file_names)) {
+    cat(paste0("Running GSEA on ", file_names[i], "\n"))
+    ranks <- extract_ranks(file_paths[i], biomart_data)
 
     if (! is.na(output_dir)) {
-      result <- run_gsea(genesets, ranks[[i]])
+      result <- run_gsea(genesets, ranks)
 
-      cat(paste0("Saving data to ", paste0(file.path(output_dir, fnames(ranks)[i]), ".csv"), "\n"))
-      save_result(result, output_dir, current_name)
+      cat(paste0("Saving data to ", paste0(file.path(output_dir, file_names[i]), ".csv"), "\n"))
+      save_result(result, output_dir, file_names[i])
     } else {
-      results[[current_name]] <- run_gsea(genesets, ranks[[i]])
-      results[[paste0("plot_", current_name)]] <- plot_gsea(genesets, ranks[[i]])
+      results[[file_names[i]]] <- run_gsea(genesets, ranks)
+      results[[paste0("plot_", file_names[[i]])]] <- plot_gsea(genesets, ranks)
     }
   }
 
@@ -293,8 +267,8 @@ ensg_data <- biomaRt::getBM(
 )
 
 results <- run_all_gsea(
-  "/home/hedmad/Files/data/transportome_profiler/cohen_d_matrix.csv",
-  "/home/hedmad/Files/data/transportome_profiler/genesets/",
+  "/home/hedmad/Files/data/mtpdb/input_deg_tables/",
+  "/home/hedmad/Files/data/mtpdb/genesets/bottomup/root/",
   ensg_data
 )
 
@@ -318,14 +292,14 @@ if (sys.nframe() == 0L) {
 
   if (args$low_memory) {
     run_all_gsea(
-      args$input_expr_matrix,
+      args$input_deg_folder,
       args$input_genesets_folder,
       ensg_data,
       output_dir = args$output_dir
     )
   } else {
     results <- run_all_gsea(
-      args$input_expr_matrix,
+      args$input_deg_folder,
       args$input_genesets_folder,
       ensg_data
     )
