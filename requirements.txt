@@ -7,3 +7,5 @@ tqdm==4.65.0
 tzdata==2023.3
 colorama==0.4.6
 bonsai @ git+https://github.com/MrHedmad/bonsai@main
+metasplit @ git+https://github.com/MrHedmad/metasplit@main
+

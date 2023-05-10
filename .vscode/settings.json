@@ -1,5 +1,6 @@
 {
     "rust-analyzer.linkedProjects": [
         "./src/run_dea/cohen_calculator/Cargo.toml"
-    ]
+    ],
+    "r.lsp.promptToInstall": false
 }

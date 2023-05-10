@@ -18,8 +18,6 @@
 
 .PHONY = all venv make_genesets run_dea retrieve_sources clean clean_input
 
-TCGA_ID = LAML ACC BLCA LGG BRCA CESC CHOL LCML COAD  ESC GBM HNSC KICH KIRC KIRP LIHC LUAD LUSC DLBC MESO OV PAAD PCPG PRAD READ SARC STAD TGCT THYM UCS UCEC UVM
-
 data_dir = ./data
 expression_matrix = $(data_dir)/in/tcga_target_gtex
 local_mtpdb = $(data_dir)/in/MTPDB.sqlite
@@ -54,16 +52,15 @@ venv/touchfile: requirements.txt
 	touch venv/touchfile
 
 ## --- 1 --- Retrieve sources
-# Retrieve all the TCGA expression files from Xena - the $(@F) variables expands
-# to the filename of the target (TCGA-xxxx in this case)
-$(data_dir)/in/tcga_raw/TCGA-$(TCGA_ID):
+# Retrieve all the expression files from xena
+$(data_dir)/in/tcga_target_gtex:
 	mkdir -p $(@D)
-	wget -4 --inet4-only -O $@.gz https://gdc-hub.s3.us-east-1.amazonaws.com/download/$(@F).htseq_counts.tsv.gz
+	wget -4 --inet4-only -O $@.gz https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGtex_gene_expected_count.gz 
 	gunzip $@.gz
 
-$(data_dir)/in/gtex_raw_counts:
+$(data_dir)/in/selected_metadata:
 	mkdir -p $(@D)
-	wget -4 --inet4-only -O $@.gz https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/gtex_gene_expected_count.gz 
+	wget -4 --inet4-only -O $@.gz https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGTEX_phenotype.txt.gz
 	gunzip $@.gz
 
 $(local_mtpdb):
@@ -72,25 +69,10 @@ $(local_mtpdb):
 	tar -xvzf $@.tar.gz -C $(@D)
 	rm $@.tar.gz
 
-## --- 4 --- Calculate the cohen's D matrix
-$(data_dir)/cohen_d_matrix.csv: $(expression_matrix) \
-		$(data_dir)/metadata.csv \
-		./src/run_dea/cohen_calculator/target/release/cohen_calculator \
-
-	./src/run_dea/cohen_calculator/target/release/cohen_calculator \
-		"$(expression_matrix)" $(data_dir)/metadata.csv ./src/run_dea/tcga_to_gtex_matches.json \
-		"$(data_dir)/cohen_d_matrix.csv"
-
-$(data_dir)/metadata.csv: \
-		venv/touchfile \
-		./src/run_dea/tcga_metadata.csv \
-		./src/run_dea/GTEX_phenotype.tsv \
-		./src/run_dea/prep_metadata.py \
-		$(expression_matrix)
-	
-	. venv/bin/activate; python ./src/run_dea/prep_metadata.py \
-		"./src/run_dea/GTEX_phenotype.tsv" "$(expression_matrix)" "./src/run_dea/tcga_metadata.csv" \
-		"$(data_dir)/metadata.csv"
+## --- --- Calculate the DEA files
+$(data_dir)/deas/flag.txt: \
+	$(data_dir)/in/tcga_target_gtex \
+	$(data_dir)/in/selected_metadata
 
 ## --- 2 ---
 # The fact that it run is detected in the `run_gsea` step by the `all.txt` file

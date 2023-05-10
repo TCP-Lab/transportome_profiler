@@ -37,15 +37,18 @@ requireNamespace("DESeq2")
 requireNamespace("assertthat")
 
 main <- function(case_path, control_path, output_path, case_rownames_col, control_rownames_col) {
-  read_csv(case_path) |> column_to_rownames(case_rownames_col) -> case_data
-  read_csv(control_path) |> column_to_rownames(control_rownames_col) -> control_data 
+  cat("Loading case data...\n")
+  read_csv(case_path, show_col_types = FALSE) |> column_to_rownames(case_rownames_col) -> case_data
+  cat(paste0("Loaded a ", nrow(case_data), " rows by ", ncol(case_data), " columns case expression matrix.\n"))
+  cat("Loading control data...\n")
+  read_csv(control_path, show_col_types = FALSE) |> column_to_rownames(control_rownames_col) -> control_data 
+  cat(paste0("Loaded a ", nrow(control_data), " rows by ", ncol(control_data), " columns control expression matrix.\n"))
 
-  assertthat::assert_that(is.numeric(case_data), msg = "The case matrix must be numeric")
-  assertthat::assert_that(is.numeric(control_data), msg = "The control matrix must be numeric")
-  
+  cat("Running deseq...\n")
   result <- run_deseq(case_data, control_data)
   
-  write_csv(result, output_path)
+  cat("Saving result...\n")
+  write.csv(result, file = output_path, row.names=FALSE)
 }
 
 rowmerge <- function(x, y, ...) {
@@ -61,7 +64,7 @@ run_deseq <- function(case_frame, control_frame) {
   # Make a dummy metadata frame
   metadata <- data.frame(
     row.names = c(colnames(case_frame), colnames((control_frame))),
-    status = c(rep("case", ncol(case_frame)), rep("control", ncol(control_frame)))
+    status = factor(c(rep("case", ncol(case_frame)), rep("control", ncol(control_frame))), levels = c("control", "case"))
   )
   
   # Merge the case and control frames
@@ -69,19 +72,24 @@ run_deseq <- function(case_frame, control_frame) {
   
   # Assert that the order of the cols and rows is the same
   data <- data[, row.names(metadata)]
-  
+
+  # The data must be un-logged
+  data <- round((2 ** data) -1)
+
   DESeq2::DESeqDataSetFromMatrix(
     data, metadata, ~ status
   ) |>
-    DESeq2::DESeq(dsq_data) |>
-    DESeq2::results(contrast = c("status", "case", "control")) -> dsq_res
+    DESeq2::DESeq() -> dsq_obj
+
+  DESeq2::results(dsq_obj, name = "status_case_vs_control") -> dsq_res
   
-  dsq_res
+  cat("Deseq finished running!\n")
+  as.data.frame(dsq_res) |> rownames_to_column("gene_id")
 }
 
 main(
   case_path = args$case_csv_file, control_path = args$control_csv_file,
-  output_path = args$output_path,
+  output_path = args$output_csv,
   case_rownames_col = args$case_rownames_col,
   control_rownames_col = args$control_rownames_col
 )
