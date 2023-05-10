@@ -55,6 +55,8 @@ load_genesets <- function(folder, biomart_data) {
 
   files <- list.files(folder, full.names = TRUE, recursive = TRUE)
 
+  files <- files[! endsWith(files, "all.txt")]
+
   data <- list()
   for (file in files) {
     file |> str_remove("\\/data\\.txt$") |> str_remove(paste0("^", folder)) -> id
@@ -77,6 +79,12 @@ load_genesets <- function(folder, biomart_data) {
   return(data)
 }
 
+purge_ensg_versions <- function(data, id_col = "gene_id") {
+  data |> mutate("{id_col}" := str_remove(.data[[id_col]], "\\.[0-9]+$")) -> data
+  data |> distinct(.data[[id_col]], .keep_all = TRUE) -> data
+  data
+}
+
 extract_ranks <- function(deg_file, biomart_data) {
   #' Make a frame ready for GSEA from a DEG file, made by BioTEA or DESeq2.
   #'
@@ -93,17 +101,24 @@ extract_ranks <- function(deg_file, biomart_data) {
 
   if (! "SYMBOL" %in% colnames(data)) {
     cat("SYMBOL not found in colnames. Attempting to grab it from ids...\n")
-    if ("id" %in% colnames(data)) {
-      relevant_data <- biomart_data[biomart_data$ensembl_gene_id %in% data$id, c("ensembl_gene_id", "hgnc_symbol")]
+    if ("gene_id" %in% colnames(data)) {
+      # Purge (possible) versions from the ensembl gene IDs
+      data |> purge_ensg_versions(id_col = "gene_id") -> data
+
+      relevant_data <- biomart_data[biomart_data$ensembl_gene_id %in% data$gene_id, c("ensembl_gene_id", "hgnc_symbol")]
+      print(relevant_data[1:10, ])
       data <- merge(
-        data, relevant_data, by.y = "ensembl_gene_id", by.x = "id",
+        data, relevant_data, by.y = "ensembl_gene_id", by.x = "gene_id",
         all.y = FALSE, all.x = TRUE, sort = FALSE
       )
+      print(data[1:10,])
       data |> rename(SYMBOL = hgnc_symbol) -> data
     } else {
-      stop("Cannot find id column. No symbols!")
+      stop(paste0("Cannot find id column in ", paste0(colnames(data), collapse = ", ")))
     }
   }
+
+  print(data[1:10,])
 
   # Patch to use DESeq2 data
   if ("stat" %in% colnames(data)) {
@@ -111,6 +126,7 @@ extract_ranks <- function(deg_file, biomart_data) {
     data |> rename(t = stat) -> data
   }
 
+  print(data[1:10,])
   data |> select(all_of(c("SYMBOL", "t"))) -> data
   data <- na.omit(data)
 
@@ -177,7 +193,11 @@ plot_gsea <- function(genesets, ranks) {
 #' @returns A list of values with file names as names and GSEA results as values.
 run_all_gsea <- function(input_data_folder, genesets_folder_path, biomart_data, output_dir = NA) {
   file_names <- list.files(input_data_folder)
+  file_names <- file_names[endsWith(file_names, ".csv")]
   file_paths <- file.path(input_data_folder, file_names)
+  file_names <- file_names[endsWith(file_names, ".csv")]
+
+  cat(paste0("Found ", length(file_names), " DEG files.\n"))
 
   cat("Loading genesets...\n")
   genesets <- load_genesets(genesets_folder_path, biomart_data = biomart_data)
