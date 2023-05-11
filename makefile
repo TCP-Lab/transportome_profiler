@@ -73,6 +73,11 @@ $(local_mtpdb):
 	mv $(data_dir)/in/MTPDB_v0.23.17-beta.sqlite $@
 	rm $@.tar.gz
 
+$(data_dir)/in/ensg_data.csv : ./src/gsea_runner/ensg_data.csv.gz
+	mkdir -p $(@D)
+	cp ./src/gsea_runner/ensg_data.csv.gz $@.gz
+	gunzip $@.gz
+
 ## --- --- Calculate the DEA files
 $(data_dir)/deas/flag.txt: \
 	env/touchfile \
@@ -102,7 +107,7 @@ $(data_dir)/genesets/all.txt: \
 		env/touchfile \
 		$(local_mtpdb) \
 		./src/geneset_maker/make_genesets.py \
-		./src/geneset_maker/basic_gene_lists.json
+		./src/geneset_maker/basic_gene_lists.json 
 
 	mkdir -p $(@D)
 
@@ -116,12 +121,14 @@ $(data_dir)/genesets/all.txt: \
 $(data_dir)/out/enrichments/done.flag: \
 		$(data_dir)/genesets/all.txt \
 		./src/gsea_runner/run_gsea.R \
-		$(data_dir)/deas/flag.txt
+		$(data_dir)/deas/flag.txt \
+		$(data_dir)/in/ensg_data.csv
 
 	mkdir -p $(@D)
 
 	Rscript ./src/gsea_runner/run_gsea.R \
-		"$(data_dir)/deas/" "$(data_dir)/genesets" "$(data_dir)/out/enrichments"
+		"$(data_dir)/deas/" "$(data_dir)/genesets" "$(data_dir)/out/enrichments" \
+		--low-memory --ensg-hugo-data $(data_dir)/in/ensg_data.csv
 
 	touch $(data_dir)/out/enrichments/done.flag
 

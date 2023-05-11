@@ -2,6 +2,7 @@ from pathlib import Path
 import json
 from subprocess import run
 from functools import partial
+import os
 
 import multiprocessing as mp
 
@@ -30,6 +31,10 @@ def run_wrapper(keyvalue, input_matrix_path, input_metadata_path, deseq, output_
     # Now we can run run_deseq.R
     deseq_args = ["Rscript", deseq, output_dir / f"{key}_case", output_dir / f"{key}_control", output_dir / f"{key}_deseq.csv", "--case_rownames_col", "sample", "--control_rownames_col", "sample"]
     run(deseq_args)
+
+    # Delete the useless input files
+    os.remove(output_dir / f"{key}_case")
+    os.remove(output_dir / f"{key}_control")
 
 
 def main(
