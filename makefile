@@ -91,7 +91,8 @@ $(data_dir)/deas/flag.txt: \
 		$(data_dir)/in/selected_metadata \
 		$(@D) \
 		./src/run_dea/run_deseq.R \
-		--delimiter '\t'
+		--delimiter '\t' \
+		--cpus 2
 
 	touch $@
 

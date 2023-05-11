@@ -106,19 +106,16 @@ extract_ranks <- function(deg_file, biomart_data) {
       data |> purge_ensg_versions(id_col = "gene_id") -> data
 
       relevant_data <- biomart_data[biomart_data$ensembl_gene_id %in% data$gene_id, c("ensembl_gene_id", "hgnc_symbol")]
-      print(relevant_data[1:10, ])
       data <- merge(
         data, relevant_data, by.y = "ensembl_gene_id", by.x = "gene_id",
         all.y = FALSE, all.x = TRUE, sort = FALSE
       )
-      print(data[1:10,])
       data |> rename(SYMBOL = hgnc_symbol) -> data
     } else {
       stop(paste0("Cannot find id column in ", paste0(colnames(data), collapse = ", ")))
     }
   }
 
-  print(data[1:10,])
 
   # Patch to use DESeq2 data
   if ("stat" %in% colnames(data)) {
@@ -126,7 +123,6 @@ extract_ranks <- function(deg_file, biomart_data) {
     data |> rename(t = stat) -> data
   }
 
-  print(data[1:10,])
   data |> select(all_of(c("SYMBOL", "t"))) -> data
   data <- na.omit(data)
 

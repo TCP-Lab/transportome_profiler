@@ -1,0 +1,23 @@
+{
+    "Adrenal_cancer": ["Adrenal gland", "Adrenal Gland"],
+    "Breast_cancer": ["Breast"],
+    "Female_ro_cancer": ["Cervix", "Cervix Uteri", "Uterus", "Endometrium", "Vagina"],
+    "Brain_cancer": ["Brain", "Pituitary"],
+    "Liver_cancer": ["Bile duct", "Liver"],
+    "Head_n_Neck_cancer": ["Head and Neck region"],
+    "Esophagus_cancer": ["Esophagus"],
+    "Ovarian_cancer": ["Fallopian Tube", "Ovary"],
+    "Prostate_cancer": ["Prostate"],
+    "Skin_cancer": ["Skin"],
+    "Colorectal_cancer": ["Colon", "Rectum"],
+    "Testicular_cancer": ["Testis"],
+    "Thyroid_cancer": ["Thyroid Gland", "Thyroid"],
+    "Lymphoma": ["Blood", "White blood cell", "Bone Marrow"],
+    "Kidney_cancer": ["Kidney"],
+    "Bladder_cancer": ["Bladder"],
+    "Pancreas_cancer": ["Pancreas"],
+    "Lung_cancer": ["Lung"],
+    "Stomach_cancer": ["Stomach"],
+    "Intestinal_cancer": ["Small Intestine"],
+    "Salivary_cancer": ["Salivary Gland"]
+}
