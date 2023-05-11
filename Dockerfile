@@ -24,16 +24,13 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 # Install python 3.10
 RUN add-apt-repository --yes ppa:deadsnakes/ppa && apt-get update && apt-get install --yes python3.11 python3.11-venv
 
-# Install tectonic - Ubuntu does not have a repo for it, so we download the 
-# precompiled from source
-RUN curl --proto '=https' --tlsv1.2 -fsSL https://drop-sh.fullyjustified.net |sh && mv ./tectonic /usr/bin/ && apt-get install --yes biber=2.17-2 
-
-RUN curl http://nz2.archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.18_amd64.deb > libss.deb && dpkg -i ./libss.deb
+# Install xsv
+RUN XSV_VERSION=$(curl -s "https://api.github.com/repos/BurntSushi/xsv/releases/latest" | grep -Po '"tag_name": "\K[0-9.]+') ; curl -Lo xsv.tar.gz "https://github.com/BurntSushi/xsv/releases/latest/download/xsv-${XSV_VERSION}-x86_64-unknown-linux-musl.tar.gz" ; tar xf xsv.tar.gz -C /usr/local/bin
 
 # Copy the source files in. The ./data/ directory will be mounted at runtime
 COPY . .
 
 # Make the python env
-RUN make venv
+RUN make env
 
 CMD make
