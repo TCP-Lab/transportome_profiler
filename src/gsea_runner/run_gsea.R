@@ -23,6 +23,10 @@ if (sys.nframe() == 0L) {
       type = "character"
     ) |>
     argparser::add_argument(
+      "--ensg-hugo-data", help = "A .csv file with the 'ensembl_gene_id', 'hgnc_symbol', 'gene_biotype' columns. If unspecified, downloads from ENSEMBL",
+      type = "character", default = NA
+    ) |>
+    argparser::add_argument(
       "--low-memory", help = "If specified, saves only output tables, skipping plots, and using less memory.",
       flag = TRUE, type = "logical"
     ) |>
@@ -298,13 +302,17 @@ if (sys.nframe() == 0L) {
   if (args$low_memory && args$save_plots) {
     cat("WARNING: Low memory mode. Cannot save plots!")
   }
-
-  embl <- biomaRt::useEnsembl(biomart = "genes")
-  hs.embl <- biomaRt::useDataset(dataset = "hsapiens_gene_ensembl", mart = embl)
-  ensg_data <- biomaRt::getBM(
-    attributes = c("ensembl_gene_id", "hgnc_symbol", "gene_biotype"),
-    mart = hs.embl
-  )
+  
+  if (is.na(args$ensg_hugo_data)) {
+    embl <- biomaRt::useEnsembl(biomart = "genes")
+    hs.embl <- biomaRt::useDataset(dataset = "hsapiens_gene_ensembl", mart = embl)
+    ensg_data <- biomaRt::getBM(
+      attributes = c("ensembl_gene_id", "hgnc_symbol", "gene_biotype"),
+      mart = hs.embl
+    )
+  } else {
+    ensg_data <- read.csv(args$ensg_hugo_data, header = TRUE)
+  }
 
   if (args$low_memory) {
     run_all_gsea(
