@@ -63,7 +63,7 @@ $(data_dir)/in/selected_metadata:
 	mkdir -p $(@D)
 	wget -4 --inet4-only -O $@.tsv.gz https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGTEX_phenotype.txt.gz
 	gunzip -f $@.tsv.gz
-	xsv slice $@.tsv > $@
+	xsv fmt -d '\t' $@.tsv > $@
 	rm $@.tsv
 
 $(local_mtpdb):
