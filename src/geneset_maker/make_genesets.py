@@ -206,7 +206,9 @@ def make_large_tables(conn: Connection, sets: dict) -> dict[pd.DataFrame]:
 
     large_tables = {}
     for set_name, tables in sets["genesets"].items():
-        assert all(map(lambda x: x in possible_tables, tables)), "Invalid input tables"
+        if not all(map(lambda x: x in possible_tables, tables)):
+            invalid = tables[not map(lambda x: x in possible_tables, tables)]
+            raise ValueError(f"Invalid input tables {invalid}")
 
         loaded_tables = []
         for table_name in tables:

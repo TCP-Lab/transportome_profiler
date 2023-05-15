@@ -6,11 +6,11 @@
 #
 # The makefile does the following:
 # 0. Setup a Python venv to use throughout the makefile;
-# 1. Retrieve all the data files through `retrieve_sources`;
+# 1. Retrieve all the data files;
 # 2. Generates the genesets from the MTP-DB with `geneset_maker` (Python)
-# 3. Compiles the `cohen_calculator` executable with `cargo` (Rust);
-# 4. Runs the executable with the TCGA/GTEX data plus some static data files
-#      (see the `run_dea` README) to generate the Cohen's D matrix;
+# 3. Split the GTEX files to single .csv files based on the metadata columns
+# 4. Run the DEA with Deseq2 from the GTEX expression + GTEX metadata +
+#    a TCGA file +   
 # 5. Runs the pre-ranked GSEA with the Cohen's D matrix and the genesets (R);
 # 6. Generates the output plots with the `gsea_plotting_graphs.R` script (R).
 # 7. Compiles the output .tex with `tectonic` from the .tex files in the
@@ -22,15 +22,16 @@ data_dir = ./data
 expression_matrix = $(data_dir)/in/tcga_target_gtex
 local_mtpdb = $(data_dir)/in/MTPDB.sqlite
 
-all: "$(data_dir)/out/paper/main.pdf"
+all: $(data_dir)/out/figures/enrichments/done.flag
 
 # Clean just the intermediary files - this is to re-run the analysis quickly
 clean:
-	rm -f $(data_dir)/cohen_d_matrix.csv
-	rm -f $(data_dir)/metadata.csv
+	rm -f $(data_dir)/deas/*
+	rm -f $(data_dir)/enrichments/*
+	rm -rf $(data_dir)/genesets
 	find $(data_dir)/out/ -type f -prune ! -name '.*' -exec rm {} +
-	rm -f ./venv/touchfile
-	rm -rf ./venv
+	rm -f ./env/touchfile
+	rm -rf ./env
 
 # Clean the input files. This is a harder clean than merely "clean", and to
 # re-run the analysis you'll need to redownload the inputs
@@ -44,92 +45,100 @@ scrub: restart
 	rm -f ./paper/resources/images/generated
 
 ## --- 0 --- Make the python virtual environment
-venv: venv/touchfile
+env: env/touchfile
 
-venv/touchfile: requirements.txt
-	python3.11 -m venv venv
-	. venv/bin/activate; pip install -Ur requirements.txt
-	touch venv/touchfile
+env/touchfile: requirements.txt
+	python3.11 -m venv env
+	. env/bin/activate; pip install -Ur requirements.txt
+	touch env/touchfile
 
 ## --- 1 --- Retrieve sources
-$(expression_matrix):
-	mkdir -p "$(data_dir)/in"
+# Retrieve all the expression files from xena
+$(data_dir)/in/tcga_target_gtex:
+	mkdir -p $(@D)
+	wget -4 --inet4-only -O $@.gz https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGtex_gene_expected_count.gz 
+	gunzip -f $@.gz
 
-	wget -4 -O "$(expression_matrix).gz" https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TCGA-GTEx-TARGET-gene-exp-counts.deseq2-normalized.log2.gz --inet4-only
-
-	echo "Unzipping..."
-	gunzip "$(expression_matrix).gz"
+$(data_dir)/in/selected_metadata:
+	mkdir -p $(@D)
+	wget -4 --inet4-only -O $@.tsv.gz https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGTEX_phenotype.txt.gz
+	gunzip -f $@.tsv.gz
+	xsv fmt -d '\t' $@.tsv > $@
+	rm $@.tsv
 
 $(local_mtpdb):
-	mkdir -p "$(data_dir)/in"
+	mkdir -p $(@D)
+	wget -O $@.tar.gz https://github.com/CMA-Lab/MTP-DB/releases/download/0.23.17-beta/MTPDB_v0.23.17-beta.sqlite.tar.gz --inet4-only
+	tar -xvzf $@.tar.gz -C $(@D)
+	mv $(data_dir)/in/MTPDB_v0.23.17-beta.sqlite $@
+	rm $@.tar.gz
 
-	wget -O "$(local_mtpdb).tar.gz" https://github.com/CMA-Lab/MTP-DB/releases/download/0.23.17-beta/MTPDB_v0.23.17-beta.sqlite.tar.gz --inet4-only
+$(data_dir)/in/ensg_data.csv : ./src/gsea_runner/ensg_data.csv.gz
+	mkdir -p $(@D)
+	cp ./src/gsea_runner/ensg_data.csv.gz $@.gz
+	gunzip $@.gz
 
-	echo "Unzipping..."
-	tar -xvzf "$(local_mtpdb).tar.gz" -C "$(data_dir)/in/"
-	echo "Removing compressed file..."
-	rm "$(local_mtpdb).tar.gz"
+## --- --- Calculate the DEA files
+$(data_dir)/deas/flag.txt: \
+	env/touchfile \
+	$(data_dir)/in/tcga_target_gtex \
+	$(data_dir)/in/selected_metadata \
+	./src/run_dea/select_and_run.py \
+	./src/run_dea/run_deseq.R \
+	./src/run_dea/tcga_gtex_queries.json
 
-## --- 3 --- Compile the cohen calculator
-./src/run_dea/cohen_calculator/target/release/cohen_calculator: ./src/run_dea/cohen_calculator/src/main.rs
-	cargo build --release --manifest-path ./src/run_dea/cohen_calculator/Cargo.toml
+	mkdir -p $(@D)
 
-## --- 4 --- Calculate the cohen's D matrix
-$(data_dir)/cohen_d_matrix.csv: $(expression_matrix) \
-		$(data_dir)/metadata.csv \
-		./src/run_dea/cohen_calculator/target/release/cohen_calculator \
+	. env/bin/activate; python \
+		./src/run_dea/select_and_run.py \
+		./src/run_dea/tcga_gtex_queries.json \
+		$(data_dir)/in/tcga_target_gtex \
+		$(data_dir)/in/selected_metadata \
+		$(@D) \
+		./src/run_dea/run_deseq.R \
+		--delimiter '\t' \
+		--cpus 2
 
-	./src/run_dea/cohen_calculator/target/release/cohen_calculator \
-		"$(expression_matrix)" $(data_dir)/metadata.csv ./src/run_dea/tcga_to_gtex_matches.json \
-		"$(data_dir)/cohen_d_matrix.csv"
-
-$(data_dir)/metadata.csv: \
-		venv/touchfile \
-		./src/run_dea/tcga_metadata.csv \
-		./src/run_dea/GTEX_phenotype.tsv \
-		./src/run_dea/prep_metadata.py \
-		$(expression_matrix)
-	
-	. venv/bin/activate; python ./src/run_dea/prep_metadata.py \
-		"./src/run_dea/GTEX_phenotype.tsv" "$(expression_matrix)" "./src/run_dea/tcga_metadata.csv" \
-		"$(data_dir)/metadata.csv"
+	touch $@
 
 ## --- 2 ---
 # The fact that it run is detected in the `run_gsea` step by the `all.txt` file
 $(data_dir)/genesets/all.txt: \
-		venv/touchfile \
+		env/touchfile \
 		$(local_mtpdb) \
 		./src/geneset_maker/make_genesets.py \
-		./src/geneset_maker/basic_gene_lists.json
+		./src/geneset_maker/basic_gene_lists.json 
 
-	mkdir -p $(data_dir)/genesets
+	mkdir -p $(@D)
 
-	. venv/bin/activate; python \
+	. env/bin/activate; python \
 		./src/geneset_maker/make_genesets.py $(local_mtpdb) ./src/geneset_maker/basic_gene_lists.json \
 		$(data_dir)/genesets \
 		--prune_direction "topdown" \
 		--verbose
 
 ## --- 5 --- Run the pre-ranked GSEA
-"$(data_dir)/out/enrichments/done.flag": \
+$(data_dir)/out/enrichments/done.flag: \
 		$(data_dir)/genesets/all.txt \
 		./src/gsea_runner/run_gsea.R \
-		$(data_dir)/cohen_d_matrix.csv
+		$(data_dir)/deas/flag.txt \
+		$(data_dir)/in/ensg_data.csv
 
-	mkdir -p $(data_dir)/out/enrichments
+	mkdir -p $(@D)
 
 	Rscript ./src/gsea_runner/run_gsea.R \
-		"$(data_dir)/cohen_d_matrix.csv" "$(data_dir)/genesets" "$(data_dir)/out/enrichments"
+		"$(data_dir)/deas/" "$(data_dir)/genesets" "$(data_dir)/out/enrichments" \
+		--low-memory --ensg-hugo-data $(data_dir)/in/ensg_data.csv
 
-	touch "$(data_dir)/out/enrichments/done.flag"
+	touch $(data_dir)/out/enrichments/done.flag
 
 ## --- 6 --- Generate plots
-"$(data_dir)/out/figures/enrichments/done.flag": \
-		"$(data_dir)/out/enrichments/done.flag" \
+$(data_dir)/out/figures/enrichments/done.flag: \
+		$(data_dir)/out/enrichments/done.flag \
 		$(data_dir)/genesets/all.txt \
 		./src/gsea_runner/gsea_plotting_graphs.R
 
-	mkdir -p $(data_dir)/out/figures/enrichments
+	mkdir -p $(@D)
 
 	Rscript ./src/gsea_runner/gsea_plotting_graphs.R \
 		$(data_dir)/out/enrichments/ \
@@ -137,10 +146,3 @@ $(data_dir)/genesets/all.txt: \
 	
 	touch "$(data_dir)/out/figures/enrichments/done.flag"
 
-## --- 7 --- Generate paper
-"$(data_dir)/out/paper/main.pdf": \
-		"$(data_dir)/out/figures/enrichments/done.flag" \
-		./paper
-
-	mkdir -p $(data_dir)/out/paper/
-	tectonic ./paper/main.tex -o $(data_dir)/out/paper/
