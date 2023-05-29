@@ -59,7 +59,7 @@ parse_tree_labels <- function(tree) {
   #' 
   #' @param tree A vector of lines where each line is from the tree output
   
-  result <- data.frame(original = tree, order = 1:length(tree))
+  result <- data.frame(original = tree, order = length(tree):1)
   
   result$cropped <- str_split_i(result$original, "whole_transportome", 2)
   
@@ -76,8 +76,8 @@ parse_tree_labels <- function(tree) {
     str_replace_all("├", "┤") |>
     str_replace_all("└", "┘")
   
-  result$pretty <- paste0(result$backbone, result$cropped)
-  result$rev_pretty <- paste0(result$cropped, result$rev_backbone)
+  result$pretty <- paste0(result$backbone, str_split_i(result$cropped, "/", -1))
+  result$rev_pretty <- paste0(str_split_i(result$cropped, "/", -1), result$rev_backbone)
   
   result
 }
@@ -111,7 +111,7 @@ main <- function(
   # the enrichment frames
   enrichment_data <- lapply(seq_along(enrichment_data), function(i) {
     frame <- enrichment_data[[i]]
-    frame$id <- str_remove_all(input_files, ".csv")[i] |> str_split_i("//", 2)
+    frame$id <- str_remove_all(input_files, ".csv")[i] |> str_split_i("/", -1)
     
     frame
   })
@@ -119,15 +119,28 @@ main <- function(
   # We can now join all the frames together
   plot_data <- reduce(enrichment_data, rbind)
   
-  print(str(plot_data))
+  plot_data$alpha_from_padj <- 0.40
+  plot_data$alpha_from_padj[plot_data$padj < 0.20] <- 1
   
-  ggplot(plot_data, aes(fill = NES, x = id, y = clean_pathway)) +
-    geom_tile()
+  plot_data$fac_id <- factor(plot_data$id)
+  print(labels)
+  plot_data$fac_cpath <- factor(plot_data$clean_pathway,  levels = labels$cropped[labels$order])
+  
+  ggplot(plot_data, aes(fill = NES, x = fac_id, y = fac_cpath, alpha = alpha_from_padj)) +
+    geom_tile() +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    ggtitle("Deregulation Overview") +
+    ylab("Pathway") + xlab("Cohort") +
+    scale_fill_gradient2("NES", low = "purple", mid = "darkgray", high = "darkorange") +
+    scale_alpha_identity("alpha_from_padj") +
+    scale_y_discrete(breaks = labels$cropped, labels = labels$rev_pretty) +
+    theme(text = element_text(family = "Fira Code NerdFont", size = 10))
 }
 
 if (RUN_LOCAL) {
   main(
-    input_dir = "/home/hedmad/Files/repos/transportome_profiler/data/out/enrichments/",
+    input_dir = "/home/hedmad/Desktop/banana/out/enrichments",
     input_tree = "/tmp/geneset_tree/tree.txt",
     out_file = "/home/hedmad/Files/repos/transportome_profiler/data/out/figures/full_heatmap.pdf"
   )

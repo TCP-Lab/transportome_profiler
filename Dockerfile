@@ -16,21 +16,22 @@ RUN Rscript \
     -e "install.packages('grid')" \
     -e "BiocManager::install('DESeq2')"
 
-# Install rust and cargo
-RUN curl https://sh.rustup.rs -sSf > rstins && sh rstins -y
-
-ENV PATH="/root/.cargo/bin:${PATH}"
-
-# Install python 3.10
+# Install python 3.11
 RUN add-apt-repository --yes ppa:deadsnakes/ppa && apt-get update && apt-get install --yes python3.11 python3.11-venv
+
+# Install tree
+RUN apt install tree
 
 # Install xsv
 RUN XSV_VERSION=$(curl -s "https://api.github.com/repos/BurntSushi/xsv/releases/latest" | grep -Po '"tag_name": "\K[0-9.]+') ; curl -Lo xsv.tar.gz "https://github.com/BurntSushi/xsv/releases/latest/download/xsv-${XSV_VERSION}-x86_64-unknown-linux-musl.tar.gz" ; tar xf xsv.tar.gz -C /usr/local/bin
 
-# Copy the source files in. The ./data/ directory will be mounted at runtime
-COPY . .
-
+# Copy the requirements for the python env + the makefile
+COPY requirements.txt makefile ./
 # Make the python env
 RUN make env
 
+# Copy the rest of the files
+COPY . .
+
+# Run the analysis
 CMD make
