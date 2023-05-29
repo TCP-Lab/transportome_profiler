@@ -18,11 +18,7 @@ if (sys.nframe() == 0L) {
       type = "character"
     ) |>
     argparser::add_argument(
-      "--png", help = "If specified, saves plots as PNG. Use `--res` to set the resolution",
-      flag = TRUE, type = "logical"
-    ) |>
-    argparser::add_argument(
-      "--res", help = "Resolution of PNG plots, in pixels per inch.",
+      "--res", help = "Resolution of plot, in pixels per inch.",
       default= 400, type = "logical"
     ) |>
     argparser::add_argument(
@@ -62,6 +58,9 @@ parse_tree_labels <- function(tree) {
   result <- data.frame(original = tree, order = length(tree):1)
   
   result$cropped <- str_split_i(result$original, "whole_transportome", 2)
+  fix_crop <- result$cropped
+  # The "whole_transportome" is reduced to "". This fixes it.
+  fix_crop[fix_crop == ""] <- "Whole Transportome"
   
   remove_backbone <- function (x) {
     # Remove all backbone chars from an input
@@ -76,8 +75,8 @@ parse_tree_labels <- function(tree) {
     str_replace_all("├", "┤") |>
     str_replace_all("└", "┘")
   
-  result$pretty <- paste0(result$backbone, str_split_i(result$cropped, "/", -1))
-  result$rev_pretty <- paste0(str_split_i(result$cropped, "/", -1), result$rev_backbone)
+  result$pretty <- paste0(result$backbone, str_split_i(fix_crop, "/", -1))
+  result$rev_pretty <- paste0(str_split_i(fix_crop, "/", -1), result$rev_backbone)
   
   result
 }
@@ -94,7 +93,8 @@ main <- function(
     save_png = FALSE,
     png_res = 300,
     plot_width = 10,
-    plot_height = 6
+    plot_height = 6,
+    alpha = 0.20
 ) {
   # Load and parse the tree labels
   tree <- read_lines(input_tree)
@@ -120,37 +120,51 @@ main <- function(
   plot_data <- reduce(enrichment_data, rbind)
   
   plot_data$alpha_from_padj <- 0.40
-  plot_data$alpha_from_padj[plot_data$padj < 0.20] <- 1
+  plot_data$alpha_from_padj[plot_data$padj < alpha] <- 1
   
   plot_data$fac_id <- factor(plot_data$id)
   print(labels)
   plot_data$fac_cpath <- factor(plot_data$clean_pathway,  levels = labels$cropped[labels$order])
   
-  ggplot(plot_data, aes(fill = NES, x = fac_id, y = fac_cpath, alpha = alpha_from_padj)) +
+  p <- ggplot(plot_data, aes(fill = NES, x = fac_id, y = fac_cpath, alpha = alpha_from_padj)) +
     geom_tile() +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
-    ggtitle("Deregulation Overview") +
+    ggtitle(paste0("Deregulation Overview (Alpha ", alpha, ")")) +
     ylab("Pathway") + xlab("Cohort") +
     scale_fill_gradient2("NES", low = "purple", mid = "darkgray", high = "darkorange") +
     scale_alpha_identity("alpha_from_padj") +
     scale_y_discrete(breaks = labels$cropped, labels = labels$rev_pretty) +
-    theme(text = element_text(family = "Fira Code NerdFont", size = 10))
+    theme(text = element_text(family = "FiraCode Nerd Font", size = 10))
+  
+  
+  # Save plot to output
+  if (save_png) {
+    png(filename = out_file, width = plot_width, height = plot_height, units = "in", res = png_res)
+  } else {
+    pdf(file = out_file, width = plot_width, height = plot_height)
+  }
+  print(p)
+  dev.off()
 }
 
 if (RUN_LOCAL) {
   main(
     input_dir = "/home/hedmad/Desktop/banana/out/enrichments",
     input_tree = "/tmp/geneset_tree/tree.txt",
-    out_file = "/home/hedmad/Files/repos/transportome_profiler/data/out/figures/full_heatmap.pdf"
-  )
+    out_file = "/home/hedmad/Files/repos/transportome_profiler/data/out/figures/full_heatmap.png",
+    save_png = TRUE,
+    alpha = 0.20,
+    png_res = 300,
+    plot_height = 10
+    )
 }
 
 main(
     input_dir = args$input_gsea_results,
     input_tree = args$input_tree,
     out_file = args$output_file,
-    save_png = args$png,
+    save_png = TRUE,
     png_res = args$res,
     plot_width = args$width,
     plot_height = args$height
