@@ -5,22 +5,27 @@
 # 	directory with the `link` utility. Read the README for more information.
 #
 # The makefile does the following:
-# 0. Setup a Python venv to use throughout the makefile;
-# 1. Retrieve all the data files;
-# 2. Generates the genesets from the MTP-DB with `geneset_maker` (Python)
-# 3. Split the GTEX files to single .csv files based on the metadata columns
-# 4. Run the DEA with Deseq2 from the GTEX expression + GTEX metadata +
-#    a TCGA file +   
-# 5. Runs the pre-ranked GSEA with the Cohen's D matrix and the genesets (R);
-# 6. Generates the output plots with the `gsea_plotting_graphs.R` script (R).
-# 7. Compiles the output .tex with `tectonic` from the .tex files in the
-#      ./paper directory with the output plots from the analysis.
+# - Setup a Python venv to use throughout the makefile;
+# - Retrieve all the data files;
+# - Generates the genesets from the MTP-DB with `geneset_maker` (Python)
+# - Split the GTEX files to single .csv files based on the metadata columns and
+#   run the DEA with Deseq2 from the splitted files.
+# - Runs the pre-ranked GSEA with the DEG tables from DeSeq2 and the genesets (R);
+# - Generates the output plots with the `gsea_plotting_graphs.R` script (R).
 
-.PHONY = all venv make_genesets run_dea retrieve_sources clean clean_input
+# The phony targets are as follows:
+# - all -> run the whole analysis
+# - env -> regenerate the python virtual environment
+# - clean -> remove the output files
+# - restart -> clean and remove the input files and the virtual env
+# - scrub -> clean and remove the ./data/ link
+
+.PHONY = all env clean restart scrub
 
 data_dir = ./data
 expression_matrix = $(data_dir)/in/tcga_target_gtex
 local_mtpdb = $(data_dir)/in/MTPDB.sqlite
+split_threads = 3
 
 all: $(data_dir)/out/figures/enrichments/done.flag
 
@@ -30,21 +35,22 @@ clean:
 	rm -f $(data_dir)/enrichments/*
 	rm -rf $(data_dir)/genesets
 	find $(data_dir)/out/ -type f -prune ! -name '.*' -exec rm {} +
-	rm -f ./env/touchfile
-	rm -rf ./env
 
 # Clean the input files. This is a harder clean than merely "clean", and to
 # re-run the analysis you'll need to redownload the inputs
 restart: clean
 	rm -f $(expression_matrix)
 	rm -f $(local_mtpdb)
+	rm -rf ./env
 
 # Clean every file made by make and remove the links made by ./link
+# the ending / removes the actual linked directory, the one without the /
+# removes the soft link
 scrub: restart
+	rm -rf $(data_dir)/
 	rm -f $(data_dir)
-	rm -f ./paper/resources/images/generated
 
-## --- 0 --- Make the python virtual environment
+## >> Make the python virtual environment
 env: env/touchfile
 
 env/touchfile: requirements.txt
@@ -52,8 +58,7 @@ env/touchfile: requirements.txt
 	. env/bin/activate; pip install -Ur requirements.txt
 	touch env/touchfile
 
-## --- 1 --- Retrieve sources
-# Retrieve all the expression files from xena
+## >> Retrieve sources
 $(data_dir)/in/tcga_target_gtex:
 	mkdir -p $(@D)
 	wget -4 --inet4-only -O $@.gz https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGtex_gene_expected_count.gz 
@@ -66,6 +71,9 @@ $(data_dir)/in/selected_metadata:
 	xsv fmt -d '\t' $@.tsv > $@
 	rm $@.tsv
 
+# TODO: once we update the releases to output a static tag, change this to
+# point at the latest release.
+# TODO2: once we publish, change this to point at a static tag again.
 $(local_mtpdb):
 	mkdir -p $(@D)
 	wget -O $@.tar.gz https://github.com/CMA-Lab/MTP-DB/releases/download/0.23.17-beta/MTPDB_v0.23.17-beta.sqlite.tar.gz --inet4-only
@@ -130,19 +138,32 @@ $(data_dir)/out/enrichments/done.flag: \
 		"$(data_dir)/deas/" "$(data_dir)/genesets" "$(data_dir)/out/enrichments" \
 		--low-memory --ensg-hugo-data $(data_dir)/in/ensg_data.csv
 
-	touch $(data_dir)/out/enrichments/done.flag
+	touch $@
 
 ## --- 6 --- Generate plots
 $(data_dir)/out/figures/enrichments/done.flag: \
 		$(data_dir)/out/enrichments/done.flag \
 		$(data_dir)/genesets/all.txt \
-		./src/gsea_runner/gsea_plotting_graphs.R
+		./src/plotting/gsea_plotting_graphs.R \
+		./src/plotting/general_heatmap.R
 
 	mkdir -p $(@D)
 
-	Rscript ./src/gsea_runner/gsea_plotting_graphs.R \
+	Rscript ./src/plotting/gsea_plotting_graphs.R \
 		$(data_dir)/out/enrichments/ \
 		$(data_dir)/out/figures/enrichments
-	
-	touch "$(data_dir)/out/figures/enrichments/done.flag"
 
+	touch $@
+
+$(data_dir)/out/figures/enrichments/pancan_heatmap.pdf: \
+		$(data_dir)/out/enrichments/done.flag \
+		$(data_dir)/genesets/all.txt \
+		./src/plotting/general_heatmap.R
+
+	mkdir -f /tmp/genesets_tree
+	tree $(data_dir)/genesets -df | head -n -2 > /tmp/geneset_tree/tree.txt
+
+	Rscript ./src/plotting/general_heatmap.R \
+		$(data_dir)/out/enrichments/ \
+		/tmp/genesets_tree/tree.txt
+		$@

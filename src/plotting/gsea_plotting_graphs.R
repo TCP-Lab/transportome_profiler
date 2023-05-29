@@ -4,7 +4,7 @@ if (sys.nframe() == 0L) {
   # Parsing arguments
   requireNamespace("argparser")
 
-  parser <- argparser::arg_parser("Run GSEA on DEG tables")
+  parser <- argparser::arg_parser("Plot Tree graphs from GSEA outputs")
 
   parser |>
     argparser::add_argument(
