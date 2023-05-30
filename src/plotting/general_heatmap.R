@@ -106,14 +106,16 @@ main <- function(
   # Get the 'pathway' var to look like the paths in the labels
   # this means getting rid of the /whole_transportome leading bit
   enrichment_data <- lapply(enrichment_data, \(frame) {
-    frame$clean_pathway <- str_split_i(frame$pathway, "whole_transportome", 2) ; frame
+    frame$clean_pathway <- str_split_i(frame$pathway, "whole_transportome", 2)
+    frame
   })
   
   # For the heatmap we will need a melted matrix. So I first combine all
   # the enrichment frames
   enrichment_data <- lapply(seq_along(enrichment_data), function(i) {
     frame <- enrichment_data[[i]]
-    frame$id <- str_remove_all(input_files, ".csv")[i] |> str_split_i("/", -1)
+    frame$id <- str_remove_all(input_files, ".csv")[i] |> str_split_i("/", -1) |>
+      str_remove_all("_deseq") |> str_replace_all("_", " ") # Further clean the inputs
     
     frame
   })
@@ -142,7 +144,7 @@ main <- function(
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
     ggtitle(paste0("Deregulation Overview (Alpha ", alpha, ")")) +
-    ylab("Pathway") + xlab("Cohort") +
+    ylab("Gene Set") + xlab("Cohort") +
     scale_fill_gradient2("NES", low = "purple", mid = "darkgray", high = "darkorange") +
     scale_alpha_identity("alpha_from_padj") +
     scale_y_discrete(breaks = labels$cropped, labels = labels$rev_pretty) +
