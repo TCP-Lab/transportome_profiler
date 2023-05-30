@@ -1,6 +1,6 @@
  #!/usr/bin/env Rscript
 
-if (sys.nframe() == 0L) {
+if (! exists("LOCAL_DEBUG")) {
   # Parsing arguments
   requireNamespace("argparser")
   
@@ -33,11 +33,10 @@ if (sys.nframe() == 0L) {
   args <- argparser::parse_args(parser)
 }
 
-RUN_LOCAL <- FALSE
-
 options(tidyverse.quiet = TRUE)
 library(tidyverse)
 requireNamespace("stringi")
+requireNamespace("reshape2")
 
 parse_tree_labels <- function(tree) {
   #' Parse the raw tree from the file to an usable labels dataframe
@@ -81,7 +80,7 @@ parse_tree_labels <- function(tree) {
   result
 }
 
-if (RUN_LOCAL) {
+if (exists("LOCAL_DEBUG")) {
   tree <- read_lines("/tmp/geneset_tree/tree.txt")
   labs <- parse_tree_labels(tree)
 }
@@ -90,6 +89,7 @@ main <- function(
     input_dir,
     input_tree,
     out_file,
+    save = TRUE,
     save_png = FALSE,
     png_res = 300,
     plot_width = 10,
@@ -105,7 +105,9 @@ main <- function(
   
   # Get the 'pathway' var to look like the paths in the labels
   # this means getting rid of the /whole_transportome leading bit
-  enrichment_data <- lapply(enrichment_data, \(frame) {frame$clean_pathway <- str_split_i(frame$pathway, "whole_transportome", 2) ; frame})
+  enrichment_data <- lapply(enrichment_data, \(frame) {
+    frame$clean_pathway <- str_split_i(frame$pathway, "whole_transportome", 2) ; frame
+  })
   
   # For the heatmap we will need a melted matrix. So I first combine all
   # the enrichment frames
@@ -119,11 +121,20 @@ main <- function(
   # We can now join all the frames together
   plot_data <- reduce(enrichment_data, rbind)
   
+  # Set the alpha values manually
   plot_data$alpha_from_padj <- 0.40
   plot_data$alpha_from_padj[plot_data$padj < alpha] <- 1
   
-  plot_data$fac_id <- factor(plot_data$id)
-  print(labels)
+  # Set the order of the column samples based on hclust
+  # - We need to make a matrix from the input
+  clust_data <- reshape2::dcast(plot_data, id ~ clean_pathway, value.var = "NES")
+  colnames(clust_data)[colnames(clust_data) == "Var.2"] <- "Whole_transportome"
+  clust_data |> column_to_rownames("id") -> clust_data
+  
+  clust <- hclust( dist( clust_data ), method = "ward.D")
+  
+  # Set the order of the labels. The actual values will be set in the plot
+  plot_data$fac_id <- factor(plot_data$id, levels = clust$labels[clust$order])
   plot_data$fac_cpath <- factor(plot_data$clean_pathway,  levels = labels$cropped[labels$order])
   
   p <- ggplot(plot_data, aes(fill = NES, x = fac_id, y = fac_cpath, alpha = alpha_from_padj)) +
@@ -137,8 +148,12 @@ main <- function(
     scale_y_discrete(breaks = labels$cropped, labels = labels$rev_pretty) +
     theme(text = element_text(family = "FiraCode Nerd Font", size = 10))
   
-  
   # Save plot to output
+  if (! save) {
+    print(p)
+    return(invisible())
+  }
+  
   if (save_png) {
     png(filename = out_file, width = plot_width, height = plot_height, units = "in", res = png_res)
   } else {
@@ -148,19 +163,19 @@ main <- function(
   dev.off()
 }
 
-if (RUN_LOCAL) {
+if (exists("LOCAL_DEBUG")) {
   main(
     input_dir = "/home/hedmad/Desktop/banana/out/enrichments",
     input_tree = "/tmp/geneset_tree/tree.txt",
     out_file = "/home/hedmad/Files/repos/transportome_profiler/data/out/figures/full_heatmap.png",
+    save = TRUE,
     save_png = TRUE,
     alpha = 0.20,
-    png_res = 300,
+    png_res = 500,
     plot_height = 10
     )
-}
-
-main(
+} else {
+  main(
     input_dir = args$input_gsea_results,
     input_tree = args$input_tree,
     out_file = args$output_file,
@@ -168,4 +183,6 @@ main(
     png_res = args$res,
     plot_width = args$width,
     plot_height = args$height
-)
+  )
+}
+
