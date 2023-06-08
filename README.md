@@ -42,3 +42,32 @@ There are several make targets if you do not want to rerun all the steps of the 
 - `make analyze`: Retrieve + analyze the data, but do not make the latex paper.
 - `make clean`: Cleanup every data file and the output.
 - `make scrub`: Cleanup just like `clean`, but also remove the soft links made by `./link` and the corresponding data folders. This should leave your disks squeaky clean, just like before you started the analysis.
+
+# The Manuscript: Transportome Profiler
+
+To compile the manuscript, install `texlive` and `biber`. Biber should be packaged in most distros. `texlive` is a bit harder. For Arch users, follow the [archwiki article](https://wiki.archlinux.org/title/TeX_Live): the recommended way to install is to follow the [official TeXlive guide](https://tug.org/texlive/quickinstall.html).
+
+The instruction above are copied here, but you should check if they changed:
+```bash
+cd /tmp/
+wget https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
+zcat < install-tl-unx.tar.gz | tar xf -
+cd install-tl-*
+# Install only the medium image
+perl ./install-tl --no-interaction --scheme=medium
+```
+
+You will probably need to install extra packages to compile successfully. The command for `tlmgr` is in `install_pkgs.sh`:
+```bash
+sudo ./install_pkgs.sh
+```
+I am a weird man online. Suffice to say you should not `sudo` anything without inspecting it manually beforehand.
+
+Once everything is installed, you should simply run `make paper`.
+
+## Editing the manuscript
+If you need to *just* edit the manuscript, without running the whole analysis each time, you can skip all the steps above (about running the analysis), and simply download the pre-made figures, put them in `./paper/src/resources/images/generated/` (from another run), then:
+```
+make --touch
+make paper
+```

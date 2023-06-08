@@ -1,0 +1,224 @@
+\documentclass{article}
+% Use `report` for longer reports
+
+% Borders
+    \usepackage{geometry}
+    \geometry{
+        a4paper,
+        total={170mm,257mm},
+        left=20mm,
+        top=20mm,
+    }
+    
+% Fonts
+    \usepackage[no-math]{fontspec}
+    \usepackage{unicode-math}
+    \defaultfontfeatures{
+        Scale=1.10
+    }
+    % Setting custom fontshttps://www.overleaf.com/project/643f9d6b8e8802d3523af0d2
+    \setmainfont{Atkinson-Hyperlegible}[
+    Path = resources/fonts/,
+    Extension = .ttf,
+    UprightFont = *-Regular-102,
+    BoldFont = *-Bold-102,
+    ItalicFont = *-Italic-102,
+    BoldItalicFont = *-BoldItalic-102
+    ]
+    \setmonofont{FiraCode}[
+    Path = resources/fonts/,
+    Extension = .ttf,
+    UprightFont = *-Regular,
+    BoldFont = *-Bold
+    ]
+    
+    \setmathfont{Latin Modern Math}[Scale=MatchLowercase]
+    \setmathrm{Latin Modern Roman}[Scale=MatchLowercase]
+    
+    \setlength{\parskip}{0.75em}
+    \renewcommand{\baselinestretch}{1.35}
+    
+    \usepackage[scaled=1.22]{helvet}
+
+% Remove a bit of the space after headings
+    \usepackage{titlesec}
+    
+    \titlespacing\section{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+    \titlespacing\subsection{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+    \titlespacing\subsubsection{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+    
+% Glossary
+    \usepackage[acronym,toc]{glossaries}
+    \loadglsentries{resources/glossary}
+    \makeglossaries
+    % Give a bit of colour to the glossary entries.
+    \renewcommand{\glstextformat}[1]{{\color{glossary} #1}}
+    
+% Add dots to the TOC
+    \usepackage{tocloft}
+    \renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+    
+% Support for hyperlinks
+    \usepackage[hyphens]{url}
+    \usepackage{hyperref}
+    \hypersetup{
+    colorlinks=true,
+    linkcolor=exturlblue,
+    urlcolor=urlblue,
+    breaklinks=true,
+    citecolor=citations,
+    }
+    \urlstyle{same}
+
+% Bibliograpy
+    \usepackage[
+        backend=biber,
+        style=nature
+        ]{biblatex}
+    \addbibresource{resources/bibliography.bib}
+    
+% Support for colors
+    \usepackage{xcolor}
+    \definecolor{listingback}{RGB}{225, 235, 252}
+    \definecolor{commentgreen}{RGB}{24, 153, 76}
+    \definecolor{numbergray}{RGB}{133, 133, 133}
+    \definecolor{keywordorange}{RGB}{199, 86, 10}
+    \definecolor{urlblue}{RGB}{35, 68, 107}
+    \definecolor{exturlblue}{RGB}{0, 65, 145}
+    \definecolor{glossary}{RGB}{0, 107, 18}
+    \definecolor{mono}{RGB}{204, 71, 0}
+    \definecolor{citations}{RGB}{123, 12, 179}
+    
+% Code listings
+    \usepackage{listings}
+    \lstdefinestyle{RStyle} {
+        language=R,
+        otherkeywords={!,!=,~,\$,*,\&,\%/\%,\%*\%,\%\%,<-,<<-,/,TRUE,FALSE},
+        alsoother={.\$}
+    }
+    \lstdefinestyle{PyStyle} {
+        language=Python
+    }
+    \lstdefinestyle{ShellStyle} {
+        language=bash
+    }
+    % For inline monospace font: \lstinline{insert code here}
+    \lstset{
+        style=Rstyle,
+        alsoletter=_,
+        frame=tb,
+        numbers=left,
+        showspaces=false,
+        basicstyle=\small,
+        numberstyle=\tiny\color{numbergray},
+        keywordstyle=\color{keywordorange},
+        commentstyle=\color{gray},
+        stringstyle=\color{commentgreen},
+        backgroundcolor=\color{listingback}
+    }
+    % Pretty colours in mono font
+    \newcommand{\mono}[1]{\texttt{\color{mono}#1}}
+    
+% Smaller title
+    \makeatletter         
+    \renewcommand\maketitle{
+        {\raggedright % Note the extra {
+        {\huge \bfseries \sffamily \@title }\\[2ex]
+        {\small \@author}
+        }} % Note the extra }
+    \makeatother
+    
+% Images
+    \usepackage{graphicx}
+    \graphicspath{ {./resources/images/} }
+    \usepackage{float} % To use hard 'H' 
+    % Style of images
+    % Set a max width to all images
+    \usepackage[export]{adjustbox}% http://ctan.org/pkg/adjustbox
+    \let\oldincludegraphics\includegraphics
+    \renewcommand{\includegraphics}[2][]{%
+        \oldincludegraphics[#1,max width=\linewidth]{#2}
+    }
+    % Support for subfigures
+    \usepackage{caption}
+    \usepackage{subcaption}
+
+% Better lists
+    \usepackage{enumitem}
+    \setlist{nosep}
+    
+% Highlight boxes
+    \usepackage{awesomebox}
+
+% Multiple authors
+    \usepackage{authblk}
+
+% Making appendices
+\newcommand{\printappendices}{
+    % Reset the section/figure/table counter 
+    \setcounter{figure}{0}
+    \setcounter{section}{0}   
+    \setcounter{table}{0}   
+    % Set the figure/table counter to aleph
+    \renewcommand\thefigure{\Alph{figure}}
+    \renewcommand\thesection{Appendix \Alph{section}}
+    \renewcommand\thetable{\Alph{table}}
+    % Set the chapters to use letters
+    \appendix
+    % Set the section numberings
+    \newpage
+    % Add a large (clickable) title
+    \addcontentsline{toc}{part}{Appendices}
+    \part*{Appendices}
+    \input{appendices}
+}
+
+% Add TODO notes
+    \newcommand{\todo}[1]{\textbf{\color{red}#1}}
+
+% Footers and headers
+    \usepackage{fancyhdr}
+    \pagestyle{fancy}
+    \fancyhead[]{}
+    \fancyhead[LO]{\color{red}Draft generated from source code on \today}
+    \renewcommand{\headrulewidth}{0pt} % no line in header area
+    \fancyfoot{} % clear all footer fields
+    \fancyfoot[RO]{\thepage}           % page number in "outer" position of footer line
+    \fancyfoot[LO]{\color{red}Draft generated from source code on \today}
+
+% Better abstracts
+\usepackage{abstract}
+\renewcommand{\abstractname}{\normalfont \large \textbf{Abstract}}
+
+% Better Tables
+    \usepackage{tabularx}
+
+% My proposal for a title: The transcriptional landscape of the Transportome in Cancer
+    \title{\normalfont A very nice title that captures the soul of the paper}
+    \author[*]{Luca Visentin\footnote{L.V., luca.visentin@unito.it}}
+    \author[**]{Giorgia Scarpellino\footnote{G.S., giorgia.scarpellino@unipv.it}}
+    \author[*]{Luca Munaron\footnote{L.M., luca.munaron@unito.it}}
+    \author[*]{Federico Alessandro Ruffinatti\footnote{Corresponding Author: F.A.R., federicoalessandro.ruffinatti@unito.it}}
+
+    \affil[*]{Department of Life Sciences and Systems Biology, University of Turin, Turin, Italy}
+    \affil[**]{Department of Biology and Biotechnology “L. Spallanzani”, University of Pavia, Pavia, Italy}
+    
+\begin{document}
+
+\maketitle
+
+%Suppress the table of contents
+%\tableofcontents
+
+\input{document}
+
+\newpage
+\Urlmuskip=0mu plus 1mu\relax % This allows for better linebreaks in URLs
+\printbibliography
+
+\printglossaries
+
+% Uncomment this to add appendices
+%\printappendices
+
+\end{document}

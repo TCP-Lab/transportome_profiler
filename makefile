@@ -20,7 +20,7 @@
 # - restart -> clean and remove the input files and the virtual env
 # - scrub -> clean and remove the ./data/ link
 
-.PHONY = all env clean restart scrub
+.PHONY = all env clean restart scrub paper
 
 data_dir = ./data
 expression_matrix = $(data_dir)/in/tcga_target_gtex
@@ -168,3 +168,16 @@ $(data_dir)/out/figures/enrichments/pancan_heatmap.pdf: \
 		$(data_dir)/out/enrichments/ \
 		/tmp/genesets_tree/tree.txt \
 		$@
+
+## --- 7 --- Build the paper
+$(data_dir)/out/paper.pdf: \
+		$(data_dir)/out/figures/enrichments/done.flag \
+		$(data_dir)/out/figures/enrichments/pancan_heatmap.pdf \
+		./paper/src
+	
+	cd ./paper/src/ && \
+		latexmk -xelatex -synctex=1 -interaction=nonstopmode -file-line-error main.tex
+
+	mv ./paper/src/main.pdf $@
+
+paper: $(data_dir)/out/paper.pdf
