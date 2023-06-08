@@ -27,7 +27,8 @@ expression_matrix = $(data_dir)/in/tcga_target_gtex
 local_mtpdb = $(data_dir)/in/MTPDB.sqlite
 split_threads = 3
 
-all: $(data_dir)/out/figures/enrichments/done.flag
+all: $(data_dir)/out/figures/enrichments/done.flag \
+		$(data_dir)/out/figures/enrichments/pancan_heatmap.pdf
 
 # Clean just the intermediary files - this is to re-run the analysis quickly
 clean:
@@ -160,10 +161,10 @@ $(data_dir)/out/figures/enrichments/pancan_heatmap.pdf: \
 		$(data_dir)/genesets/all.txt \
 		./src/plotting/general_heatmap.R
 
-	mkdir -f /tmp/genesets_tree
-	tree $(data_dir)/genesets -df | head -n -2 > /tmp/geneset_tree/tree.txt
+	mkdir -p /tmp/genesets_tree
+	tree $(data_dir)/genesets -df | head -n -2 > /tmp/genesets_tree/tree.txt
 
 	Rscript ./src/plotting/general_heatmap.R \
 		$(data_dir)/out/enrichments/ \
-		/tmp/genesets_tree/tree.txt
+		/tmp/genesets_tree/tree.txt \
 		$@

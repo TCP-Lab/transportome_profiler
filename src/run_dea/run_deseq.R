@@ -39,10 +39,16 @@ requireNamespace("assertthat")
 main <- function(case_path, control_path, output_path, case_rownames_col, control_rownames_col) {
   cat("Loading case data...\n")
   read_csv(case_path, show_col_types = FALSE) |> column_to_rownames(case_rownames_col) -> case_data
-  cat(paste0("Loaded a ", nrow(case_data), " rows by ", ncol(case_data), " columns case expression matrix.\n"))
+  cat(paste0(
+    "Loaded a ", nrow(case_data), " rows by ", ncol(case_data),
+    " columns case expression matrix from '", case_path, "'.\n"
+  ))
   cat("Loading control data...\n")
   read_csv(control_path, show_col_types = FALSE) |> column_to_rownames(control_rownames_col) -> control_data 
-  cat(paste0("Loaded a ", nrow(control_data), " rows by ", ncol(control_data), " columns control expression matrix.\n"))
+  cat(paste0(
+    "Loaded a ", nrow(control_data), " rows by ", ncol(control_data),
+    " columns control expression matrix from '", control_path, "'.\n"
+  ))
 
   cat("Running deseq...\n")
   result <- run_deseq(case_data, control_data)

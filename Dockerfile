@@ -3,18 +3,10 @@ FROM rocker/tidyverse:4.3.0
 # Install prerequisites
 RUN apt-get update && apt-get install --yes curl software-properties-common
 
+# Copy the required R packages
+COPY ./src/helper_scripts/install_r_pkgs.R .
 # Install R packages - the tidyverse is already compiled
-RUN Rscript \
-    -e "options(repos='https://cloud.r-project.org/')" \
-    -e "install.packages('BiocManager')" \
-    -e "BiocManager::install('fgsea')" \
-    -e "BiocManager::install('biomaRt')" \
-    -e "install.packages('ggraph')" \
-    -e "install.packages('assertthat')" \
-    -e "install.packages('argparser')" \
-    -e "install.packages('uuid')" \
-    -e "install.packages('grid')" \
-    -e "BiocManager::install('DESeq2')"
+RUN Rscript ./install_r_pkgs.R
 
 # Install python 3.11
 RUN add-apt-repository --yes ppa:deadsnakes/ppa && apt-get update && apt-get install --yes python3.11 python3.11-venv

@@ -12,9 +12,11 @@ You need some requirements to be installed before you can run the analysis:
 - `R`
 - `Python`
 - The `tree` utility (`sudo apt install tree` on Debian-like or `sudo pacman -Syu tree` on Arch).
-- A series of R packages that can be installed with `Rscript ./src/install_R_pkgs.R`
-- A series of Python packages that can be installed with `pip install -r requirements.txt`
+- The `xsv` program, required by [`metasplit`](https://github.com/MrHedmad/metasplit) (`sudo pacman -Syu xsv` on Arch, not packaged by Debian, but [this guide might be useful](https://lindevs.com/install-xsv-on-ubuntu). If you have `cargo` installed, you can simply run `cargo install xsv`).
+- A series of R packages that can be installed with `Rscript ./src/helper_scripts/install_R_pkgs.R`
 - Quite a bit of RAM (the full analysis takes > 50 Gb of RAM) and time. If you want to run with less ram (but slower), override the `make` variable `split_threads` with `make split_threads=1`. By default this is 3. If you have a ton of memory and want to run more threads in parallel increase this value. 
+
+`make` handles making and using a Python `venv` when appropriate.
 
 If you have all the requirements, you can:
 ```bash
@@ -25,6 +27,7 @@ cd ./transportome_profiler
 ./link A_FOLDER_THAT_WILL_CONTAIN_THE_DATA
 # Run the analysis
 make all
+# or just `make`, since `all` is the default.
 ```
 
 The variable `A_FOLDER_THAT_WILL_CONTAIN_THE_DATA` should be the directory where you want the (rather bulky) data to live. The directory can be anywhere you want, but care must be taken that **YOU DO NOT CHOOSE `./transportome_profiler/data`** as a data directory! It is the place where your actual data directory will be linked to. Beware of paradoxes!
@@ -34,8 +37,8 @@ This is the same workflow you use to start working on the project on a new PC. Y
 
 ## Other make targets
 There are several make targets if you do not want to rerun all the steps of the analysis (like `all` does):
-- `make all`: Runs the whole analysis - from the retrieval of the data to the generation of the paper.
+- `make all`: Runs the whole analysis - from the retrieval of the data to the generation of the final output.
 - `make retrieve`: Just download the remote data files.
 - `make analyze`: Retrieve + analyze the data, but do not make the latex paper.
-- `make clean`: Cleanup every data file and the output paper.
-- `make scrub`: Cleanup just like `clean`, but also remove the soft links made by `./link` and the corresponding data folders. This should leave your disks squeaky clean.
+- `make clean`: Cleanup every data file and the output.
+- `make scrub`: Cleanup just like `clean`, but also remove the soft links made by `./link` and the corresponding data folders. This should leave your disks squeaky clean, just like before you started the analysis.
