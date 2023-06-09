@@ -8,7 +8,7 @@ analysis.
 % I want to introduce the MTP with the answer to "why didn't you use the GO?"
 While the \gls{go} knowledgebase \cite{ashburnerGeneOntologyTool2000,
 thegeneontologyconsortiumGeneOntologyKnowledgebase2023} represents an invaluable
-source of meaningful gene sets, we decided not to rely only on the manually and
+source of meaningful gene sets, we decided not to rely solely on the manually curated and
 automatically generated gene lists of the \gls{go}. Instead, we preferred to
 explore all the possible \glspl{tgl} that can originate by the
 transporter-related features of interest in an unbiased and systematic way.
@@ -45,7 +45,7 @@ Gene Onthology                         & BioMart XML requests                  &
 \end{table}
 
 The specific data downloaded from each database and the methods used to retrieve
-it can be seen in Table \ref{tab:dataSources}. A Python package nicknamed
+them can be seen in Table \ref{tab:dataSources}. A Python package nicknamed
 \textit{Daedalus} was created to download, parse, and save this information,
 recreating the \gls{mtpdb} \textit{on the fly} at every execution. We opted for
 this generation method instead of a manually updated, static database file for a
@@ -58,17 +58,16 @@ and stored (by examining the source code).
 
 It was interesting to notice how information from the above databases was, and
 still is at the time of writing, flawed in several minor ways. For instance, the
-GABA\textsubscript{A} receptors in the brain are permeable to chloride ions, but
-the the \gls{hgnc} database does not classify them as chloride channels.
+GABA\textsubscript{A} receptors in the brain are ionotropic receptors notoriously permeable to chloride ions, but
+the \gls{hgnc} database classifies them only as \textit{ligand gated ion channels} and not as \textit{chloride channels}.
 Additionally, the \gls{iuphar} does not contain any permeability information for
-these genes. This makes it impossible for Daedalus to classify them as permeable
+any of the \textit{GABR*} genes (conductance and permeability being properties of the receptor \textit{protein complex} rather than the single subunit gene). This makes it impossible for Daedalus to classify them as permeable
 to chloride ions.
-In a review on GABA\textsubscript{A} receptors,
-\textcite{goetzGABAAReceptors2007}, state that the permeability of these
-channels to HCO\textsubscript{3}\textsuperscript{-} is between $0.2$ and $0.4$
-that of the chloride ion, and this was not reflected in the above databases. 
-Another example is how some ion channels (including some Polycystin like
-channels, some potassium voltage-gated channels and the mithocondrial calcium
+It is also known that GABA\textsubscript{A} receptors exhibit a 
+permeability to HCO\textsubscript{3}\textsuperscript{-} that is generally between $0.2$ and $0.4$
+that of the chloride ion \cite{goetzGABAAReceptors2007}, but not even this feature is reflected in the above databases.
+A similar argument applies to nicotinic acetylcholine receptors (nAChRs) and related \textit{CHRN*} subunits.
+Another example is how some ion channels (including many potassium voltage-gated or Ca\textsuperscript{2+}-activated beta subunits and the mithocondrial calcium
 uniporter family of proteins) were missing from the ion channel lists provided
 by the \gls{iuphar} and the \gls{hgnc}.
 All of these defects were manually addressed in the \gls{mtpdb} through
