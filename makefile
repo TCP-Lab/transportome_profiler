@@ -176,7 +176,7 @@ $(data_dir)/out/paper.pdf: \
 		./paper/src
 	
 	cd ./paper/src/ && \
-		latexmk -xelatex -synctex=1 -interaction=nonstopmode -file-line-error main.tex
+		latexmk -lualatex -f -quiet -synctex=1 -interaction=nonstopmode -file-line-error main.tex
 
 	mv ./paper/src/main.pdf $@
 

@@ -1,8 +1,8 @@
 #/usr/bin/env bash
 
 tlmgr install \
-    collections-fontsextra \
-    collections-fontsreccomended \
+    collection-fontsextra \
+    collection-fontsrecommended \
     preprint \
     fontawesome5 \
     enumitem \
@@ -16,5 +16,8 @@ tlmgr install \
     awesomebox \
     fancyhdr \
     abstract \
-    mwe
+    mwe \
+    adjustbox \
+    biblatex-nature
+
 
