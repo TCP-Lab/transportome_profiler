@@ -1,16 +1,47 @@
-# Transportome Profiler
+# Transportome Profiler analysis
 
-This repository contains the code for the analysis on the expression profile of the transportome in Cancer based on the [MTP-DB](https://github.com/CMA-Lab/MTP-DB).
+This repository contains the code for the analysis on the expression profile of
+the transportome in Cancer based on the [MTP-DB](https://github.com/CMA-Lab/MTP-DB).
 
-This is a two-step process. The database is queried for information by the script in `src/geneset_maker`. The algorithm generates gene sets ready for use by GSEA. We then generate a series of DEG tables with `src/run_dea` based on the comparison of gene expression from TCGA (cancer) and GTEx (healthy) tissues. Finally, GSEA is called by `src/gsea_runner` in a pre-ranked manner on all the DEG tables with all of the genesets, making enrichment tables.
-The enrichment tables are then processed by a script in `src/gsea_runner` to make enrichment plots.
+This is a two-step process. The database is queried for information by the
+script in `src/geneset_maker`. The algorithm generates gene sets ready for use
+by GSEA. We then generate a series of DEG tables with `src/run_dea` based on the
+comparison of gene expression from TCGA (cancer) and GTEx (healthy) tissues.
+Finally, GSEA is called by `src/gsea_runner` in a pre-ranked manner on all the
+DEG tables with all of the genesets, making enrichment tables.
+The enrichment tables are then processed by a script in `src/gsea_runner` to
+make enrichment plots.
 
 ## Running the analysis
-A docker container is coming soon(tm). For now, follow these steps:
+You can run the analysis in two ways: locally or in a Docker container.
+In both cases, you must first clone and link the repository locally:
+```bash
+# Clone the repo
+git clone git@github.com:CMA-Lab/transportome_profiler.git
+cd ./transportome_profiler
+# Make housekeeping directories. See the following note.
+./link A_FOLDER_THAT_WILL_CONTAIN_THE_DATA
+```
+The variable `A_FOLDER_THAT_WILL_CONTAIN_THE_DATA` should be the directory where
+you want the (rather bulky) data to live.
+The directory can be anywhere you want, but
+**DO NOT CHOOSE `./transportome_profiler/data`** as a data directory!
+It is the place where your actual data directory will be linked to by `link`.
 
-You need some requirements to be installed before you can run the analysis:
-- `R`
-- `Python`
+### Running in Docker
+You will need to have `docker` installed. Once you do, you can either pull the
+remote container or build a new one locally.
+
+The script `run_docker` in the root of the repository helps you do just that:
+- There is not (**yet!**) a remote docker container for the analysis. When there will be, run `run_docker --pull` to run the analysis in that.
+- To build and run a docker container locally, run `run_docker`. The docker container will be built and executed immediately after.
+
+Currently, docker will save everything as root. Run `chown ./data` after it is finished to re-own the files that it generated. Sorry for the inconvenience!
+
+### Running locally
+You need some requirements to be installed before you can run the analysis locally:
+- `R` version `4.3.0`.
+- `Python` version `3.11`.
 - The `tree` utility (`sudo apt install tree` on Debian-like or `sudo pacman -Syu tree` on Arch).
 - The `xsv` program, required by [`metasplit`](https://github.com/MrHedmad/metasplit) (`sudo pacman -Syu xsv` on Arch, not packaged by Debian, but [this guide might be useful](https://lindevs.com/install-xsv-on-ubuntu). If you have `cargo` installed, you can simply run `cargo install xsv`).
 - A series of R packages that can be installed with `Rscript ./src/helper_scripts/install_R_pkgs.R`
@@ -18,24 +49,17 @@ You need some requirements to be installed before you can run the analysis:
 
 `make` handles making and using a Python `venv` when appropriate.
 
-If you have all the requirements, you can:
+If you have all the requirements, you can simply:
 ```bash
-# Clone the repo
-git clone git@github.com:CMA-Lab/transportome_profiler.git
-cd ./transportome_profiler
-# Make housekeeping directories. See the following note.
-./link A_FOLDER_THAT_WILL_CONTAIN_THE_DATA
 # Run the analysis
 make all
 # or just `make`, since `all` is the default.
 ```
 
-The variable `A_FOLDER_THAT_WILL_CONTAIN_THE_DATA` should be the directory where you want the (rather bulky) data to live. The directory can be anywhere you want, but care must be taken that **YOU DO NOT CHOOSE `./transportome_profiler/data`** as a data directory! It is the place where your actual data directory will be linked to. Beware of paradoxes!
-
-### A note for developers
+#### A note for developers
 This is the same workflow you use to start working on the project on a new PC. You can then simply re-run `make all` as you work.
 
-## Other make targets
+### Other make targets
 There are several make targets if you do not want to rerun all the steps of the analysis (like `all` does):
 - `make all`: Runs the whole analysis - from the retrieval of the data to the generation of the final output.
 - `make retrieve`: Just download the remote data files.
@@ -44,8 +68,11 @@ There are several make targets if you do not want to rerun all the steps of the 
 - `make scrub`: Cleanup just like `clean`, but also remove the soft links made by `./link` and the corresponding data folders. This should leave your disks squeaky clean, just like before you started the analysis.
 
 # The Manuscript: Transportome Profiler
-
-To compile the manuscript, install `texlive` and `biber`. Biber should be packaged in most distros. `texlive` is a bit harder. For Arch users, follow the [archwiki article](https://wiki.archlinux.org/title/TeX_Live): the recommended way to install is to follow the [official TeXlive guide](https://tug.org/texlive/quickinstall.html).
+To compile the manuscript, you will need a local installation of `texlive` and `biber`.
+Biber should be packaged in most distros. You can google how to install it.
+`texlive` is a bit harder.
+For Arch users, follow the [archwiki article](https://wiki.archlinux.org/title/TeX_Live).
+In general, the recommended way to install `texlive` is to follow the [official TeXlive guide](https://tug.org/texlive/quickinstall.html).
 
 The instruction above are copied here, but you should check if they changed:
 ```bash
@@ -57,13 +84,14 @@ cd install-tl-*
 perl ./install-tl --no-interaction --scheme=medium
 ```
 
-You will probably need to install extra packages to compile successfully. The command for `tlmgr` is in `install_pkgs.sh`:
+You will probably need to install extra packages to compile successfully.
+The command to do this for `tlmgr` is in `install_pkgs.sh`:
 ```bash
 sudo ./install_pkgs.sh
 ```
 I am a weird man online. Suffice to say you should not `sudo` anything without inspecting it manually beforehand.
 
-Once everything is installed, you should simply run `make paper`.
+Once everything is installed, you should simply run `make paper`. `make` will run the analysis (to generate the figures for the manuscript), and then generate the paper itself. Keep reading if you want to *just* compile the manuscript, and not run the analysis proper.
 
 ## Editing the manuscript
 If you need to *just* edit the manuscript, without running the whole analysis each time, you can skip all the steps above (about running the analysis), and simply download the pre-made figures, put them in `./paper/src/resources/images/generated/` (from another run), then:
