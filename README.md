@@ -71,3 +71,7 @@ If you need to *just* edit the manuscript, without running the whole analysis ea
 make --touch
 make paper
 ```
+
+**NOTE:** Since commit `d0e34f`, *in theory*, stand-in images should be included
+in the paper if you did not run the analysis, so the aforementioned "download 
+the pre-made figures" should not be needed anymore to actually compile (but you will not have any images, of course).
