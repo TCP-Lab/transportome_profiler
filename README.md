@@ -85,7 +85,7 @@ perl ./install-tl --no-interaction --scheme=medium
 ```
 
 You will probably need to install extra packages to compile successfully.
-The command to do this for `tlmgr` is in `install_pkgs.sh`:
+The command to do this for `tlmgr` is in `.../transportome_profiler/paper/install_pkgs.sh`:
 ```bash
 sudo ./install_pkgs.sh
 ```
