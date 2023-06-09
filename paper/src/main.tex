@@ -137,7 +137,10 @@
     \usepackage[export]{adjustbox}% http://ctan.org/pkg/adjustbox
     \let\oldincludegraphics\includegraphics
     \renewcommand{\includegraphics}[2][]{%
-        \oldincludegraphics[#1,max width=\linewidth]{#2}
+        \IfFileExists{#2}
+        {\oldincludegraphics[#1,max width=\linewidth]{#2}}
+        {\oldincludegraphics[#1,max width=\linewidth]{example-image}}
+        
     }
     % Support for subfigures
     \usepackage{caption}
