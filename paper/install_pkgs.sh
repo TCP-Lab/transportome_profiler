@@ -15,4 +15,6 @@ tlmgr install \
     listings \
     awesomebox \
     fancyhdr \
-    abstract
+    abstract \
+    mwe
+
