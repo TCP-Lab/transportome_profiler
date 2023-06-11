@@ -150,31 +150,39 @@ participate in the creation of a more useful resource.
         \hline
         \hline
     gene\_ids
-        & Genome-wide gene identifiers from Ensembl (``ENSGs'') and their versions. \\
+        & Genome-wide gene identifiers from Ensembl (``ENSGs'') and their
+        versions. \\
         \hline
     transcript\_ids
-        & Transcript identifiers from Ensembl (``ENSTs''), and their version, associated with gene identifiers. \\
+        & Transcript identifiers from Ensembl (``ENSTs''), and their version,
+        associated with gene identifiers. \\
         \hline
     mrna\_refseq
         & RefSeq transcript identifiers and their ENST counterparts. \\
         \hline
     protein\_ids
-        & Protein identifiers from Ensembl (``ENSPs'') associated with their respective ENSTs, PDB accession codes and RefSeq protein IDs. \\
+        & Protein identifiers from Ensembl (``ENSPs'') associated with their
+        respective ENSTs, PDB accession codes and RefSeq protein IDs. \\
         \hline
     gene\_names
-        & ENSGs associated with their respective HUGO gene IDs, symbols and names. \\
+        & ENSGs associated with their respective HUGO gene IDs, symbols and
+        names. \\
         \hline
     iuphar\_targets
-        & Every gene considered as a ``target'' by the IUPHAR, with relevant names, IDs and family information. \\
+        & Every gene considered as a ``target'' by the IUPHAR, with relevant
+        names, IDs and family information. \\
         \hline
     iuphar\_ligands
-        & Every ligand considered by the IUPHAR, as well as its type, name, ENSG (if relevant), pubchem SIDs and CIDs, and information on drug status. \\
+        & Every ligand considered by the IUPHAR, as well as its type, name, ENSG
+        (if relevant), pubchem SIDs and CIDs, and information on drug status. \\
         \hline
     iuphar\_interaction
-        & Every interaction between a IUPHAR-recognized ligand and human protein target, with relevant information. \\
+        & Every interaction between a IUPHAR-recognized ligand and human protein
+        target, with relevant information. \\
         \hline
     tcdb\_ids
-        & The entirety of the TCDB linked with the respecitve ENSPs, split by type, subtype, family, subfamily and superfamily. \\
+        & The entirety of the TCDB linked with the respecitve ENSPs, split by
+        type, subtype, family, subfamily and superfamily. \\
         \hline
     tcdb\_types
         & Names of the types in the TCDB. \\
@@ -183,25 +191,34 @@ participate in the creation of a more useful resource.
         & Names of the families in the TCDB. \\
         \hline
     cosmic\_genes
-        & Information regarding the presence of the gene in the COSMIC database, as well as its hallmark status. \\
+        & Information regarding the presence of the gene in the COSMIC database,
+        as well as its hallmark status. \\
         \hline
     channels
-        & All genes catalogued as ``channels'' by IUPHAR or the HGNC, with information on their gating mechanism, carried solute and relative and absolute conductance. \todo{clarify GO role in this} \\
+        & All genes catalogued as ``channels'' by IUPHAR or the HGNC, with
+        information on their gating mechanism, carried solute and relative and
+        absolute conductance. \todo{clarify GO role in this} \\
         \hline
     aquaporins
         & All aquaporin genes as well as their expression tissue. \\
         \hline
     solute\_carriers
-        & All genes catalogued as as ``solute carriers'' by IUPHAR or the HGNC, as well as their carried solute, rate of transport, stoichiometry, port type, direction, and more. \\
+        & All genes catalogued as as ``solute carriers'' by IUPHAR or the HGNC,
+        as well as their carried solute, rate of transport, stoichiometry, port
+        type, direction, and more. \\
         \hline
     atp\_driven\_transporters
-        & All active transporters (excluding ABC transporters) \todo{rename this table as ion pumps?}, correlated with their carried solute, rate, direction, net charge, and more. \\
+        & All active transporters (excluding ABC transporters) \todo{rename this
+        table as ion pumps?}, correlated with their carried solute, rate,
+        direction, net charge, and more. \\
         \hline
     ABC\_transporters
-        & All ABC transporter genes, correlated with their carried solute, rate, direction, and more. \\
+        & All ABC transporter genes, correlated with their carried solute, rate,
+        direction, and more. \\
         \hline
 \end{tabularx}
-\caption{Brief description of the data contained in all the tables present in the \gls{mtpdb}.}
+\caption{Brief description of the data contained in all the tables present in
+    the \gls{mtpdb}.}
 \label{tab:databaseSchema}
 \end{table}
 
@@ -270,13 +287,18 @@ leaf nodes that are highly congruent with other nodes in the tree. For each leaf
 node $A$ in the tree $T$, containing a set of genes $A^g$, the algorithm
 computes the measure:
 \begin{equation}
-    \kappa = \max_{i:B_i \in T, B_i \ne A}\left(\frac{[(A^g - B_i^g) \cup (B_i^g - A^g)]}{[A^g \cap B_i^g]}\right)
+    \kappa = 2\ \frac{\left|A^g \cap B^g\right|}{\left|A^g\right|+\left|B^g\right|}
+    \ \ \ \forall B \in T \ \ \ \text{with}\ \ \  B \neq A
     \label{eq:node_similarity}
 \end{equation}
-$\kappa$ is a value spanning from $0$ to $1$, where $1$ means perfectly
+\begin{equation}
+    \kappa = \max_{i:B_i \in T, B_i \ne A}\left(\frac{[(A^g - B_i^g) \cup (B_i^g - A^g)]}{[A^g \cap B_i^g]}\right)
+    \label{eq:node_similarityold}
+\end{equation}
+$\kappa$ is a value ranging from $0$ to $1$, where $1$ means perfectly
 congruent nodes, and $0$ meaning completely different nodes. If $\kappa$ is
-greater than an user-defined threshold value $\eta$ (generally close to 1),
-% MAYBE THIS IS WRONG? Generally close to 0?
+greater than a user-defined threshold value $\eta$ (generally close to 1),
+% MAYBE THIS IS WRONG? Generally close to 0? Yeah, it was wrong... but now it's right
 the node is deemed redundant and pruned. When all leaves are considered, if the
 algorithm pruned at least one leaf, it is executed again. This process leaves a
 tree in which all leaf nodes are sufficiently different from each other. There
