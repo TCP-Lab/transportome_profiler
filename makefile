@@ -20,7 +20,7 @@
 # - restart -> clean and remove the input files and the virtual env
 # - scrub -> clean and remove the ./data/ link
 
-.PHONY = all env clean restart scrub paper
+.PHONY = all env clean restart scrub paper thin_paper
 
 data_dir = ./data
 expression_matrix = $(data_dir)/in/tcga_target_gtex
@@ -171,15 +171,19 @@ $(data_dir)/out/figures/enrichments/pancan_heatmap.png: \
 		$@ \
 		--height 15
 
+build_paper_command = cd ./paper/src/ && latexmk -lualatex -f -quiet -gg -synctex=1 -interaction=nonstopmode -file-line-error main.tex
+
 ## --- 7 --- Build the paper
 $(data_dir)/out/paper.pdf: \
 		$(data_dir)/out/figures/enrichments/done.flag \
 		$(data_dir)/out/figures/enrichments/pancan_heatmap.pdf \
 		./paper/src
 	
-	cd ./paper/src/ && \
-		latexmk -lualatex -f -quiet -synctex=1 -interaction=nonstopmode -file-line-error main.tex
+	$(build_paper_command)
 
 	mv ./paper/src/main.pdf $@
 
 paper: $(data_dir)/out/paper.pdf
+
+thin_paper:
+	$(build_paper_command)
