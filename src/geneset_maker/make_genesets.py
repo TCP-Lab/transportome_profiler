@@ -14,62 +14,7 @@ from sqlite3 import Connection, connect
 import pandas as pd
 from bonsai import Node, Tree
 from colorama import Back, Fore, Style
-
-
-class PruneDirection(Enum):
-    TOPDOWN = "topdown"
-    BOTTOMUP = "bottomup"
-
-
-def prune(tree: Tree, similarity: float, direction: PruneDirection) -> Tree:
-    original_len = len(tree.nodes)
-    log.info(f"Pruning {tree}.")
-
-    reverse_sort = direction == PruneDirection.BOTTOMUP
-
-    def is_similar(node: Node, nodes: list[Node]) -> bool:
-        for other in nodes:
-            if any([other.id == "0", node.id == "0"]):
-                continue
-            if (
-                len(set(other.data) ^ set(node.data))
-                / len(set(other.data) | set(node.data))
-                > similarity
-            ):
-                continue
-            return True
-        return False
-
-    cycle = 0
-    pruned = True
-    while pruned:
-        pruned = False
-        log.info(f"Prune cycle {cycle} -- {len(tree.nodes)} nodes.")
-        # Find all leaves
-        leaves = tree.leaves()
-
-        # Sort them
-        leaves.sort(key=lambda x: tree.depth_of(x.id), reverse=reverse_sort)
-
-        # Prune
-        for node in leaves:
-            other_nodes = list(copy(list(tree.nodes.values())))
-            other_nodes.remove(node)
-            if is_similar(node, other_nodes):
-                log.debug(f"Pruned {node}")
-                pruned = True
-                tree.prune(node.id)
-
-        cycle += 1
-
-    len_diff = original_len - len(tree.nodes)
-    log.info(
-        f"Prune finished. Removed {len_diff} nodes - {round(len_diff / original_len * 100, 4)} %"
-    )
-
-    return tree
-
-
+from tqdm import tqdm
 ## >>>> Logging setup
 class ColorFormatter(logging.Formatter):
     # Change this dictionary to suit your coloring needs!
@@ -92,8 +37,7 @@ class ColorFormatter(logging.Formatter):
         return logging.Formatter.format(self, record)
 
 
-# Dobby makes gene sets now!
-log = logging.getLogger("Dobby")  # Keep this at the module level name
+log = logging.getLogger("Persephone")
 log.setLevel(logging.DEBUG)
 log.propagate = False
 # Keep this at DEBUG - set levels in handlers themselves
@@ -107,6 +51,59 @@ stream_h.setLevel(logging.INFO)
 
 log.addHandler(stream_h)
 ## <<<< Logging setup
+
+class PruneDirection(Enum):
+    TOPDOWN = "topdown"
+    BOTTOMUP = "bottomup"
+
+
+def prune(tree: Tree, similarity: float, direction: PruneDirection) -> Tree:
+    original_len = len(tree.nodes)
+    log.info(f"Pruning {tree}.")
+
+    reverse_sort = direction == PruneDirection.TOPDOWN
+
+    def is_similar(node: Node, nodes: list[Node]) -> bool:
+        for other in nodes:
+            if any([other.id == "0", node.id == "0"]):
+                continue
+            if (
+                len(set(other.data) ^ set(node.data))
+                / len(set(other.data) | set(node.data))
+                > similarity
+            ):
+                continue
+            return True
+        return False
+
+    cycle = 0
+    pruned = True
+    while pruned:
+        pruned = False
+        log.info(f"Prune cycle {cycle} -- {len(tree.nodes)} nodes in tree.")
+        # Find all leaves
+        leaves = tree.leaves()
+
+        # Sort them
+        leaves.sort(key=lambda x: tree.depth_of(x.id), reverse=reverse_sort)
+
+        # Prune
+        for node in tqdm(leaves):
+            other_nodes = list(copy(list(tree.nodes.values())))
+            other_nodes.remove(node)
+            if is_similar(node, other_nodes):
+                log.debug(f"Pruned {node}")
+                pruned = True
+                tree.prune(node.id)
+
+        cycle += 1
+
+    len_diff = original_len - len(tree.nodes)
+    log.info(
+        f"Prune finished. Removed {len_diff} nodes ({round(len_diff / original_len * 100, 3)}% of total)"
+    )
+
+    return tree
 
 
 def main(args: dict) -> None:
@@ -142,7 +139,7 @@ def main(args: dict) -> None:
     # 3. Make the union of the genesets following the structure
     log.info("Pasting trees together...")
     large_tree = Tree()
-    for source, sink in sets["structure"]:
+    for source, sink in tqdm(sets["structure"], desc="Merging"):
         if source == "root":
             large_tree.create_node(sink, None)
         else:
@@ -152,10 +149,6 @@ def main(args: dict) -> None:
             large_tree.get_one_node_named(sink).id,
             update_data=True,
         )
-        print(large_tree)
-
-    for source, sink in sets["structure"]:
-        print(large_tree.get_one_node_named(sink))
 
     if not args.no_prune:
         log.info("Pruning tree...")
@@ -257,7 +250,7 @@ def generate_gene_list_trees(
     """
 
     def generate_list(tree: Tree, father_node_id: str, frame: pd.DataFrame, layer: int):
-        log.info(f"Enumerating layer {layer}: {list(frame.columns)}")
+        log.debug(f"Enumerating layer {layer}: {list(frame.columns)}")
         # This is the recursive wrapper
 
         valid_cols = []
@@ -379,13 +372,13 @@ if __name__ == "__main__":
         "--prune_similarity",
         type=float,
         help="Node similarity threshold for pruning",
-        default=0.1,
+        default=0.45,
     )
     parser.add_argument(
         "--prune_direction",
         choices=["topdown", "bottomup"],
         help="Direction to prune nodes in",
-        default="topdown",
+        default="bottomup",
     )
     parser.add_argument("--verbose", help="Increase verbosity", action="store_true")
 

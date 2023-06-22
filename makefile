@@ -28,7 +28,7 @@ local_mtpdb = $(data_dir)/in/MTPDB.sqlite
 split_threads = 3
 
 all: $(data_dir)/out/figures/enrichments/done.flag \
-		$(data_dir)/out/figures/enrichments/pancan_heatmap.pdf
+		$(data_dir)/out/figures/enrichments/pancan_heatmap.png
 
 # Clean just the intermediary files - this is to re-run the analysis quickly
 clean:
@@ -117,7 +117,8 @@ $(data_dir)/genesets/all.txt: \
 		$(local_mtpdb) \
 		./src/geneset_maker/make_genesets.py \
 		./src/geneset_maker/basic_gene_lists.json 
-
+	
+	rm -rf $(@D)
 	mkdir -p $(@D)
 
 	. env/bin/activate; python \
@@ -156,7 +157,7 @@ $(data_dir)/out/figures/enrichments/done.flag: \
 
 	touch $@
 
-$(data_dir)/out/figures/enrichments/pancan_heatmap.pdf: \
+$(data_dir)/out/figures/enrichments/pancan_heatmap.png: \
 		$(data_dir)/out/enrichments/done.flag \
 		$(data_dir)/genesets/all.txt \
 		./src/plotting/general_heatmap.R
@@ -167,7 +168,8 @@ $(data_dir)/out/figures/enrichments/pancan_heatmap.pdf: \
 	Rscript ./src/plotting/general_heatmap.R \
 		$(data_dir)/out/enrichments/ \
 		/tmp/genesets_tree/tree.txt \
-		$@
+		$@ \
+		--height 15
 
 ## --- 7 --- Build the paper
 $(data_dir)/out/paper.pdf: \
