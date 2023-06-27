@@ -62,7 +62,7 @@ env/touchfile: requirements.txt
 ## >> Retrieve sources
 $(data_dir)/in/tcga_target_gtex:
 	mkdir -p $(@D)
-	wget -4 --inet4-only -O $@.gz https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGtex_gene_expected_count.gz 
+	wget -4 --inet4-only -O $@.gz https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGtex_gene_expected_count.gz
 	gunzip -f $@.gz
 
 $(data_dir)/in/selected_metadata:
@@ -116,8 +116,8 @@ $(data_dir)/genesets/all.txt: \
 		env/touchfile \
 		$(local_mtpdb) \
 		./src/geneset_maker/make_genesets.py \
-		./src/geneset_maker/basic_gene_lists.json 
-	
+		./src/geneset_maker/basic_gene_lists.json
+
 	rm -rf $(@D)
 	mkdir -p $(@D)
 
@@ -138,7 +138,7 @@ $(data_dir)/out/enrichments/done.flag: \
 
 	Rscript ./src/gsea_runner/run_gsea.R \
 		"$(data_dir)/deas/" "$(data_dir)/genesets" "$(@D)" \
-		--low-memory --ensg-hugo-data $(data_dir)/in/ensg_data.csv
+		--ensg-hugo-data $(data_dir)/in/ensg_data.csv
 
 	touch $@
 
@@ -147,14 +147,14 @@ $(data_dir)/out/absolute_enrichments/done.flag: \
 		./src/gesea_runner/run_gsea.R \
 		$(data_dir)/deas/flag.txt \
 		$(data_dir)/in/ensg_data.csv
-	
+
 	mkdir -p $(@D)
 
 	Rscript ./src/gsea_runner/run_gsea.R \
 		"$(data_dir)/deas/" "$(data_dir)/genesets" "$(@D)" \
-		--low-memory --ensg-hugo-data $(data_dir)/in/ensg_data.csv \
+		--ensg-hugo-data $(data_dir)/in/ensg_data.csv \
 		--absolute
-	
+
 	touch $@
 
 ## --- 6 --- Generate plots
@@ -226,7 +226,7 @@ $(data_dir)/out/paper.pdf: \
 		$(data_dir)/out/figures/enrichments/done.flag \
 		$(data_dir)/out/figures/enrichments/pancan_heatmap.pdf \
 		./paper/src
-	
+
 	$(build_paper_command)
 
 	mv ./paper/src/main.pdf $@
