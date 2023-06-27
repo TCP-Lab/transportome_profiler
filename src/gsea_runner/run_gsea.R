@@ -31,6 +31,10 @@ if (sys.nframe() == 0L) {
       flag = TRUE, type = "logical"
     ) |>
     argparser::add_argument(
+      "--absolute", help = "If specified, runs GSEA by sorting on the absolute values instead of the real values."
+      flag = TRUE, type = "logical"
+    )
+    argparser::add_argument(
       "--save-plots", help = "If specified, also save GSEA plots alongside tables.",
       flag = TRUE, type = "logical"
     ) -> parser
@@ -89,7 +93,7 @@ purge_ensg_versions <- function(data, id_col = "gene_id") {
   data
 }
 
-extract_ranks <- function(deg_file, biomart_data) {
+extract_ranks <- function(deg_file, biomart_data, absolute = FALSE) {
   #' Make a frame ready for GSEA from a DEG file, made by BioTEA or DESeq2.
   #'
   #' Some compatibility is needed to parse DESeq2 files, as they have no
@@ -99,6 +103,8 @@ extract_ranks <- function(deg_file, biomart_data) {
   #' @param biomart_data A data.frame with at least the "ensembl_gene_id" and
   #'   "gene_biotype" columns.
   #'   Such a table can be retrieved from Biomart with biomaRt.
+  #' @param absolute Boolean. If TRUE, will compute the absolute values of the
+  #'   statistic instead of the actual ones.
   #'
   #' @returns A named vector of gene_names : statistic, ready for fgsea::fgsea
   data <- read_csv(deg_file, show_col_types = FALSE)
@@ -136,6 +142,10 @@ extract_ranks <- function(deg_file, biomart_data) {
   coding <- biomart_data$hgnc_symbol[biomart_data$gene_biotype == "protein_coding"]
 
   named_vec <- named_vec[names(named_vec) %in% coding]
+
+  if (absolute) {
+    named_vec <- abs(named_vec)
+  }
 
   return(named_vec)
 }
@@ -184,14 +194,17 @@ plot_gsea <- function(genesets, ranks) {
 #'   tables to be loaded with `extract_ranks`.
 #' @param output_dir The output directory to save output files to. If NA, does
 #'   not save files, and instead returns a list of results.
-#' @param genesets_folder_patdh (Full) path to the folder with genesets, as .txt
+#' @param genesets_folder_path (Full) path to the folder with genesets, as .txt
 #'   files with one gene id per row.
 #' @param biomart_data A data.frame with at least the "ensembl_gene_id",
 #'   "hgnc_symbol" and "gene_biotype" columns.
 #'   Such a table can be retrieved from Biomart with biomaRt.
+#' @param absolute Runs absolute GSEA instead of normal GSEA. Sorts the ranks
+#'   based on their absolute values. Useful to find overall "deregulation"
+#'   by sacrificing finding up or down regulated groups.
 #'
 #' @returns A list of values with file names as names and GSEA results as values.
-run_all_gsea <- function(input_data_folder, genesets_folder_path, biomart_data, output_dir = NA) {
+run_all_gsea <- function(input_data_folder, genesets_folder_path, biomart_data, output_dir = NA, absolute = FALSE) {
   file_names <- list.files(input_data_folder)
   file_names <- file_names[endsWith(file_names, ".csv")]
   file_paths <- file.path(input_data_folder, file_names)
@@ -205,7 +218,7 @@ run_all_gsea <- function(input_data_folder, genesets_folder_path, biomart_data, 
   results <- list()
   for (i in seq_along(file_names)) {
     cat(paste0("Running GSEA on ", file_names[i], "\n"))
-    ranks <- extract_ranks(file_paths[i], biomart_data)
+    ranks <- extract_ranks(file_paths[i], biomart_data, absolute = absolute)
 
     if (! is.na(output_dir)) {
       result <- run_gsea(genesets, ranks)

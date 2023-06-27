@@ -20,16 +20,12 @@
 # - restart -> clean and remove the input files and the virtual env
 # - scrub -> clean and remove the ./data/ link
 
-.PHONY = all env clean restart scrub paper thin_paper
-
 data_dir = ./data
 expression_matrix = $(data_dir)/in/tcga_target_gtex
 local_mtpdb = $(data_dir)/in/MTPDB.sqlite
 split_threads = 3
 
-all: $(data_dir)/out/figures/enrichments/done.flag \
-		$(data_dir)/out/figures/enrichments/pancan_heatmap.png
-
+PHONY += clean
 # Clean just the intermediary files - this is to re-run the analysis quickly
 clean:
 	rm -f $(data_dir)/deas/*
@@ -37,6 +33,7 @@ clean:
 	rm -rf $(data_dir)/genesets
 	find $(data_dir)/out/ -type f -prune ! -name '.*' -exec rm {} +
 
+PHONY += restart
 # Clean the input files. This is a harder clean than merely "clean", and to
 # re-run the analysis you'll need to redownload the inputs
 restart: clean
@@ -44,6 +41,7 @@ restart: clean
 	rm -f $(local_mtpdb)
 	rm -rf ./env
 
+PHONY += scrub
 # Clean every file made by make and remove the links made by ./link
 # the ending / removes the actual linked directory, the one without the /
 # removes the soft link
@@ -51,9 +49,11 @@ scrub: restart
 	rm -rf $(data_dir)/
 	rm -f $(data_dir)
 
+PHONY += env
 ## >> Make the python virtual environment
 env: env/touchfile
 
+PHONY += env/touchfile
 env/touchfile: requirements.txt
 	python3.11 -m venv env
 	. env/bin/activate; pip install -Ur requirements.txt
@@ -137,12 +137,32 @@ $(data_dir)/out/enrichments/done.flag: \
 	mkdir -p $(@D)
 
 	Rscript ./src/gsea_runner/run_gsea.R \
-		"$(data_dir)/deas/" "$(data_dir)/genesets" "$(data_dir)/out/enrichments" \
+		"$(data_dir)/deas/" "$(data_dir)/genesets" "$(@D)" \
 		--low-memory --ensg-hugo-data $(data_dir)/in/ensg_data.csv
 
 	touch $@
 
+$(data_dir)/out/absolute_enrichments/done.flag: \
+		$(data_dir)/genesets/all.txt \
+		./src/gesea_runner/run_gsea.R \
+		$(data_dir)/deas/flag.txt \
+		$(data_dir)/in/ensg_data.csv
+	
+	mkdir -p $(@D)
+
+	Rscript ./src/gsea_runner/run_gsea.R \
+		"$(data_dir)/deas/" "$(data_dir)/genesets" "$(@D)" \
+		--low-memory --ensg-hugo-data $(data_dir)/in/ensg_data.csv \
+		--absolute
+	
+	touch $@
+
 ## --- 6 --- Generate plots
+/tmp/genesets_tree/tree.txt: $(data_dir)/genesets/all.txt
+	mkdir -p $(@D)
+	tree $(data_dir)/genesets -df | head -n -2 > $@
+
+ALL += $(data_dir)/out/figures/enrichments/done.flag
 $(data_dir)/out/figures/enrichments/done.flag: \
 		$(data_dir)/out/enrichments/done.flag \
 		$(data_dir)/genesets/all.txt \
@@ -153,20 +173,48 @@ $(data_dir)/out/figures/enrichments/done.flag: \
 
 	Rscript ./src/plotting/gsea_plotting_graphs.R \
 		$(data_dir)/out/enrichments/ \
-		$(data_dir)/out/figures/enrichments
+		$(@D)
 
 	touch $@
 
+ALL += $(data_dir)/out/figures/enrichments/pancan_heatmap.png
 $(data_dir)/out/figures/enrichments/pancan_heatmap.png: \
 		$(data_dir)/out/enrichments/done.flag \
 		$(data_dir)/genesets/all.txt \
-		./src/plotting/general_heatmap.R
-
-	mkdir -p /tmp/genesets_tree
-	tree $(data_dir)/genesets -df | head -n -2 > /tmp/genesets_tree/tree.txt
+		./src/plotting/general_heatmap.R \
+		/tmp/genesets_tree/tree.txt
 
 	Rscript ./src/plotting/general_heatmap.R \
 		$(data_dir)/out/enrichments/ \
+		/tmp/genesets_tree/tree.txt \
+		$@ \
+		--height 15
+
+## This is duplicated from above but i'm not sure how to merge them.
+ALL += $(data_dir)/out/figures/absolute_enrichments/done.flag
+$(data_dir)/out/figures/absolute_enrichments/done.flag: \
+		$(data_dir)/out/absolute_enrichments/done.flag \
+		$(data_dir)/genesets/all.txt \
+		./src/plotting/gsea_plotting_graphs.R \
+		./src/plotting/general_heatmap.R
+
+	mkdir -p $(@D)
+
+	Rscript ./src/plotting/gsea_plotting_graphs.R \
+		$(data_dir)/out/absolute_enrichments/ \
+		$(@D)
+
+	touch $@
+
+ALL +=$(data_dir)/out/figures/absolute_enrichments/pancan_heatmap.png
+$(data_dir)/out/figures/absolute_enrichments/pancan_heatmap.png: \
+		$(data_dir)/out/absolute_enrichments/done.flag \
+		$(data_dir)/genesets/all.txt \
+		./src/plotting/general_heatmap.R \
+		/tmp/genesets_tree/tree.txt
+
+	Rscript ./src/plotting/general_heatmap.R \
+		$(data_dir)/out/absolute_enrichments/ \
 		/tmp/genesets_tree/tree.txt \
 		$@ \
 		--height 15
@@ -187,3 +235,10 @@ paper: $(data_dir)/out/paper.pdf
 
 thin_paper:
 	$(build_paper_command)
+
+
+PHONY += all
+all: $(ALL)
+
+.PHONY = $(PHONY)
+.DEFAULT_GOAL := all
