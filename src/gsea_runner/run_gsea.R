@@ -31,7 +31,7 @@ if (sys.nframe() == 0L) {
       flag = TRUE, type = "logical"
     ) |>
     argparser::add_argument(
-      "--absolute", help = "If specified, runs GSEA by sorting on the absolute values instead of the real values."
+      "--absolute", help = "If specified, runs GSEA by sorting on the absolute values instead of the real values.",
       flag = TRUE, type = "logical"
     )
     argparser::add_argument(
@@ -45,10 +45,13 @@ if (sys.nframe() == 0L) {
 
 requireNamespace("biomaRt")
 requireNamespace("fgsea")
+requireNamespace("rjson")
 library(tidyverse, quietly = TRUE)
 
 # This suppresses the messages from readr::read_table
 options(readr.num_columns = 0)
+
+
 
 load_genesets <- function(folder, biomart_data) {
   #' Load all genesets from FOLDER.
@@ -84,6 +87,36 @@ load_genesets <- function(folder, biomart_data) {
 
   data <- lapply(data, ensg_to_symbol)
 
+  return(data)
+}
+
+
+load_genesets_from_node_json <- function(file, biomart_data) {
+  #' This takes a node json from `Bonsai` and loads it as gene sets
+  #' 
+  #' @param file The node list file
+  #' @param biomart_data A data.frame with at least the "ensembl_gene_id" and
+  #'   "hgnc_symbol" columns, with the correspondence from ENSG to symbol.
+  #'   Such a table can be retrieved from Biomart with biomaRt.
+  #' @returns A list of vectors, each with the gene symbols of that gene set
+  
+  # Each entry in the json looks like this:
+  # "{id}": {"name": "{name}", "data": [data], "parent": "{id}"}
+  data <- rjson::fromJSON(readr::read_file(file))
+  
+  # We need a list of id: data
+  data <- lapply(data, \(x) {x[["data"]]})
+  
+  # Convert from ENSG to gene symbol
+  biomart_data |> select(all_of(c("ensembl_gene_id", "hgnc_symbol"))) -> biomart_data
+  ensg_to_symbol <- function(ensgs) {
+    symbols <- biomart_data$hgnc_symbol[biomart_data$ensembl_gene_id %in% ensgs]
+    
+    return(symbols)
+  }
+  
+  data <- lapply(data, ensg_to_symbol)
+  
   return(data)
 }
 
