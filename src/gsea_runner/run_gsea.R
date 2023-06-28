@@ -15,7 +15,7 @@ if (sys.nframe() == 0L) {
       "input_deg_folder", help="Folder with DEG tables to run GSEA on.", type="character"
     ) |>
     argparser::add_argument(
-      "input_genesets_folder", help = "Folder with input genesets as .txt files",
+      "input_genesets", help = "Json file with input genesets.",
       type = "character"
     ) |>
     argparser::add_argument(
@@ -33,7 +33,7 @@ if (sys.nframe() == 0L) {
     argparser::add_argument(
       "--absolute", help = "If specified, runs GSEA by sorting on the absolute values instead of the real values.",
       flag = TRUE, type = "logical"
-    )
+    ) |>
     argparser::add_argument(
       "--save-plots", help = "If specified, also save GSEA plots alongside tables.",
       flag = TRUE, type = "logical"
@@ -227,8 +227,8 @@ plot_gsea <- function(genesets, ranks) {
 #'   tables to be loaded with `extract_ranks`.
 #' @param output_dir The output directory to save output files to. If NA, does
 #'   not save files, and instead returns a list of results.
-#' @param genesets_folder_path (Full) path to the folder with genesets, as .txt
-#'   files with one gene id per row.
+#' @param genesets_json (Full) path to the json file with genesets, as generated
+#'   by Bonsai (github.com/MrHedmad/bonsai).
 #' @param biomart_data A data.frame with at least the "ensembl_gene_id",
 #'   "hgnc_symbol" and "gene_biotype" columns.
 #'   Such a table can be retrieved from Biomart with biomaRt.
@@ -237,7 +237,7 @@ plot_gsea <- function(genesets, ranks) {
 #'   by sacrificing finding up or down regulated groups.
 #'
 #' @returns A list of values with file names as names and GSEA results as values.
-run_all_gsea <- function(input_data_folder, genesets_folder_path, biomart_data, output_dir = NA, absolute = FALSE) {
+run_all_gsea <- function(input_data_folder, genesets_json biomart_data, output_dir = NA, absolute = FALSE) {
   file_names <- list.files(input_data_folder)
   file_names <- file_names[endsWith(file_names, ".csv")]
   file_paths <- file.path(input_data_folder, file_names)
@@ -246,7 +246,7 @@ run_all_gsea <- function(input_data_folder, genesets_folder_path, biomart_data, 
   cat(paste0("Found ", length(file_names), " DEG files.\n"))
 
   cat("Loading genesets...\n")
-  genesets <- load_genesets(genesets_folder_path, biomart_data = biomart_data)
+  genesets <- load_genesets_from_node_json(genesets_json, biomart_data = biomart_data)
 
   results <- list()
   for (i in seq_along(file_names)) {
@@ -363,15 +363,17 @@ if (sys.nframe() == 0L) {
   if (args$low_memory) {
     run_all_gsea(
       args$input_deg_folder,
-      args$input_genesets_folder,
+      args$input_genesets,
       ensg_data,
-      output_dir = args$output_dir
+      output_dir = args$output_dir,
+      absolute = args$absolute
     )
   } else {
     results <- run_all_gsea(
       args$input_deg_folder,
-      args$input_genesets_folder,
-      ensg_data
+      args$input_genesets,
+      ensg_data,
+      absolute = args$absolute
     )
 
     save_results(results, out_dir = args$output_dir, skip_plots = !args$save_plots)
