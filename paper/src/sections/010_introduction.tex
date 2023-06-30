@@ -1,31 +1,47 @@
 \section{Introduction}
 
-The movement of molecules between the intracellular and extracellular environments is essential for cellular survival.
-This movement is due, in part, by transmembrane proteins.
-These may be sorted into 5 main classes: channels, aquaporins, atp-driven pumps, solute carriers and \gls{abc} transporters.
-The collection of all membrane transport proteins is commonly referred to as the \textit{transportome}.
+The movement of molecules between the intracellular and extracellular environments is essential for cell survival.
+This movement is due, in part, by transmembrane proteins of various nature, which we refer to with the term \textit{transmembrane transporters}.
+The -omic layer that comprises the transmembrane transporters is referred to as the \textit{transportome}.
 
-The coordinated action of these proteins, regulates a large number of physiological functions, such as membrane potential, nutrient absorption, waste product removal, cellular signalling, regulation of intracellular and extracellular pH, \todo{and more.}
+The coordinated action of these proteins regulates a large number of physiological functions, such as membrane potential, nutrient absorption, waste product removal, cellular signalling, regulation of intracellular and extracellular pH, and more.
 
 The key molecule that performs the action of transportation is of course the protein.
 The presence of the specific transport protein itself is, however, not sufficient for the achievement of the overall function.
-The presence of accessory proteins or other complex-forming proteins is often a requirement for the correct formation of the so-called functional unit, which is then able to perform the function.
+The presence of accessory proteins or other complex-forming proteins is often a requirement for the correct formation of the so-called \textit{\gls{fu}}, which is then able to perform the function proper.
 
-Cataloguing functional units is complex, mainly due to the current challenges in the proteomics field.
+Cataloguing functional units is complex, especially due to the current challenges in the proteomics field.
 Once sufficient technological advancements are made, however, it is probable that functional units will be defined with high accuracy.
-Currently, however, the best approximation to the functional unit is the gene itself.
-The \gls{go} provides such a classification, binding genes (and also proteins) to their cellular function.
+Currently, however, a generally accepted approximation to the functional unit is the gene transcript, assuming that the presence and quantity of the transcript is directly proportional to the \glspl{fu}.
 
-A commonly carried out essay is the measurement of gene expression in healthy and diseased samples, followed by differential expression analysis and gene list enrichment with ontologies such as the aforementioned \gls{go}.
-However, this process allows only to find which terms the genes of interest (in the example the differentially expressed genes) fall in, providing a narrow point of view on the role of the genes of interest.
+There are many exceptions, but it is easy to distinguish between:
 
-Another, similar but reversed approach is to generate gene lists of interest and then test them against the data to see if the list is differentially expressed or not, for example through the \gls{gsea} method.
+\begin{itemize}
+    \item Pores: \gls{fu} that create water-filled pores that allow the facilitated passage of molecules through the membrane.
+    These may be additionally subdivided into \textit{channels} proper and \textit{aquaporins}, pores that allow only the passage of water.
+    \item Transporters: proteins or protein complexes that, embedded in the membrane, allow passage of molecules thanks to changes in protein conformation.
+    These may be furthermore divided into those that require the hydrolysis of ATP to function and those that do not as \textit{atp-driven transporters} and \textit{solute carriers}, respectively.
+    \begin{itemize}
+        \item A common distinction in atp-driven transporters is given by \textit{\gls{abc} transporters} and \textit{pumps}, where \gls{abc} transporters feature the conserved \gls{abc} subunit, while pumps do not.
+    \end{itemize}
+\end{itemize}
+
+A commonly carried out essay is the measurement of gene expression in healthy and diseased samples, followed by differential expression analysis and gene list enrichment with ontologies such as the \gls{go} with tests such as Fisher's exact test.
+This process is, of course, dependent on the curation and structure of the \gls{go}.
+
+A similar, but "reversed" approach is to generate gene lists of interest and then test them against the data to see if the list is differentially expressed or not, for example through the \gls{gsea} method.
+Assuming that these gene lists meaningfully group together genes by their functional role, the main advantage of such an approach is that through the systematic generation of all possible lists (given some descriptors), one could in theory profile all aspects of the studied function.
 
 Cancer cells differ fundamentally in respect with their healthy counterparts, especially in their relationship with the extracellular environment.
 Dramatic metabolic shifts are also seen in cancer.
-Both of these aspects probably require a shift in the expression levels of transportome genes.
+Both of these aspects probably involve a shift in transportome \glspl{fu}, and are potentially reflected in the expression levels of the same genes.
 
-We therefore aimed at profiling the expression levels of Transportome genes in the context of cancer.
+We therefore aimed at profiling the expression levels of transportome genes in the context of cancer.
 To do this, we collected information on these genes (such as their complete list, which molecule(s) they transport, their gating mechanism, their functional class, etc.) and used it to systematically arrange them into meaningful \glspl{tgl}.
 After sorting all the protein-coding genes found in cancer cells based on their differential expression with respect to healthy cells, we run a pre-ranked \gls{gsea} on these ordered lists to obtain enrichment scores for every \gls{tgl}.
+We therefore obtained the "deregulation status" of most functional facets of the transportome in 19 different cancer tissue types.
 
+We provide an open-source, documented and reproducible Python package, Daedalus (\href{https://github.com/CMA-Lab/MTP-DB}{github.com/CMA-Lab/MTP-DB}) that retrieves transportome-related data from various databases and compiles it in a local \mono{.sqlite} database, and we provide pre-compiled database files as periodic releases.
+
+We additionally provide a \mono{make}-driven and docker-containerized pipeline, dubbed "transportome profiler", (\href{https://github.com/CMA-Lab/transportome_profiler}{github.com/CMA-Lab/transportome\_profiler}) that takes gene expression data and the aforementioned database to generate gene lists, sort genes based on their differential expression and run \gls{gsea}.
+This pipeline was designed with modularity and reproducibility in mind, so that it would be easily adaptable on other datasets and databases.
