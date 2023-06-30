@@ -144,7 +144,7 @@ $(data_dir)/out/enrichments/done.flag: \
 
 $(data_dir)/out/absolute_enrichments/done.flag: \
 		$(data_dir)/genesets/all.txt \
-		./src/gesea_runner/run_gsea.R \
+		./src/gsea_runner/run_gsea.R \
 		$(data_dir)/deas/flag.txt \
 		$(data_dir)/in/ensg_data.csv
 

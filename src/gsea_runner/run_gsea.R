@@ -33,7 +33,7 @@ if (sys.nframe() == 0L) {
     argparser::add_argument(
       "--absolute", help = "If specified, runs GSEA by sorting on the absolute values instead of the real values.",
       flag = TRUE, type = "logical"
-    )
+    ) |>
     argparser::add_argument(
       "--save-plots", help = "If specified, also save GSEA plots alongside tables.",
       flag = TRUE, type = "logical"
