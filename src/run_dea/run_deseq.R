@@ -54,13 +54,13 @@ main <- function(case_path, control_path, output_path, case_rownames_col, contro
   result <- run_deseq(case_data, control_data)
 
   # Save diagnostic information
-  upregulated <- sum(result$padj < 0.05 & result$log2FoldChange > 0, na.rm = TRUE)
-  downregulated <- sum(result$padj < 0.05 & result$log2FoldChange < 0, na.rm = TRUE)
+  upregulated <- sum(result$padj < 0.05 & result$log2FoldChange > 0)
+  downregulated <- sum(result$padj < 0.05 & result$log2FoldChange < 0)
 
   cat(paste0(
     "Found ", upregulated, " up (", round(upregulated / nrow(result) * 100, 2),
-    "%) and ", downregulated, " down (", round(downregulated / nrow(result) * 100, 2),
-    "%) -regulated genes from ", case_path, " vs ", control_path, "\n"
+    "%) and ", downregulated, "down (", round(downregulated / nrow(result) * 100, 2),
+    "%) -regulated genes from ", case_path, " vs ", control_path
   ))
 
   cat("Saving result...\n")
