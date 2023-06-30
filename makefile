@@ -77,7 +77,7 @@ $(data_dir)/in/selected_metadata:
 # TODO2: once we publish, change this to point at a static tag again.
 $(local_mtpdb):
 	mkdir -p $(@D)
-	wget -O $@.tar.gz https://github.com/CMA-Lab/MTP-DB/releases/download/0.23.17-beta/MTPDB_v0.23.17-beta.sqlite.tar.gz --inet4-only
+	wget -O $@.tar.gz https://github.com/CMA-Lab/MTP-DB/releases/latest/download/MTPDB.sqlite.gz --inet4-only
 	tar -xvzf $@.tar.gz -C $(@D)
 	mv $(data_dir)/in/MTPDB_v0.23.17-beta.sqlite $@
 	rm $@.tar.gz
