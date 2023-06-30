@@ -158,10 +158,7 @@ def main(args: dict) -> None:
             direction=PruneDirection(args.prune_direction),
         )
 
-    with (args.out_dir / "nodes.json").open("w+") as nodes_stream, \
-        (args.out_dir / "adjacency_matrix.csv").open("w+") as matrix_stream: 
-        large_tree.to_node_json(nodes_stream)
-        large_tree.to_adjacency_matrix(matrix_stream)
+    large_tree.to_files(args.out_dir)
 
     log.info("Finished!")
 

@@ -110,24 +110,26 @@ $(data_dir)/deas/flag.txt: \
 
 	touch $@
 
-## --- 2 --- Make the genesets
-$(data_dir)/genesets/nodes.json $(data_dir)/genesets/adjacency_matrix.csv: \
+## --- 2 ---
+# The fact that it run is detected in the `run_gsea` step by the `all.txt` file
+$(data_dir)/genesets/all.txt: \
 		env/touchfile \
 		$(local_mtpdb) \
 		./src/geneset_maker/make_genesets.py \
 		./src/geneset_maker/basic_gene_lists.json
 
+	rm -rf $(@D)
 	mkdir -p $(@D)
 
 	. env/bin/activate; python \
 		./src/geneset_maker/make_genesets.py $(local_mtpdb) ./src/geneset_maker/basic_gene_lists.json \
-		$(@D) \
+		$(data_dir)/genesets \
 		--prune_direction "topdown" \
 		--verbose
 
 ## --- 5 --- Run the pre-ranked GSEA
 $(data_dir)/out/enrichments/done.flag: \
-		$(data_dir)/genesets/nodes.json \
+		$(data_dir)/genesets/all.txt \
 		./src/gsea_runner/run_gsea.R \
 		$(data_dir)/deas/flag.txt \
 		$(data_dir)/in/ensg_data.csv
@@ -135,21 +137,21 @@ $(data_dir)/out/enrichments/done.flag: \
 	mkdir -p $(@D)
 
 	Rscript ./src/gsea_runner/run_gsea.R \
-		"$(data_dir)/deas/" "$(data_dir)/genesets/nodes.json" "$(@D)" \
+		"$(data_dir)/deas/" "$(data_dir)/genesets" "$(@D)" \
 		--ensg-hugo-data $(data_dir)/in/ensg_data.csv
 
 	touch $@
 
 $(data_dir)/out/absolute_enrichments/done.flag: \
-		$(data_dir)/genesets/nodes.json \
-		./src/gsea_runner/run_gsea.R \
+		$(data_dir)/genesets/all.txt \
+		./src/gesea_runner/run_gsea.R \
 		$(data_dir)/deas/flag.txt \
 		$(data_dir)/in/ensg_data.csv
 
 	mkdir -p $(@D)
 
 	Rscript ./src/gsea_runner/run_gsea.R \
-		"$(data_dir)/deas/" "$(data_dir)/genesets/nodes.json" "$(@D)" \
+		"$(data_dir)/deas/" "$(data_dir)/genesets" "$(@D)" \
 		--ensg-hugo-data $(data_dir)/in/ensg_data.csv \
 		--absolute
 
@@ -163,8 +165,7 @@ $(data_dir)/out/absolute_enrichments/done.flag: \
 ALL += $(data_dir)/out/figures/enrichments/done.flag
 $(data_dir)/out/figures/enrichments/done.flag: \
 		$(data_dir)/out/enrichments/done.flag \
-		$(data_dir)/genesets/nodes.json \
-		$(data_dir)/genesets/adjacency_matrix.csv \
+		$(data_dir)/genesets/all.txt \
 		./src/plotting/gsea_plotting_graphs.R \
 		./src/plotting/general_heatmap.R
 
@@ -179,8 +180,7 @@ $(data_dir)/out/figures/enrichments/done.flag: \
 ALL += $(data_dir)/out/figures/enrichments/pancan_heatmap.png
 $(data_dir)/out/figures/enrichments/pancan_heatmap.png: \
 		$(data_dir)/out/enrichments/done.flag \
-		$(data_dir)/genesets/nodes.json \
-		$(data_dir)/genesets/adjacency_matrix.csv \
+		$(data_dir)/genesets/all.txt \
 		./src/plotting/general_heatmap.R \
 		/tmp/genesets_tree/tree.txt
 
@@ -194,8 +194,7 @@ $(data_dir)/out/figures/enrichments/pancan_heatmap.png: \
 ALL += $(data_dir)/out/figures/absolute_enrichments/done.flag
 $(data_dir)/out/figures/absolute_enrichments/done.flag: \
 		$(data_dir)/out/absolute_enrichments/done.flag \
-		$(data_dir)/genesets/nodes.json \
-		$(data_dir)/genesets/adjacency_matrix.csv \
+		$(data_dir)/genesets/all.txt \
 		./src/plotting/gsea_plotting_graphs.R \
 		./src/plotting/general_heatmap.R
 
@@ -210,8 +209,7 @@ $(data_dir)/out/figures/absolute_enrichments/done.flag: \
 ALL +=$(data_dir)/out/figures/absolute_enrichments/pancan_heatmap.png
 $(data_dir)/out/figures/absolute_enrichments/pancan_heatmap.png: \
 		$(data_dir)/out/absolute_enrichments/done.flag \
-		$(data_dir)/genesets/nodes.json \
-		$(data_dir)/genesets/adjacency_matrix.csv \
+		$(data_dir)/genesets/all.txt \
 		./src/plotting/general_heatmap.R \
 		/tmp/genesets_tree/tree.txt
 
