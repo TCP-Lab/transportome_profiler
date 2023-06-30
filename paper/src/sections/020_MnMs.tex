@@ -19,16 +19,14 @@ transporter-related features of interest in a more unbiased and systematic way.
 To improve the ease of use and portability, we compiled all the data we needed
 to generate the \glspl{tgl} in a SQLite database and named it \gls{mtpdb}. To
 populate the \gls{mtpdb}, we sourced information from a variety of online
-databases. In particular, we extracted data from the \gls{go}
-\cite{ashburnerGeneOntologyTool2000,
-thegeneontologyconsortiumGeneOntologyKnowledgebase2023}, the \gls{hgnc} database
-\cite{sealGenenamesOrgHGNC2023}, the \gls{iuphar} ``Guide to Pharmacology''
-database \cite{hardingIUPHARBPSGuide2022}, Ensembl
-\cite{cunninghamEnsembl20222022} through the use of BioMart
-\cite{smedleyBioMartBiologicalQueries2009}, the \gls{tcdb}
-\cite{saierTransporterClassificationDatabase2021}, the \gls{cosmic}
-\cite{tateCOSMICCatalogueSomatic2019}, and the \gls{slc} Tables website
-\cite{hedigerABCsMembraneTransporters2013}.
+databases. In particular, we extracted data from
+the \gls{hgnc} database \cite{sealGenenamesOrgHGNC2023},
+the \gls{iuphar} ``Guide to Pharmacology'' database \cite{hardingIUPHARBPSGuide2022},
+Ensembl \cite{cunninghamEnsembl20222022} through the use of BioMart \cite{smedleyBioMartBiologicalQueries2009},
+the \gls{tcdb} \cite{saierTransporterClassificationDatabase2021},
+the \gls{slc} Tables website \cite{hedigerABCsMembraneTransporters2013},
+the \gls{cosmic} \cite{tateCOSMICCatalogueSomatic2019} database,
+and the \gls{go} \cite{ashburnerGeneOntologyTool2000, thegeneontologyconsortiumGeneOntologyKnowledgebase2023}.
 
 \begin{table}
 \begin{tabularx}{\textwidth}{|X|X|X|}
@@ -279,7 +277,7 @@ appending them to the parent node. The algorithm then considers a subset of the
 original data, based on the column value used to generate the child gene set,
 and attempts to create more by considering all other columns in turn. This
 approach essentially enumerates all possible gene sets that could be
-meaningfully derived from the annotated data. 
+meaningfully derived from the annotated data.
 
 This iterative process generates a very large number of gene sets \todo{how many?}.
 For this reason, we implemented pruning on the resulting tree, which prunes away
@@ -370,7 +368,7 @@ metadata file plus the \gls{tcga} metadata for ease of use. However, it is
 unclear how to meaningfully pair such large databases, as methodology, possible
 batch effects due to sample handling, sample preprocessing (such as
 microdissection), and the intrinsic non-healthy nature of \gls{gtex} samples can
-cause confounding in the results. 
+cause confounding in the results.
 
 To pair the healthy and tumor data together, we followed the macroscopic
 grouping provided by the metadata files in the Xena platform. To subset the very

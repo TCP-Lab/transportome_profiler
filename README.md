@@ -62,10 +62,11 @@ This is the same workflow you use to start working on the project on a new PC. Y
 ### Other make targets
 There are several make targets if you do not want to rerun all the steps of the analysis (like `all` does):
 - `make all`: Runs the whole analysis - from the retrieval of the data to the generation of the final output.
-- `make retrieve`: Just download the remote data files.
-- `make analyze`: Retrieve + analyze the data, but do not make the latex paper.
 - `make clean`: Cleanup every data file and the output.
-- `make scrub`: Cleanup just like `clean`, but also remove the soft links made by `./link` and the corresponding data folders. This should leave your disks squeaky clean, just like before you started the analysis.
+- `make restart`: Cleanup input and output data and the virtual enviroment. To restart the analysis from scratch.
+- `make scrub`: Cleanup just like `restart`, but also remove the soft links made by `./link` and the corresponding data folders. This should leave your disks squeaky clean, just like before you started the analysis.
+- `make paper`: Runs the analysis and rebuilds the paper.
+- `make thin_paper`: Rebuild the paper, without running the analysis. Figures that are not found are replaced by placeholders. Useful when you just want to write the paper without having to run the whole shebang.
 
 # The Manuscript: Transportome Profiler
 To compile the manuscript, you will need a local installation of `texlive` and `biber`.
@@ -93,13 +94,8 @@ I am a weird man online. Suffice to say you should not `sudo` anything without i
 
 Once everything is installed, you should simply run `make paper`. `make` will run the analysis (to generate the figures for the manuscript), and then generate the paper itself. Keep reading if you want to *just* compile the manuscript, and not run the analysis proper.
 
-## Editing the manuscript
-If you need to *just* edit the manuscript, without running the whole analysis each time, you can skip all the steps above (about running the analysis), and simply download the pre-made figures, put them in `./paper/src/resources/images/generated/` (from another run), then:
-```
-make --touch
-make paper
-```
+## Just edit the manuscript
+If you just want to edit the manuscript, but do not care about restarting the analysis, you can simply run `make thin_paper`. The paper will be built (with no figures) and saved to `/paper/src/main.pdf`. 
 
-**NOTE:** Since commit `d0e34f`, *in theory*, stand-in images should be included
-in the paper if you did not run the analysis, so the aforementioned "download 
-the pre-made figures" should not be needed anymore to actually compile (but you will not have any images, of course).
+If you have access to pre-built images (from e.g. a previous run) you can just drop them in `/paper/src/resources/figures/generated` and even `make thin_paper` will pick them up and isert them in the output.
+

@@ -44,7 +44,7 @@ main <- function(case_path, control_path, output_path, case_rownames_col, contro
     " columns case expression matrix from '", case_path, "'.\n"
   ))
   cat("Loading control data...\n")
-  read_csv(control_path, show_col_types = FALSE) |> column_to_rownames(control_rownames_col) -> control_data 
+  read_csv(control_path, show_col_types = FALSE) |> column_to_rownames(control_rownames_col) -> control_data
   cat(paste0(
     "Loaded a ", nrow(control_data), " rows by ", ncol(control_data),
     " columns control expression matrix from '", control_path, "'.\n"
@@ -52,7 +52,17 @@ main <- function(case_path, control_path, output_path, case_rownames_col, contro
 
   cat("Running deseq...\n")
   result <- run_deseq(case_data, control_data)
-  
+
+  # Save diagnostic information
+  upregulated <- sum(result$padj < 0.05 & result$log2FoldChange > 0, na.rm = TRUE)
+  downregulated <- sum(result$padj < 0.05 & result$log2FoldChange < 0, na.rm = TRUE)
+
+  cat(paste0(
+    "Found ", upregulated, " up (", round(upregulated / nrow(result) * 100, 2),
+    "%) and ", downregulated, " down (", round(downregulated / nrow(result) * 100, 2),
+    "%) -regulated genes from ", case_path, " vs ", control_path, "\n"
+  ))
+
   cat("Saving result...\n")
   write.csv(result, file = output_path, row.names=FALSE)
 }
@@ -61,21 +71,21 @@ rowmerge <- function(x, y, ...) {
   res <- merge(x, y, by='row.names', ...)
   row.names(res) <- res$Row.names
   res$Row.names <- NULL
-  
+
   res
 }
 
 run_deseq <- function(case_frame, control_frame) {
-  
+
   # Make a dummy metadata frame
   metadata <- data.frame(
     row.names = c(colnames(case_frame), colnames((control_frame))),
     status = factor(c(rep("case", ncol(case_frame)), rep("control", ncol(control_frame))), levels = c("control", "case"))
   )
-  
+
   # Merge the case and control frames
   data <- rowmerge(case_frame, control_frame, all = FALSE) # inner merge
-  
+
   # Assert that the order of the cols and rows is the same
   data <- data[, row.names(metadata)]
 
@@ -88,7 +98,7 @@ run_deseq <- function(case_frame, control_frame) {
     DESeq2::DESeq() -> dsq_obj
 
   DESeq2::results(dsq_obj, name = "status_case_vs_control") -> dsq_res
-  
+
   cat("Deseq finished running!\n")
   as.data.frame(dsq_res) |> rownames_to_column("gene_id")
 }
@@ -99,4 +109,3 @@ main(
   case_rownames_col = args$case_rownames_col,
   control_rownames_col = args$control_rownames_col
 )
-

@@ -1,13 +1,31 @@
 \section{Introduction}
 
-[Something something introduction]
-% Define "transportome"
+The movement of molecules between the intracellular and extracellular environments is essential for cellular survival.
+This movement is due, in part, by transmembrane proteins.
+These may be sorted into 5 main classes: channels, aquaporins, atp-driven pumps, solute carriers and \gls{abc} transporters.
+The collection of all membrane transport proteins is commonly referred to as the \textit{transportome}.
 
-We therefore aimed at profiling the expression levels of Transportome genes in
-the context of cancer. To do this, we collected information on these genes (such
-as their complete list, which molecule(s) they transport, their gating mechanism,
-their functional class, etc.) and used it to systematically arrange them into
-meaningful \glspl{tgl}. After sorting all the protein-coding genes found in
-cancer cells based on their differential expression with respect to healthy
-cells, we run a pre-ranked \gls{gsea} on these ordered lists to obtain
-enrichment scores for every \gls{tgl}.
+The coordinated action of these proteins, regulates a large number of physiological functions, such as membrane potential, nutrient absorption, waste product removal, cellular signalling, regulation of intracellular and extracellular pH, \todo{and more.}
+
+The key molecule that performs the action of transportation is of course the protein.
+The presence of the specific transport protein itself is, however, not sufficient for the achievement of the overall function.
+The presence of accessory proteins or other complex-forming proteins is often a requirement for the correct formation of the so-called functional unit, which is then able to perform the function.
+
+Cataloguing functional units is complex, mainly due to the current challenges in the proteomics field.
+Once sufficient technological advancements are made, however, it is probable that functional units will be defined with high accuracy.
+Currently, however, the best approximation to the functional unit is the gene itself.
+The \gls{go} provides such a classification, binding genes (and also proteins) to their cellular function.
+
+A commonly carried out essay is the measurement of gene expression in healthy and diseased samples, followed by differential expression analysis and gene list enrichment with ontologies such as the aforementioned \gls{go}.
+However, this process allows only to find which terms the genes of interest (in the example the differentially expressed genes) fall in, providing a narrow point of view on the role of the genes of interest.
+
+Another, similar but reversed approach is to generate gene lists of interest and then test them against the data to see if the list is differentially expressed or not, for example through the \gls{gsea} method.
+
+Cancer cells differ fundamentally in respect with their healthy counterparts, especially in their relationship with the extracellular environment.
+Dramatic metabolic shifts are also seen in cancer.
+Both of these aspects probably require a shift in the expression levels of transportome genes.
+
+We therefore aimed at profiling the expression levels of Transportome genes in the context of cancer.
+To do this, we collected information on these genes (such as their complete list, which molecule(s) they transport, their gating mechanism, their functional class, etc.) and used it to systematically arrange them into meaningful \glspl{tgl}.
+After sorting all the protein-coding genes found in cancer cells based on their differential expression with respect to healthy cells, we run a pre-ranked \gls{gsea} on these ordered lists to obtain enrichment scores for every \gls{tgl}.
+
