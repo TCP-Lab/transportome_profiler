@@ -56,6 +56,13 @@ class PruneDirection(Enum):
     TOPDOWN = "topdown"
     BOTTOMUP = "bottomup"
 
+def calc_similarity(node_a: set, node_b: set) -> float:
+    # For compatibility
+    node_a = set(node_a)
+    node_b = set(node_b)
+    
+    return 2 * (len(node_a.intersection(node_b)) / (len(node_a) + len(node_b))) 
+
 
 def prune(tree: Tree, similarity: float, direction: PruneDirection) -> Tree:
     original_len = len(tree.nodes)
@@ -65,14 +72,15 @@ def prune(tree: Tree, similarity: float, direction: PruneDirection) -> Tree:
 
     def is_similar(node: Node, nodes: list[Node]) -> bool:
         for other in nodes:
+            # This is reversed.
+            # If the other node is the root, ignore it.
             if any([other.id == "0", node.id == "0"]):
                 continue
-            if (
-                len(set(other.data) ^ set(node.data))
-                / len(set(other.data) | set(node.data))
-                > similarity
-            ):
+            # If the two nodes are NOT similar, we can go on and
+            # check the others.
+            if calc_similarity(node.data, other.data) < similarity:
                 continue
+            # If they ARE similar, we can stop, and return TRUE
             return True
         return False
 

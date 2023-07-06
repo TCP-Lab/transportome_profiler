@@ -125,7 +125,7 @@ $(data_dir)/genesets/all.txt: \
 		./src/geneset_maker/make_genesets.py $(local_mtpdb) ./src/geneset_maker/basic_gene_lists.json \
 		$(data_dir)/genesets \
 		--prune_direction "topdown" \
-		--prune_similarity 0.2 \
+		--prune_similarity 0.9 \
 		--verbose
 
 ## --- 5 --- Run the pre-ranked GSEA
