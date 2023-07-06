@@ -365,13 +365,15 @@ if (sys.nframe() == 0L) {
       args$input_deg_folder,
       args$input_genesets_folder,
       ensg_data,
-      output_dir = args$output_dir
+      output_dir = args$output_dir,
+      absolute = args$absolute
     )
   } else {
     results <- run_all_gsea(
       args$input_deg_folder,
       args$input_genesets_folder,
-      ensg_data
+      ensg_data,
+      absolute = args$absolute
     )
 
     save_results(results, out_dir = args$output_dir, skip_plots = !args$save_plots)
