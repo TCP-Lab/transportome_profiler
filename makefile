@@ -125,6 +125,7 @@ $(data_dir)/genesets/all.txt: \
 		./src/geneset_maker/make_genesets.py $(local_mtpdb) ./src/geneset_maker/basic_gene_lists.json \
 		$(data_dir)/genesets \
 		--prune_direction "topdown" \
+		--prune_similarity 0.2 \
 		--verbose
 
 ## --- 5 --- Run the pre-ranked GSEA
@@ -180,7 +181,6 @@ $(data_dir)/out/figures/enrichments/done.flag: \
 ALL += $(data_dir)/out/figures/enrichments/pancan_heatmap.png
 $(data_dir)/out/figures/enrichments/pancan_heatmap.png: \
 		$(data_dir)/out/enrichments/done.flag \
-		$(data_dir)/genesets/all.txt \
 		./src/plotting/general_heatmap.R \
 		/tmp/genesets_tree/tree.txt
 
@@ -209,7 +209,6 @@ $(data_dir)/out/figures/absolute_enrichments/done.flag: \
 ALL +=$(data_dir)/out/figures/absolute_enrichments/pancan_heatmap.png
 $(data_dir)/out/figures/absolute_enrichments/pancan_heatmap.png: \
 		$(data_dir)/out/absolute_enrichments/done.flag \
-		$(data_dir)/genesets/all.txt \
 		./src/plotting/general_heatmap.R \
 		/tmp/genesets_tree/tree.txt
 
@@ -218,6 +217,21 @@ $(data_dir)/out/figures/absolute_enrichments/pancan_heatmap.png: \
 		/tmp/genesets_tree/tree.txt \
 		$@ \
 		--height 15
+
+ALL +=$(data_dir)/out/figures/combined_heatmap.png
+$(data_dir)/out/figures/combined_heatmap.png: \
+		$(data_dir)/out/absolute_enrichments/done.flag \
+		$(data_dir)/out/enrichments/done.flag \
+		./src/plotting/fused_general_heatmap.R \
+		/tmp/genesets_tree/tree.txt
+
+	Rscript --no-save --no-restore --verbose ./src/plotting/fused_general_heatmap.R \
+		$(data_dir)/out/enrichments/ \
+		$(data_dir)/out/absolute_enrichments/ \
+		/tmp/genesets_tree/tree.txt \
+		$@ \
+		--height 15
+
 
 build_paper_command = cd ./paper/src/ && latexmk -lualatex -f -quiet -gg -synctex=1 -interaction=nonstopmode -file-line-error main.tex
 
