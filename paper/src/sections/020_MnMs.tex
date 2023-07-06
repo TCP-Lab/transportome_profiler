@@ -200,6 +200,9 @@ We structured the \glspl{tgl} as a directed acyclic graph, more specifically as 
 In this tree, each node represents a separate \gls{tgl}; all transportome genes are present in the root node, while subsets of these gene sets are considered in every child node.
 This is similar to the gene lists present in the \gls{go}.
 
+It is hard to differentiate between transcript of which proteins are embedded in the plasma membrane or in intracellular membranes based on the information in the DB.
+For this reason, the cellular location of the transportes is ignored for the generation of \glspl{tgl}.
+
 To divide the genes into meaningful \glspl{tgl}, we seeded the algorithm to always produce a manually defined tree, or ``core'' tree, visible in Figure u\ref{fig:BasicTree}.
 This subdivision purposefully follows the internal schema of the database, since most nodes represent a table or a combination of whole tables.
 The algorithm then retrieves all relevant information to each node of the core tree and finds all the possible sub-classes based on the available data, finally appending each sub-class to the tree as a child node.
@@ -272,8 +275,10 @@ As we lack specific information on the actual location of the biopsied tissue, i
 
 The fitted DESeq2 model had only the tumor status variable and the intercept.
 This resulted in a t-statistic metric for each gene in each comparison.
-We ordered the gene lists according to this statistic, and used them to run a pre-ranked GSEA analysis with the fGSEA R package \cite{korotkevichFastGeneSet2021} using the previously generated gene sets of interest.
-We obtained one significance table for each tumor-healthy cohort, with enrichment information for each input gene set. We used this data to generate an enrichment matrix with the tree-like graph with the hierarchy of the gene sets on the rows, the cohorts on the columns, and the \gls{nes} as values.
+We used the t-statistic values as weights to run a weigthed, pre-ranked GSEA analysis with the fGSEA R package \cite{korotkevichFastGeneSet2021} using the previously generated gene sets of interest.
+We ran the analysis with both actual values for the statistic and absolute ones, in order to also detect possible symmetric deregulations.
+We obtained one significance table for each tumor-healthy cohort, with enrichment information for each input gene set.
+We used this data to generate an enrichment matrix with gene sets on the rows, the cohorts on the columns, and the \gls{nes} as values.
 
 %% We will not include this for now -- but we will later!
 %In order to see if independently-published dataset from single studies would

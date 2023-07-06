@@ -173,7 +173,7 @@ main <- function(
     ylab("Gene Set") + xlab("Cohort") +
     scale_fill_gradientn(
       "NES",
-      colours = c("purple", "gray", "white", "gray", "darkorange")
+      colours = c("purple", "gray", "gray", "darkorange")
       ) + 
     scale_alpha_identity("alpha_from_padj") +
     scale_y_discrete(breaks = labels$cropped, labels = labels$rev_pretty) +
