@@ -156,7 +156,7 @@ Please note, however, that Daedalus does not directly depend on any environment 
     channels
         & All genes catalogued as ``channels'' by IUPHAR or the HGNC, with
         information on their gating mechanism, carried solute and relative and
-        absolute conductance. \todo{clarify GO role in this} \\
+        absolute conductance. Information from GO regarding permeability information is also included. \\
         \hline
     aquaporins
         & All aquaporin genes as well as their expression tissue. \\
@@ -166,10 +166,9 @@ Please note, however, that Daedalus does not directly depend on any environment 
         as well as their carried solute, rate of transport, stoichiometry, port
         type, direction, and more. \\
         \hline
-    atp\_driven\_transporters
-        & All active transporters (excluding ABC transporters) \todo{rename this
-        table as ion pumps?}, correlated with their carried solute, rate,
-        direction, net charge, and more. \\
+    pumps
+        & All active transporters (excluding ABC transporters), correlated with their carried solute, rate,
+        transport direction, net transported charge, and more. \\
         \hline
     ABC\_transporters
         & All ABC transporter genes, correlated with their carried solute, rate,
@@ -243,9 +242,9 @@ this is not surprising, as three nodes $A$, $B$ and $C$, where $\kappa(A) \becau
 
 For efficiency purposes, the algorithm does not consider data columns that contain too many missing values (deeming them not meaningful to split on, with the default being $> 50\%$ emptiness), does not generate gene sets that are smaller than a threshold (by default $10$ genes) and does not consider for further subsetting gene sets smaller than a threshold (by default $40$).
 
-It is important to note that the specifications for the core tree, the SQL calls used to retrieve the data for each node in the core tree, the threshold for $\kappa$, the pruning direction and other settings are all easily configurable in a separate file and/or as command-line arguments.
+It is important to note that the specifications for the core tree, the SQL calls used to retrieve the data for each node in the core tree, the threshold for $\kappa$, the pruning direction and other settings are all easily configurable as command-line arguments.
 This makes this approach easily adaptable to future versions of the \gls{mtpdb} and even other kinds of SQLite and more generally SQL-based databases provided by other researchers.
-The specification file used in our run is the default one (available on GitHub), and we used a $\kappa$ threshold of \todo{Set the threshold}.
+For our run, we used all the default parameters, but we used a $\kappa$ threshold of $0.9$.
 
 Once generated, the tree is translated to a set of files in folders on disk. The folders are named with the names of the nodes, and the \mono{all.txt} files in them contain the Ensembl Gene IDs of the genes in the specific \gls{tgl}. This structure was chosen to easily allow the reconstruction of the tree by any other program, simply by following the tree-like file system paths.
 
