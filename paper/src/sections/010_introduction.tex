@@ -8,30 +8,30 @@ The -omic layer that comprises the transmembrane transporters is referred to as 
 
 The coordinated action of these proteins regulates a large number of physiological functions, such as membrane potential, nutrient absorption, waste product removal, cellular signalling, regulation of intracellular and extracellular pH, and more.
 
-While the presence of these proteins is necessary for membrane transport, it alone may not be sufficient to accomplish the overall function effectively.
-The formation of \glspl{fu}, which are capable of performing specific tasks, often requires the interaction of transport proteins with accessory proteins or other complex-forming proteins.
+While the expression of these proteins is necessary for membrane transport, it is not sufficient to accomplish the overall function effectively.
+Indeed, the formation of \glspl{fu}, which are capable of performing specific tasks, often requires the interaction of transport proteins with accessory proteins or other complex-forming proteins.
 
 The cataloging and characterization of \glspl{fu} can be a complex task, especially due to current limitations in proteomics research.
 However, advancements in technology and methodologies are continuously being made, so it is highly likely that the characterization of \glspl{fu} will become more precise in the future.
 
-We can broadly classify \glspl{fu} into two main categories: \textit{pores} and \textit{transporters}:
+We can broadly classify \glspl{fu} into two main categories: \textit{pores} and \textit{transporters}.
 \begin{itemize}
-    \item Pores: \gls{fu} that create water-filled pores that allow the facilitated passage of molecules through the membrane.
-    These may be additionally subdivided into \textit{channels} proper and \textit{aquaporins}, pores that allow only the passage of water.
-    \item Transporters: proteins or protein complexes that, embedded in the membrane, allow passage of molecules thanks to changes in protein conformation.
-    These may be furthermore divided into those that require the hydrolysis of ATP to function and those that do not as \textit{atp-driven transporters} and \textit{solute carriers}, respectively.
+    \item Pores: water-filled pores that allow the facilitated passage of molecules through the membrane.
+    These may be additionally subdivided into \textit{channels} proper and \textit{aquaporins}, pores that mostly allow the passage of water.
+    \item Transporters: proteins or protein complexes that, embedded in the membrane, allow passage of molecules thanks to conformational changes.
+    These may be furthermore divided into those that require ATP hydrolysis to function and those that do not as \textit{ATP-driven transporters} and \textit{solute carriers}, respectively.
     \begin{itemize}
         \item A common distinction in atp-driven transporters is given by \textit{\gls{abc} transporters} and \textit{pumps}, where \gls{abc} transporters feature the conserved \gls{abc} subunit, while pumps do not.
     \end{itemize}
 \end{itemize}
 
 Currently, a widely accepted approximation for defining functional units is the gene transcript.
-It is assumed that the presence and quantity of gene transcripts are directly proportional to the abundance and activity of the corresponding functional units.
-Although this approximation has limitations, it serves as a practical approach until more precise methods for functional unit characterization become available.
+It is assumed that the presence and quantity of gene transcripts are directly proportional to the abundance and activity of the corresponding \glspl{fu}.
+Although this approximation has limitations, it serves as a practical approach until more precise methods for \gls{fu} characterization become available.
 
 Cancer cells differ fundamentally in respect with their healthy counterparts, especially in their relationship with the extracellular environment.
 Dramatic metabolic shifts are also seen in cancer.
-Both of these aspects probably involve a shift in transportome \glspl{fu}, and, by the above approximation, may be potentially reflected in the expression levels of the same genes.
+Both of these aspects probably involve an alteration in transportome \glspl{fu}, and, by the above approximation, may be potentially reflected in the expression levels of the same genes.
 It is therefore of interest to study the expression levels of transportome genes in cancer cells.
 
 One commonly employed approach to accomplish this is by measuring gene expression in both healthy and diseased samples.
@@ -47,7 +47,7 @@ Assuming that these gene lists meaningfully group together genes by their functi
     \item Given a set of characteristics, it is possible to systematically generate all gene lists that may be meaningfully created, and test them all against the data.
 \end{itemize}
 
-We therefore aimed at profiling the expression levels of transportome genes in the context of cancer.
+The present work aims at profiling the expression levels of transportome genes in the context of cancer.
 To do this, we collected information on these genes (such as their complete list, which molecule(s) they transport, their gating mechanism, their functional class, etc.) and used it to systematically arrange them into meaningful \glspl{tgl}.
 After sorting all the protein-coding genes found in cancer cells based on their differential expression with respect to healthy cells, we run a pre-ranked \gls{gsea} on these ordered lists to obtain enrichment scores for every \gls{tgl}.
 We therefore obtained the "deregulation status" of most functional facets of the transportome in 19 different cancer tissue types.
