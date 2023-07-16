@@ -194,7 +194,7 @@ This is similar to the gene lists present in the \gls{go}.
 It is hard to differentiate between transcript of which proteins are embedded in the plasma membrane or in intracellular membranes based on the information in the DB.
 For this reason, the cellular location of the transportes is ignored for the generation of \glspl{tgl}.
 
-To divide the genes into meaningful \glspl{tgl}, we seeded the algorithm to always produce a manually defined tree--or ``core'' tree--equal to the classification schema already shown in Figure \ref{fig:BasicTree}.
+To divide the genes into meaningful \glspl{tgl}, we seeded the algorithm to always produce a manually defined tree---or ``core'' tree---equal to the classification schema already shown in Figure \ref{fig:BasicTree}.
 This subdivision purposefully follows the internal schema of the database, since most nodes represent a table or a combination of whole tables.
 The algorithm then retrieves all relevant information to each node of the core tree and finds all the possible sub-classes based on the available data, finally appending each sub-class to the tree as a child node.
 This approach is then repeated for each added child, recursively creating smaller and smaller child gene sets.
