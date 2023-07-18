@@ -1,14 +1,14 @@
 \section{Materials and Methods}
 
-In this section we broadly cover the implementation of the pipeline, with particular regard to the generation of the \glspl{tgl} and the \gls{gsea} analysis.
+In this section we broadly cover the implementation of the pipeline, with particular regard to the generation of the \glspl{tgs} and the related \gls{gsea}.
 
 \subsection{The Membrane Transport Protein Database}
 
 % I want to introduce the MTP with the answer to "why didn't you use the GO?"
 Even if the \gls{go} knowledgebase \cite{ashburnerGeneOntologyTool2000,thegeneontologyconsortiumGeneOntologyKnowledgebase2023} represents an invaluable source of meaningful and readily available gene sets, we decided not to rely solely on the manually curated and automatically generated gene lists of the \gls{go}.
-Instead, we preferred to explore all the possible \glspl{tgl} that can originate by the transporter-related features of interest in a more unbiased and systematic way.
+Instead, we preferred to explore all the possible \glspl{tgs} that can originate by the transporter-related features of interest in a more unbiased and systematic way.
 
-To improve the ease of use and portability, we compiled all the data we needed to generate the \glspl{tgl} in a SQLite database and named it \gls{mtpdb}.
+To improve the ease of use and portability, we compiled all the data we needed to generate the \glspl{tgs} in a SQLite database and named it \gls{mtpdb}.
 To populate the \gls{mtpdb}, we sourced information from a variety of online databases.
 In particular, we extracted data from % This is like this by design!
 the \gls{hgnc} database \cite{sealGenenamesOrgHGNC2023},
@@ -67,11 +67,13 @@ For instance, the GABA\textsubscript{A} receptors in the brain are ionotropic re
 Additionally, the \gls{iuphar} does not contain any permeability information for any of the \textit{GABR\textasteriskcentered{}} genes (conductance and permeability being properties of the receptor \textit{protein complex} rather than the single subunit gene).
 This makes it impossible for Daedalus to classify them as permeable to chloride ions.
 It is also known that GABA\textsubscript{A} receptors exhibit a certain permeability to HCO\textsubscript{3}\textsuperscript{-}, generally in between $0.2$ and $0.4$ that of the chloride ions \cite{goetzGABAAReceptors2007}, but not even this feature is reflected in the above databases.
-A similar argument applies to nicotinic acetylcholine receptors (nAChRs) and related \textit{CHRN*} subunits.
-Another example is how some ion channels (including many potassium voltage-gated and calcium-activated beta subunits and the mitochondrial calcium uniporter family of proteins) were missing from the ion channel lists provided by the \gls{iuphar} and the \gls{hgnc}.
+A similar argument applies to nicotinic acetylcholine receptors (nAChRs) and related \textit{CHRN\textasteriskcentered{}} subunits.
+Moreover, when classifying channels by \textit{gating mechanism}, HGNC makes no distinction between \textit{gating} proper (in the senses of activating stimulus) and \textit{modulation}.
+As a result, some voltage-modulated channels, such as the TRP superfamily of cation channels are pooled with pure voltage-activated channels such as K\textsubscript{v}, Na\textsubscript{v}, and Ca\textsubscript{v}, which may not be desirable from a physiologist's point of view.
+A final example is how some ion channels (including many beta subunits of potassium voltage-gated and calcium-activated channels,as well as the mitochondrial calcium uniporter family of proteins) were missing from the ion channel lists provided by the \gls{iuphar} and the \gls{hgnc}.
 All of these defects were manually addressed in the \gls{mtpdb} through post-build hooks automatically applied by Daedalus during each build process.
 Notably, even such ``terminal patches'' can be easily inspected in detail by the reader in order to get an idea of the degree of manual curation within the \gls{mtpdb}.
-If needed, post-build hooks can be easily turned off to obtain a version of the database free of manual annotations.
+If needed, post-build hooks can be turned off to obtain a version of the database free of manual annotations.
 
 To support a more varied search strategy, especially when querying data for \glspl{slc}, we implemented a sort of internal thesaurus, adding synonyms or more general terms to the database besides the already-present information on the carried molecule in all relevant tables.
 For example, we inserted the more general values of ``cation'' and ``anion'' next to each particular ion species;
@@ -84,21 +86,27 @@ The \gls{mtpdb} will be an effective way to stimulate further research in the Tr
 The pre-compiled \gls{mtpdb} and the Daedalus package are open-source and available for free on GitHub at \href{https://github.com/CMA-Lab/MTP-DB/}{www.github.com/CMA-Lab/MTP-DB}, and we encourage users to inspect and propose improvements.
 
 At every development milestone, a published version of the database (in the form of the generated SQLite file) will be released on GitHub, for reproducibility purposes.
-The latest release can be downloaded directly from \href{https://github.com/CMA-Lab/MTP-DB/releases/latest/download/MTPDB.sqlite.gz}{this url} in \mono{gzipped} format.
+The latest release can be downloaded directly from \href{https://github.com/CMA-Lab/MTP-DB/releases/latest/download/MTPDB.sqlite.gz}{this URL} in \mono{gzipped} format.
 Additionally, note that the data blob downloaded and then used by Daedalus to generate the database is locally saved as a Python Pickle file, and is the only file that the package needs to regenerate the database.
 This can be useful to exactly reproduce the database in the future even after the remote databases have updated.
 The database is versioned using the CalVer specification, with representation \mono{Major.YY.0W[\_MINOR][-TAG]}.
-At the time of writing, the latest version of the database is \mono{1.23.26-beta}.
 
-The \gls{mtpdb} is, however, partially incomplete.
-We manually curated a list of \todo{SOME NUMBER OF} calcium-permeable ion channels and found that, although most of them were correctly annotated as such, several of them (\todo{SOME PERCENTAGE}) were not correctly annotated.
-Of these, \todo{A FEW} were annotated as ``cation'' permeable, but without the more specific term for calcium.
+At the time of writing, the latest version of the database is \mono{1.23.26-beta}, featuring a total of $932$ ICT gene entries ($356$ ion channel, $14$ aquaporins, $47$ ABC transporters, $83$ pumps, and $432$ \glspl{slc}). 
+
+The \gls{mtpdb} is, however, still partially incomplete.
+We manually curated a list of $151$ calcium-permeable ion channels and found that, although most of them were correctly annotated as such, $68$ ($45\%$) were not.
+Of these, $30$ were annotated as ``cation'' permeable, but without the more specific term for calcium.
+In that case, much of the inconsistency stemmed from the different interpretation of the term ``calcium channel'' given by the list curators.
+\gls{hgnc}, for example, reserves this term for only those ion channels \textit{selectively} permeable to Ca\textsuperscript{2+}.
+On the contrary, our list included all calcium-permeable channels, even those non-selective for that ion species.
+Nevertheless, some well-known calcium-selective ion channels (including \textit{PIEZO1}, \textit{PIEZO2}, \textit{P2RX7}, and some others) were not correctly annotated in any of the sources consulted by Daedalus.
+%Even now, even with post-build hooks, there are still 45 calcium channels not included: the gap junctions are still missing, pannexins, nicotinic cholinergic receptors, and ionotropic serotonin receptors... a next good issue.
 We addressed these missing annotations, but we cannot however be sure that the same phenomenon does not occur for other ion channels, or even more generally  in other transporters.
 For this reason we set up the GitHub repository with a collaborative approach
 in mind, following Open Science practices.
 This would allow researchers that notice an issue with the annotations in the database to participate in the creation of a more useful resource.
 
-A docker image per every release, representing the environment in which the database was rebuilt in is available on Docker Hub at \href{https://hub.docker.com/r/cmalabscience/mtpdb}{cmalabscience/mtpdb}.
+A docker image per every release, representing the environment in which the database was rebuilt in, is available on Docker Hub at \href{https://hub.docker.com/r/cmalabscience/mtpdb}{cmalabscience/mtpdb}.
 Please note, however, that Daedalus does not directly depend on any environment variables.
 
 \begin{table}
@@ -186,76 +194,87 @@ The actual database schema file is present in the GitHub repository at
 
 \subsection{Generation of Transporter Gene Lists}
 
-We created a Python script to query the database file produced by Daedalus and generate the \glspl{tgl}.
-We structured the \glspl{tgl} as a directed acyclic graph, more specifically as a tree.
-In this tree, each node represents a separate \gls{tgl}; all transportome genes are present in the root node, while subsets of these gene sets are considered in every child node.
-This is similar to the gene lists present in the \gls{go}.
+We created a Python script to query the database file produced by Daedalus and generate the \glspl{tgs}.
+We structured the \glspl{tgs} as a tree in which each node represents a separate \gls{tgs}.
+All transportome genes are present in the root node, while subsets of these gene sets are considered in every child node.
 
-It is hard to differentiate between transcript of which proteins are embedded in the plasma membrane or in intracellular membranes based on the information in the DB.
-For this reason, the cellular location of the transportes is ignored for the generation of \glspl{tgl}.
+% -- Un po' avulso in questo punto... lo sposterei
+%It is hard to differentiate between transcript of which proteins are embedded in the plasma membrane or in intracellular membranes based on the information in the DB.
+%For this reason, the cellular localization of the transporters is currently ignored for the generation of \glspl{tgs}.
 
-To divide the genes into meaningful \glspl{tgl}, we seeded the algorithm to always produce a manually defined tree---or ``core'' tree---equal to the classification schema already shown in Figure \ref{fig:BasicTree}.
-This subdivision purposefully follows the internal schema of the database, since most nodes represent a table or a combination of whole tables.
+To divide the genes into meaningful \glspl{tgs}, we seeded the algorithm to always produce a manually defined tree---or ``core'' tree---reflecting the classification schema already shown in Figure \ref{fig:BasicTree}.
+This subdivision purposefully follows also the internal schema of the database, since most nodes represent a table or a combination of whole tables.
 The algorithm then retrieves all relevant information to each node of the core tree and finds all the possible sub-classes based on the available data, finally appending each sub-class to the tree as a child node.
 This approach is then repeated for each added child, recursively creating smaller and smaller child gene sets.
 
 In practice, for each core node, the database is queried to obtain the relevant columns of data to the starting node, possibly joining multiple tables.
-For instance, for the ``ATP-Driven'' core node, the algorithm will consider data from both the \mono{ABC\_transporters} and the \mono{atp\_driven\_transporters} tables.
+For instance, for the ``ATP-Driven'' core node, the algorithm will consider data from both the \mono{ABC\_transporters} and the \mono{pumps} tables.
 Once the data is retrieved from the database, for each available column the algorithm generates gene groups of unique genes with the same shared column value, appending them to the parent node.
 The algorithm then considers a subset of the original data, based on the column value used to generate the child gene set, and attempts to create more by considering all other columns in turn.
 This approach essentially enumerates all possible gene sets that could be
 meaningfully derived from the annotated data.
 
 This iterative process generates a very large number of gene sets (with version 1.23.25-beta of the database, this number was $\sim 6000$).
-For this reason, we implemented pruning on the resulting tree, which prunes away leaf nodes that are highly congruent with other nodes in the tree.
-For each leaf node $A$ in the tree $T$, containing a set of genes $A^g$, the algorithm computes the measure:
+For this reason, we implemented a pruning procedure on the resulting tree, which prunes away leaf nodes that are highly similar with other nodes in the tree.
+
+We measured node similarity by the Sørensen–Dice coefficient $\kappa$ as defined below:
 \begin{equation}
-    \kappa = 2\ \frac{\left|A^g \cap B^g\right|}{\left|A^g\right|+\left|B^g\right|}
-    \ \ \ \forall B \in T \ \ \ \text{with}\ \ \  B \neq A
-    \label{eq:node_similarity}
+    \kappa\left(A,B\right) = 2\ \frac{\left|A^g \cap B^g\right|}{\left|A^g\right|+\left|B^g\right|}\ ,
+    \label{eq:node_similarity_1}
 \end{equation}
+where $A$ and $B$ are nodes in the tree $T$, associated to the sets of genes $A^g$ and $B^g$, respectively.
 $\kappa$ is a value ranging from $0$ to $1$, where $1$ means perfectly congruent nodes, and $0$ meaning completely different nodes.
-If $\kappa$ is greater than a user-defined threshold value $\eta$ (generally close to 1), the node is deemed redundant and pruned.
+Given a tree $T$, we calculated the similarity index for each node $A$ as
+\begin{equation}
+    K_T\left(A\right) = \max_{B \in T,\ B \neq A}\kappa\left(A,B\right)
+    \label{eq:node_similarity_2}
+\end{equation}
+If $K_T\left(A\right)$ is greater than a user-defined threshold value $\eta$ (generally close to $1$), the node $A$ is deemed redundant and pruned.
 After all leaves are considered, if the algorithm pruned at least one leaf, it is executed again.
-This process leaves a tree in which all leaf nodes are sufficiently different from each other.
-There might be congruence between internal nodes, but they cannot be eliminated
-without the removal of meaningful leaf nodes, so they are preserved.
+This process returns a tree in which all leaf nodes are sufficiently different from each other.
+On the contrary, internal nodes are always preserved, even in the presence of high similarity scores between them, since they cannot be eliminated without the removal of meaningful leaf nodes.
 
 % I know it's a bit on the nose - the 'acute' - but I love it.
-The acute reader might notice that this process removes leaves in an order-dependent way, as $\kappa$ is a symmetric measure. i.e. in Equation \ref{eq:node_similarity}, if the node $B_i$ causes the value of $\kappa$ for node $A$, then $A$ does the same to $B_i$.
+The acute reader might notice that, as $\kappa$ is a symmetric measure, this process removes leaves in an order-dependent way.
+Indeed, if $\kappa\left(A,B\right) > \eta$, the pruning of $A$ or $B$ depends on which is considered first.
 This was taken into account, and the leaf nodes are sorted based on their depth (the number of edges to follow to return to the root node) before the pruning cycle begins.
 This allows the usage of two pruning strategies: bottom-up or top-down.
 In the top-down approach, higher leaves (farther from the root) are pruned first, as the nodes are sorted in descending order.
 The opposite happens in the bottom-up approach, where leaves closer to the root are pruned first, in favor of distant leaves.
 
-Do note that although the measures are symmetrical, the two pruning methods do
-not generate trees that have an identical number of nodes:
-this is not surprising, as three nodes $A$, $B$ and $C$, where $\kappa(A) \because B > \eta$, $\kappa(B) \because C > \eta$ but $\kappa(A)  \because C < \eta$ will be pruned differently if they are considered in one order (e.g. $A \rightarrow B \rightarrow C$, resulting in $C$) than in another (e.g. $B \rightarrow C \rightarrow A$, resulting in $C, A$).
+% Here below I slightly modified your beautiful example just to enable the comparison of the A->B->C sequence with its reverse... which is more closely akin to our situation :-)
+Do note that although $\kappa$ is symmetric, similarity among sets is not a transitive relation (except for $\kappa = 1$), so the two pruning methods do not necessarily generate trees with an identical number of nodes.
+This is not surprising, as three nodes $A$, $B$, and $C$, where $\kappa(A,B) > \eta$, $\kappa(A,C) > \eta$, but $\kappa(B,C) < \eta$ will be pruned differently if they are considered in one order (e.g., $A \rightarrow B \rightarrow C$, resulting in $\left\{B,C\right\}$) or the opposite (e.g., $C \rightarrow B \rightarrow A$, resulting in $\left\{A\right\}$).
 
 For efficiency purposes, the algorithm does not consider data columns that contain too many missing values (deeming them not meaningful to split on, with the default being $> 50\%$ emptiness), does not generate gene sets that are smaller than a threshold (by default $10$ genes) and does not consider for further subsetting gene sets smaller than a threshold (by default $40$).
 
-It is important to note that the specifications for the core tree, the SQL calls used to retrieve the data for each node in the core tree, the threshold for $\kappa$, the pruning direction and other settings are all easily configurable as command-line arguments.
+The specifications for the core tree, the SQL calls used to retrieve the data for each node in the core tree, the threshold for $\kappa$, the pruning direction, and other settings are all easily configurable as command-line arguments.
 This makes this approach easily adaptable to future versions of the \gls{mtpdb} and even other kinds of SQLite and more generally SQL-based databases provided by other researchers.
-For our run, we used all the default parameters, but we used a $\kappa$ threshold of $0.9$.
+For our run, we used the default parameter values, while $\kappa$ was set to $0.9$.
 
-Once generated, the tree is translated to a set of files in folders on disk. The folders are named with the names of the nodes, and the \mono{all.txt} files in them contain the Ensembl Gene IDs of the genes in the specific \gls{tgl}. This structure was chosen to easily allow the reconstruction of the tree by any other program, simply by following the tree-like file system paths.
+Once generated, the tree is translated to a set of files in folders on disk.
+The folders are named with the names of the nodes, and the \mono{all.txt} files in them contain the Ensembl Gene IDs of the genes in the specific \gls{tgs}.
+This structure was chosen to easily allow the reconstruction of the tree by any other programs, simply by following the tree-like file system paths.
 
 \subsection{GSEA analysis}
 
-Raw expression data and metadata between \gls{tcga} and \gls{gtex} for this analysis were downloaded from the University of Santa Cruz's Xena platform \cite{UCSCXena}.
-Do note that TARGET samples were omitted from this analysis.
-This data has the benefit of being processed by the same analysis pipeline, eliminating technical noise coming from the pipeline itself.
+Raw expression data (in the form of un-normalized RNA-Seq counts) and related metadata to accomplish this analysis were downloaded from the University of California Santa Cruz's Xena platform \cite{UCSCXena}, selecting the \mono{TCGA TARGET GTEx} study (although TARGET samples were omitted from the analysis).
+This data have the benefit of being processed by the same analysis pipeline, eliminating technical noise coming from the pipeline itself.
+% Here cite Xena TOIL publication:
+%   John Vivian, et al.
+%   Toil enables reproducible, open source, big biomedical data analyses.
+%   Nat Biotechnol. 2017 Apr 11;35(4):314-316. doi: 10.1038/nbt.3772.
 % If we run it barebones add version info. If we dockerize it, omit it.
-% TODO: Do this - but not now for the preprint. Later for the full publication.u
+% TODO: Do this - but not now for the preprint. Later for the full publication.
 
-To run \gls{gsea}, we needed to pair \gls{tcga} tumor expression data with their \gls{gtex} ``healthy'' counterparts and separately perform differential expression analysis on each cohort with the DESeq2 R package.
-This has proven not so simple a task.
+To run \gls{gsea}, we needed to pair \gls{tcga} tumor expression data with their \gls{gtex} ``healthy'' counterparts and then perform \gls{dea} on each cohort separately with the DESeq2 R package.
+This proved to be not so straightforward.
 The Xena platform provides a fused version of the \gls{gtex} official metadata file plus the \gls{tcga} metadata for ease of use.
 However, it is unclear how to meaningfully pair such large databases, as methodology, possible batch effects due to sample handling, sample preprocessing (such as microdissection), and the intrinsic non-healthy nature of \gls{gtex} samples can cause confounding in the results.
 
 To pair the healthy and tumor data together, we therefore followed the macroscopic grouping provided by the metadata files in the Xena platform.
-To subset the very large expression matrix file based on the metadata, we implemented a Python package called \mono{metasplit}.
-The specific calls used to subset the expression matrix and therefore match the tumor and healthy samples are available in the GitHub repository at \href{https://github.com/CMA-Lab/transportome_profiler/blob/main/src/run_dea/tcga_gtex_queries.json}{this url}.
+To subset the very large expression matrix file based on the metadata, we implemented a Python package called \textit{metasplit}, which makes use of the low level Rust-compiled \mono{xsv} package to speed up the computation \todo{PUT A REFERENCE HERE}.
+The specific calls used to subset the expression matrix and therefore match the tumor and healthy samples are available in the GitHub repository at \href{https://github.com/CMA-Lab/transportome_profiler/blob/main/src/run_dea/tcga_gtex_queries.json}{this url}. %Should we explicitly show them as a table??
 As an overview, we compared tumor samples with their healthy counterparts from the same tissue or organ of origin.
 
 % Is the following correct? -- We might want to talk about this later, or earlier.
@@ -265,11 +284,11 @@ As we lack specific information on the actual location of the biopsied tissue, i
 % We might want to discuss a bit about what the comparisons tell us, like we discussed internally.
 
 The fitted DESeq2 model had only the tumor status variable and the intercept.
-This resulted in a t-statistic metric for each gene in each comparison.
-We used the t-statistic values as weights to run a weigthed, pre-ranked GSEA analysis with the fGSEA R package \cite{korotkevichFastGeneSet2021} using the previously generated gene sets of interest.
-We ran the analysis with both actual values for the statistic and absolute ones, in order to also detect possible symmetric deregulations.
-We obtained one significance table for each tumor-healthy cohort, with enrichment information for each input gene set.
-We used this data to generate an enrichment matrix with gene sets on the rows, the cohorts on the columns, and the \gls{nes} as values.
+This resulted in an independent Wald-statistic metric for each gene in each comparison.
+We used the Wald-statistic values as weights to run a weighted, pre-ranked GSEA analysis with the fGSEA R package \cite{korotkevichFastGeneSet2021} using the previously generated \glspl{tgs} of interest.
+We ran the analysis with both actual values for the statistic and absolute ones, in order to also detect possible symmetric dysregulations.
+Thus we obtained one significance table for each tumor-healthy cohort, with enrichment information for each input gene set.
+Finally, we used this data to generate a global enrichment matrix with gene sets on the rows, the cohorts on the columns, and the \gls{nes} as values.
 
 %% We will not include this for now -- but we will later!
 %In order to see if independently-published dataset from single studies would
