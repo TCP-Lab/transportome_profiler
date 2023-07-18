@@ -1,7 +1,7 @@
 # Transportome Profiler analysis
 
 This repository contains the code for the analysis on the expression profile of
-the transportome in Cancer based on the [MTP-DB](https://github.com/CMA-Lab/MTP-DB).
+the transportome in Cancer based on the [MTP-DB](https://github.com/TCP-Lab/MTP-DB).
 
 This is a two-step process. The database is queried for information by the
 script in `src/geneset_maker`. The algorithm generates gene sets ready for use
@@ -17,7 +17,7 @@ You can run the analysis in two ways: locally or in a Docker container.
 In both cases, you must first clone and link the repository locally:
 ```bash
 # Clone the repo
-git clone git@github.com:CMA-Lab/transportome_profiler.git
+git clone git@github.com:TCP-Lab/transportome_profiler.git
 cd ./transportome_profiler
 # Make housekeeping directories. See the following note.
 ./link A_FOLDER_THAT_WILL_CONTAIN_THE_DATA

@@ -83,10 +83,10 @@ The thesaurus is also consulted to correct any parsing errors made by Daedalus, 
 The thesaurus is contained in a single, human-readable comma-separated-values file, available in the remote repository.
 
 The \gls{mtpdb} will be an effective way to stimulate further research in the Transportome by providing a centralized and human- and machine-friendly place to obtain a lot of relevant information on Transportome genes.
-The pre-compiled \gls{mtpdb} and the Daedalus package are open-source and available for free on GitHub at \href{https://github.com/CMA-Lab/MTP-DB/}{www.github.com/CMA-Lab/MTP-DB}, and we encourage users to inspect and propose improvements.
+The pre-compiled \gls{mtpdb} and the Daedalus package are open-source and available for free on GitHub at \href{https://github.com/TCP-Lab/MTP-DB/}{www.github.com/TCP-Lab/MTP-DB}, and we encourage users to inspect and propose improvements.
 
 At every development milestone, a published version of the database (in the form of the generated SQLite file) will be released on GitHub, for reproducibility purposes.
-The latest release can be downloaded directly from \href{https://github.com/CMA-Lab/MTP-DB/releases/latest/download/MTPDB.sqlite.gz}{this URL} in \mono{gzipped} format.
+The latest release can be downloaded directly from \href{https://github.com/TCP-Lab/MTP-DB/releases/latest/download/MTPDB.sqlite.gz}{this URL} in \mono{gzipped} format.
 Additionally, note that the data blob downloaded and then used by Daedalus to generate the database is locally saved as a Python Pickle file, and is the only file that the package needs to regenerate the database.
 This can be useful to exactly reproduce the database in the future even after the remote databases have updated.
 The database is versioned using the CalVer specification, with representation \mono{Major.YY.0W[\_MINOR][-TAG]}.
@@ -190,7 +190,7 @@ Please note, however, that Daedalus does not directly depend on any environment 
 
 An overview of the database schema, with information on the type of data in every table, can be seen in Table \ref{tab:databaseSchema}.
 The actual database schema file is present in the GitHub repository at
-\href{https://github.com/CMA-Lab/MTP-DB/blob/main/src/db_rebuilder/daedalus/local_data/schema.sql}{this URL}.
+\href{https://github.com/TCP-Lab/MTP-DB/blob/main/src/db_rebuilder/daedalus/local_data/schema.sql}{this URL}.
 
 \subsection{Generation of Transporter Gene Lists}
 
@@ -274,7 +274,7 @@ However, it is unclear how to meaningfully pair such large databases, as methodo
 
 To pair the healthy and tumor data together, we therefore followed the macroscopic grouping provided by the metadata files in the Xena platform.
 To subset the very large expression matrix file based on the metadata, we implemented a Python package called \textit{metasplit}, which makes use of the low level Rust-compiled \mono{xsv} package to speed up the computation \todo{PUT A REFERENCE HERE}.
-The specific calls used to subset the expression matrix and therefore match the tumor and healthy samples are available in the GitHub repository at \href{https://github.com/CMA-Lab/transportome_profiler/blob/main/src/run_dea/tcga_gtex_queries.json}{this url}. %Should we explicitly show them as a table??
+The specific calls used to subset the expression matrix and therefore match the tumor and healthy samples are available in the GitHub repository at \href{https://github.com/TCP-Lab/transportome_profiler/blob/main/src/run_dea/tcga_gtex_queries.json}{this url}. %Should we explicitly show them as a table??
 As an overview, we compared tumor samples with their healthy counterparts from the same tissue or organ of origin.
 
 % Is the following correct? -- We might want to talk about this later, or earlier.

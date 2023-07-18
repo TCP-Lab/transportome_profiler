@@ -58,9 +58,9 @@ To do this, we collected information on these genes (such as their complete list
 After sorting all the protein-coding genes found in cancer cells based on their differential expression with respect to healthy cells, we ran a pre-ranked \gls{gsea} on these ordered lists to obtain enrichment scores for every \gls{tgs}.
 We therefore obtained the ``dysregulation status'' of most functional facets of the transportome in $19$ different cancer tissue types.
 
-We provide an open-source, documented, and reproducible Python package, Daedalus (\href{https://github.com/CMA-Lab/MTP-DB}{github.com/CMA-Lab/MTP-DB}) that retrieves transportome-related data from various databases and compiles it in a local \mono{.sqlite} database.
+We provide an open-source, documented, and reproducible Python package, Daedalus (\href{https://github.com/TCP-Lab/MTP-DB}{github.com/TCP-Lab/MTP-DB}) that retrieves transportome-related data from various databases and compiles it in a local \mono{.sqlite} database.
 In parallel, we also provide pre-compiled database files as periodic releases.
 
-A \mono{make}-driven and docker-containerized pipeline, named ``transportome profiler'', (\href{https://github.com/CMA-Lab/transportome_profiler}{github.com/CMA-Lab/transportome\_profiler}) is also available.
+A \mono{make}-driven and docker-containerized pipeline, named ``transportome profiler'', (\href{https://github.com/TCP-Lab/transportome_profiler}{github.com/TCP-Lab/transportome\_profiler}) is also available.
 It takes gene expression data and the aforementioned database to generate gene sets, sorts genes based on their differential expression, and runs \gls{gsea}.
 This pipeline was designed with modularity and reproducibility in mind, so that it would be easily adaptable on other datasets and databases.
