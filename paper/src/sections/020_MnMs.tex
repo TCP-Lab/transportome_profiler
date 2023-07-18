@@ -273,7 +273,7 @@ The Xena platform provides a fused version of the \gls{gtex} official metadata f
 However, it is unclear how to meaningfully pair such large databases, as methodology, possible batch effects due to sample handling, sample preprocessing (such as microdissection), and the intrinsic non-healthy nature of \gls{gtex} samples can cause confounding in the results.
 
 To pair the healthy and tumor data together, we therefore followed the macroscopic grouping provided by the metadata files in the Xena platform.
-To subset the very large expression matrix file based on the metadata, we implemented a Python package called \textit{metasplit}, which makes use of the low level Rust-compiled \mono{xsv} package to speed up the computation \todo{PUT A REFERENCE HERE}.
+To subset the very large expression matrix file based on the metadata, we implemented a Python package called \textit{metasplit}, which makes use of the low level Rust-compiled \mono{xsv} package to speed up the computation \cite{gallantBurntSushiXsv2023}.
 The specific calls used to subset the expression matrix and therefore match the tumor and healthy samples are available in the GitHub repository at \href{https://github.com/TCP-Lab/transportome_profiler/blob/main/src/run_dea/tcga_gtex_queries.json}{this url}. %Should we explicitly show them as a table??
 As an overview, we compared tumor samples with their healthy counterparts from the same tissue or organ of origin.
 
