@@ -3,6 +3,8 @@
 This repository contains the code for the analysis on the expression profile of
 the transportome in Cancer based on the [MTP-DB](https://github.com/TCP-Lab/MTP-DB).
 
+> Read the preprint here: [Profiling the Expression of Transportome Genes in cancer: A systematic approach](https://doi.org/10.1101/2023.07.18.549498)
+
 This is a two-step process. The database is queried for information by the
 script in `src/geneset_maker`. The algorithm generates gene sets ready for use
 by GSEA. We then generate a series of DEG tables with `src/run_dea` based on the
