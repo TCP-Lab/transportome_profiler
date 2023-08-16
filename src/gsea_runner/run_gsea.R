@@ -93,30 +93,30 @@ load_genesets <- function(folder, biomart_data) {
 
 load_genesets_from_node_json <- function(file, biomart_data) {
   #' This takes a node json from `Bonsai` and loads it as gene sets
-  #' 
+  #'
   #' @param file The node list file
   #' @param biomart_data A data.frame with at least the "ensembl_gene_id" and
   #'   "hgnc_symbol" columns, with the correspondence from ENSG to symbol.
   #'   Such a table can be retrieved from Biomart with biomaRt.
   #' @returns A list of vectors, each with the gene symbols of that gene set
-  
+
   # Each entry in the json looks like this:
   # "{id}": {"name": "{name}", "data": [data], "parent": "{id}"}
   data <- rjson::fromJSON(readr::read_file(file))
-  
+
   # We need a list of id: data
   data <- lapply(data, \(x) {x[["data"]]})
-  
+
   # Convert from ENSG to gene symbol
   biomart_data |> select(all_of(c("ensembl_gene_id", "hgnc_symbol"))) -> biomart_data
   ensg_to_symbol <- function(ensgs) {
     symbols <- biomart_data$hgnc_symbol[biomart_data$ensembl_gene_id %in% ensgs]
-    
+
     return(symbols)
   }
-  
+
   data <- lapply(data, ensg_to_symbol)
-  
+
   return(data)
 }
 
@@ -161,15 +161,16 @@ extract_ranks <- function(deg_file, biomart_data, absolute = FALSE) {
 
 
   # Patch to use DESeq2 data
-  if ("stat" %in% colnames(data)) {
-    cat("Converting stat to t - for compatibility...\n")
-    data |> rename(t = stat) -> data
+  if ("log2FoldChange" %in% colnames(data)) {
+    cat("Converting 'log2FoldChange' to 'LogFc' - for compatibility...\n")
+    data |> rename(LogFC = log2FoldChange) -> data
   }
 
-  data |> select(all_of(c("SYMBOL", "t"))) -> data
+  # The select is so that the na.omit does not kill everything.
+  data |> select(all_of(c("SYMBOL", "LogFC"))) -> data
   data <- na.omit(data)
 
-  named_vec <- data$t
+  named_vec <- data$LogFC
   names(named_vec) <- data$SYMBOL
 
   coding <- biomart_data$hgnc_symbol[biomart_data$gene_biotype == "protein_coding"]
@@ -348,7 +349,7 @@ if (sys.nframe() == 0L) {
   if (args$low_memory && args$save_plots) {
     cat("WARNING: Low memory mode. Cannot save plots!")
   }
-  
+
   if (is.na(args$ensg_hugo_data)) {
     embl <- biomaRt::useEnsembl(biomart = "genes")
     hs.embl <- biomaRt::useDataset(dataset = "hsapiens_gene_ensembl", mart = embl)
