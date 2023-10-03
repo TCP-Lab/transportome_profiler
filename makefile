@@ -77,10 +77,8 @@ $(data_dir)/in/selected_metadata:
 # TODO2: once we publish, change this to point at a static tag again.
 $(local_mtpdb):
 	mkdir -p $(@D)
-	wget -O $@.tar.gz https://github.com/TCP-Lab/MTP-DB/releases/latest/download/MTPDB.sqlite.gz --inet4-only
-	tar -xvzf $@.tar.gz -C $(@D)
-	mv $(data_dir)/in/MTPDB_v0.23.17-beta.sqlite $@
-	rm $@.tar.gz
+	wget -O $@.gz https://github.com/TCP-Lab/MTP-DB/releases/latest/download/MTPDB.sqlite.gz
+	gunzip $@.gz -c > $@
 
 $(data_dir)/in/ensg_data.csv : ./src/gsea_runner/ensg_data.csv.gz
 	mkdir -p $(@D)
