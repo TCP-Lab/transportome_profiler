@@ -37,7 +37,7 @@ class ColorFormatter(logging.Formatter):
         return logging.Formatter.format(self, record)
 
 
-log = logging.getLogger("Persephone")
+log = logging.getLogger("Ariadne")
 log.setLevel(logging.DEBUG)
 log.propagate = False
 # Keep this at DEBUG - set levels in handlers themselves
@@ -60,8 +60,8 @@ def calc_similarity(node_a: set, node_b: set) -> float:
     # For compatibility
     node_a = set(node_a)
     node_b = set(node_b)
-    
-    return 2 * (len(node_a.intersection(node_b)) / (len(node_a) + len(node_b))) 
+
+    return 2 * (len(node_a.intersection(node_b)) / (len(node_a) + len(node_b)))
 
 
 def prune(tree: Tree, similarity: float, direction: PruneDirection) -> Tree:
