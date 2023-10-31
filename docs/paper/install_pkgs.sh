@@ -19,5 +19,3 @@ tlmgr install \
     mwe \
     adjustbox \
     biblatex-nature
-
-

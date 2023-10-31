@@ -9,7 +9,7 @@
         left=30mm,
         top=40mm,
     }
-    
+
 % Fonts
     \usepackage[no-math]{fontspec}
     \usepackage{unicode-math}
@@ -31,33 +31,33 @@
     UprightFont = *-Regular,
     BoldFont = *-Bold
     ]
-    
+
     \setmathfont{Latin Modern Math}[Scale=MatchLowercase]
     \setmathrm{Latin Modern Roman}[Scale=MatchLowercase]
-    
+
     \setlength{\parskip}{0.75em}
     \renewcommand{\baselinestretch}{1.35}
-    
+
     \usepackage[scaled=1.22]{helvet}
 
 % Remove a bit of the space after headings
     \usepackage{titlesec}
-    
+
     \titlespacing\section{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
     \titlespacing\subsection{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
     \titlespacing\subsubsection{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
-    
+
 % Glossary
     \usepackage[acronym,toc]{glossaries}
     \loadglsentries{resources/glossary}
     \makeglossaries
     % Give a bit of colour to the glossary entries.
     \renewcommand{\glstextformat}[1]{{\color{glossary} #1}}
-    
+
 % Add dots to the TOC
     \usepackage{tocloft}
     \renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
-    
+
 % Support for hyperlinks
     \usepackage[hyphens]{url}
     \usepackage{hyperref}
@@ -76,7 +76,7 @@
         style=nature
         ]{biblatex}
     \addbibresource{resources/bibliography.bib}
-    
+
 % Support for colors
     \usepackage{xcolor}
     \definecolor{listingback}{RGB}{225, 235, 252}
@@ -88,7 +88,7 @@
     \definecolor{glossary}{RGB}{0, 107, 18}
     \definecolor{mono}{RGB}{204, 71, 0}
     \definecolor{citations}{RGB}{123, 12, 179}
-    
+
 % Code listings
     \usepackage{listings}
     \lstdefinestyle{RStyle} {
@@ -118,20 +118,20 @@
     }
     % Pretty colours in mono font
     \newcommand{\mono}[1]{\texttt{\color{mono}#1}}
-    
+
 % Smaller title
-    \makeatletter         
+    \makeatletter
     \renewcommand\maketitle{
         {\raggedright % Note the extra {
         {\huge \bfseries \sffamily \@title }\\[2ex]
         {\small \@author}
         }} % Note the extra }
     \makeatother
-    
+
 % Images
     \usepackage{graphicx}
     \graphicspath{ {./resources/images/} }
-    \usepackage{float} % To use hard 'H' 
+    \usepackage{float} % To use hard 'H'
     % Style of images
     % Set a max width to all images
     \usepackage[export]{adjustbox}% http://ctan.org/pkg/adjustbox
@@ -140,7 +140,7 @@
         \IfFileExists{#2}
         {\oldincludegraphics[#1,max width=\linewidth]{#2}}
         {\oldincludegraphics[#1,max width=\linewidth]{example-image}}
-        
+
     }
     % Support for subfigures
     \usepackage{caption}
@@ -149,7 +149,7 @@
 % Better lists
     \usepackage{enumitem}
     \setlist{nosep}
-    
+
 % Highlight boxes
     \usepackage{awesomebox}
 
@@ -158,10 +158,10 @@
 
 % Making appendices
 \newcommand{\printappendices}{
-    % Reset the section/figure/table counter 
+    % Reset the section/figure/table counter
     \setcounter{figure}{0}
-    \setcounter{section}{0}   
-    \setcounter{table}{0}   
+    \setcounter{section}{0}
+    \setcounter{table}{0}
     % Set the figure/table counter to aleph
     \renewcommand\thefigure{\Alph{figure}}
     \renewcommand\thesection{Appendix \Alph{section}}
@@ -205,7 +205,7 @@
 
     \affil[*]{Department of Life Sciences and Systems Biology, University of Turin, Turin, Italy}
     \affil[**]{Department of Biology and Biotechnology “L. Spallanzani”, University of Pavia, Pavia, Italy}
-    
+
 \begin{document}
 
 \maketitle
