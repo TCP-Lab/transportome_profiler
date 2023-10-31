@@ -20,17 +20,18 @@
 # - restart -> clean and remove the input files and the virtual env
 # - scrub -> clean and remove the ./data/ link
 
+## Where the data is located
 data_dir = ./data
+## Where the 
 expression_matrix = $(data_dir)/in/tcga_target_gtex
 local_mtpdb = $(data_dir)/in/MTPDB.sqlite
 split_threads = 3
+mods = ./src/modules
 
 PHONY += clean
 # Clean just the intermediary files - this is to re-run the analysis quickly
 clean:
-	rm -f $(data_dir)/deas/*
-	rm -f $(data_dir)/enrichments/*
-	rm -rf $(data_dir)/genesets
+	rm -f $(CLEAN_TARGETS)
 	find $(data_dir)/out/ -type f -prune ! -name '.*' -exec rm {} +
 
 PHONY += restart
@@ -54,9 +55,9 @@ PHONY += env
 env: env/touchfile
 
 PHONY += env/touchfile
-env/touchfile: requirements.txt
+env/touchfile: ./src/requirements.txt
 	python3.11 -m venv env
-	. env/bin/activate; pip install -Ur requirements.txt
+	. env/bin/activate; pip install -Ur ./src/requirements.txt
 	touch env/touchfile
 
 ## >> Retrieve sources
@@ -80,9 +81,9 @@ $(local_mtpdb):
 	wget -O $@.gz https://github.com/TCP-Lab/MTP-DB/releases/latest/download/MTPDB.sqlite.gz
 	gunzip $@.gz -c > $@
 
-$(data_dir)/in/ensg_data.csv : ./src/gsea_runner/ensg_data.csv.gz
+$(data_dir)/in/ensg_data.csv : $(mods)/gsea_runner/ensg_data.csv.gz
 	mkdir -p $(@D)
-	cp ./src/gsea_runner/ensg_data.csv.gz $@.gz
+	cp $(mods)/gsea_runner/ensg_data.csv.gz $@.gz
 	gunzip $@.gz
 
 ## --- --- Calculate the DEA files
@@ -90,19 +91,19 @@ $(data_dir)/deas/flag.txt: \
 	env/touchfile \
 	$(data_dir)/in/tcga_target_gtex \
 	$(data_dir)/in/selected_metadata \
-	./src/run_dea/select_and_run.py \
-	./src/run_dea/run_deseq.R \
-	./src/run_dea/tcga_gtex_queries.json
+	$(mods)/run_dea/select_and_run.py \
+	$(mods)/run_dea/run_deseq.R \
+	$(mods)/run_dea/tcga_gtex_queries.json
 
 	mkdir -p $(@D)
 
 	. env/bin/activate; python \
-		./src/run_dea/select_and_run.py \
-		./src/run_dea/tcga_gtex_queries.json \
+		$(mods)/run_dea/select_and_run.py \
+		$(mods)/run_dea/tcga_gtex_queries.json \
 		$(data_dir)/in/tcga_target_gtex \
 		$(data_dir)/in/selected_metadata \
 		$(@D) \
-		./src/run_dea/run_deseq.R \
+		$(mods)/run_dea/run_deseq.R \
 		--delimiter '\t' \
 		--cpus 2
 
@@ -113,14 +114,14 @@ $(data_dir)/deas/flag.txt: \
 $(data_dir)/genesets/all.txt: \
 		env/touchfile \
 		$(local_mtpdb) \
-		./src/geneset_maker/make_genesets.py \
-		./src/geneset_maker/basic_gene_lists.json
+		$(mods)/geneset_maker/make_genesets.py \
+		$(mods)/geneset_maker/basic_gene_lists.json
 
 	rm -rf $(@D)
 	mkdir -p $(@D)
 
 	. env/bin/activate; python \
-		./src/geneset_maker/make_genesets.py $(local_mtpdb) ./src/geneset_maker/basic_gene_lists.json \
+		$(mods)/geneset_maker/make_genesets.py $(local_mtpdb) $(mods)/geneset_maker/basic_gene_lists.json \
 		$(data_dir)/genesets \
 		--prune_direction "topdown" \
 		--prune_similarity 0.9 \
@@ -129,13 +130,13 @@ $(data_dir)/genesets/all.txt: \
 ## --- 5 --- Run the pre-ranked GSEA
 $(data_dir)/out/enrichments/done.flag: \
 		$(data_dir)/genesets/all.txt \
-		./src/gsea_runner/run_gsea.R \
+		$(mods)/gsea_runner/run_gsea.R \
 		$(data_dir)/deas/flag.txt \
 		$(data_dir)/in/ensg_data.csv
 
 	mkdir -p $(@D)
 
-	Rscript ./src/gsea_runner/run_gsea.R \
+	Rscript $(mods)/gsea_runner/run_gsea.R \
 		"$(data_dir)/deas/" "$(data_dir)/genesets" "$(@D)" \
 		--ensg-hugo-data $(data_dir)/in/ensg_data.csv
 
@@ -143,13 +144,13 @@ $(data_dir)/out/enrichments/done.flag: \
 
 $(data_dir)/out/absolute_enrichments/done.flag: \
 		$(data_dir)/genesets/all.txt \
-		./src/gsea_runner/run_gsea.R \
+		$(mods)/gsea_runner/run_gsea.R \
 		$(data_dir)/deas/flag.txt \
 		$(data_dir)/in/ensg_data.csv
 
 	mkdir -p $(@D)
 
-	Rscript ./src/gsea_runner/run_gsea.R \
+	Rscript $(mods)/gsea_runner/run_gsea.R \
 		"$(data_dir)/deas/" "$(data_dir)/genesets" "$(@D)" \
 		--ensg-hugo-data $(data_dir)/in/ensg_data.csv \
 		--absolute
@@ -165,12 +166,12 @@ ALL += $(data_dir)/out/figures/enrichments/done.flag
 $(data_dir)/out/figures/enrichments/done.flag: \
 		$(data_dir)/out/enrichments/done.flag \
 		$(data_dir)/genesets/all.txt \
-		./src/plotting/gsea_plotting_graphs.R \
-		./src/plotting/general_heatmap.R
+		$(mods)/plotting/gsea_plotting_graphs.R \
+		$(mods)/plotting/general_heatmap.R
 
 	mkdir -p $(@D)
 
-	Rscript ./src/plotting/gsea_plotting_graphs.R \
+	Rscript $(mods)/plotting/gsea_plotting_graphs.R \
 		$(data_dir)/out/enrichments/ \
 		$(@D)
 
@@ -179,10 +180,10 @@ $(data_dir)/out/figures/enrichments/done.flag: \
 ALL += $(data_dir)/out/figures/enrichments/pancan_heatmap.png
 $(data_dir)/out/figures/enrichments/pancan_heatmap.png: \
 		$(data_dir)/out/enrichments/done.flag \
-		./src/plotting/general_heatmap.R \
+		$(mods)/plotting/general_heatmap.R \
 		/tmp/genesets_tree/tree.txt
 
-	Rscript ./src/plotting/general_heatmap.R \
+	Rscript $(mods)/plotting/general_heatmap.R \
 		$(data_dir)/out/enrichments/ \
 		/tmp/genesets_tree/tree.txt \
 		$@ \
@@ -193,12 +194,12 @@ ALL += $(data_dir)/out/figures/absolute_enrichments/done.flag
 $(data_dir)/out/figures/absolute_enrichments/done.flag: \
 		$(data_dir)/out/absolute_enrichments/done.flag \
 		$(data_dir)/genesets/all.txt \
-		./src/plotting/gsea_plotting_graphs.R \
-		./src/plotting/general_heatmap.R
+		$(mods)/plotting/gsea_plotting_graphs.R \
+		$(mods)/plotting/general_heatmap.R
 
 	mkdir -p $(@D)
 
-	Rscript ./src/plotting/gsea_plotting_graphs.R \
+	Rscript $(mods)/plotting/gsea_plotting_graphs.R \
 		$(data_dir)/out/absolute_enrichments/ \
 		$(@D)
 
@@ -207,10 +208,10 @@ $(data_dir)/out/figures/absolute_enrichments/done.flag: \
 ALL +=$(data_dir)/out/figures/absolute_enrichments/pancan_heatmap.png
 $(data_dir)/out/figures/absolute_enrichments/pancan_heatmap.png: \
 		$(data_dir)/out/absolute_enrichments/done.flag \
-		./src/plotting/general_heatmap.R \
+		$(mods)/plotting/general_heatmap.R \
 		/tmp/genesets_tree/tree.txt
 
-	Rscript ./src/plotting/general_heatmap.R \
+	Rscript $(mods)/plotting/general_heatmap.R \
 		$(data_dir)/out/absolute_enrichments/ \
 		/tmp/genesets_tree/tree.txt \
 		$@ \
@@ -220,10 +221,10 @@ ALL +=$(data_dir)/out/figures/combined_heatmap.png
 $(data_dir)/out/figures/combined_heatmap.png: \
 		$(data_dir)/out/absolute_enrichments/done.flag \
 		$(data_dir)/out/enrichments/done.flag \
-		./src/plotting/fused_general_heatmap.R \
+		$(mods)/plotting/fused_general_heatmap.R \
 		/tmp/genesets_tree/tree.txt
 
-	Rscript --no-save --no-restore --verbose ./src/plotting/fused_general_heatmap.R \
+	Rscript --no-save --no-restore --verbose $(mods)/plotting/fused_general_heatmap.R \
 		$(data_dir)/out/enrichments/ \
 		$(data_dir)/out/absolute_enrichments/ \
 		/tmp/genesets_tree/tree.txt \
@@ -237,20 +238,20 @@ build_paper_command = cd ./paper/src/ && latexmk -lualatex -f -quiet -gg -syncte
 $(data_dir)/out/paper.pdf: \
 		$(data_dir)/out/figures/enrichments/done.flag \
 		$(data_dir)/out/figures/enrichments/pancan_heatmap.pdf \
-		./paper/src
+		./docs/src
 
 	$(build_paper_command)
 
-	mv ./paper/src/main.pdf $@
+	mv ./docs/src/main.pdf $@
 
 paper: $(data_dir)/out/paper.pdf
 
 thin_paper:
 	$(build_paper_command)
 
-
 PHONY += all
 all: $(ALL)
 
 .PHONY = $(PHONY)
 .DEFAULT_GOAL := all
+

@@ -95,7 +95,7 @@ run_deseq <- function(case_frame, control_frame) {
   DESeq2::DESeqDataSetFromMatrix(
     data, metadata, ~ status
   ) |>
-    DESeq2::DESeq() -> dsq_obj
+    DESeq2::DESeq() -> dsq_obj 
 
   DESeq2::results(dsq_obj, name = "status_case_vs_control") -> dsq_res
 

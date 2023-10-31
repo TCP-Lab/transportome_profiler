@@ -30,3 +30,5 @@ install("uuid")
 install("grid")
 install("reshape2")
 install("rjson")
+install_bioc("glmGamPoi")
+
