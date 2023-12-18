@@ -1,0 +1,8 @@
+
+[data.remote]
+"https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGtex_gene_expected_count.gz" = "expression_matrix.csv.gz"
+"https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGTEX_phenotype.txt.gz" = "expression_matrix_metadata.tsv.gz"
+"https://github.com/TCP-Lab/MTP-DB/releases/latest/download/MTPDB.sqlite.gz" = "MTPDB.sqlite.gz" 
+
+[data.profiles.test]
+"expression_matrix.csv.gz" = "test_expression_matrix.csv.gz"

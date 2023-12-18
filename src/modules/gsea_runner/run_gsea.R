@@ -53,26 +53,25 @@ options(readr.num_columns = 0)
 
 
 
-load_genesets <- function(folder, biomart_data) {
+load_genesets <- function(files, biomart_data) {
   #' Load all genesets from FOLDER.
   #'
   #' Genesets should have been made by make_genests.py
   #'
-  #' @param folder The folder to find files in, all in .csv format.
+  #' @param files The genesets to load
   #' @param biomart_data A data.frame with at least the "ensembl_gene_id" and
   #'   "hgnc_symbol" columns, with the correspondence from ENSG to symbol.
   #'   Such a table can be retrieved from Biomart with biomaRt.
   #' @returns A list of vectors, each with the gene symbols of that gene set
-
-  files <- list.files(folder, full.names = TRUE, recursive = TRUE)
-
-  files <- files[! endsWith(files, "all.txt")]
+  print(files)
 
   data <- list()
   for (file in files) {
-    file |> str_remove("\\/data\\.txt$") |> str_remove(paste0("^", folder)) -> id
+    file |> str_remove("\\/data\\.txt$") -> id
+    print(id)
     data[[ id ]] <- read_table(file, col_names = "ensg")[["ensg"]]
   }
+
 
   filter_values <- reduce(data, c)
   filter_values <- unique(filter_values)
@@ -239,15 +238,15 @@ plot_gsea <- function(genesets, ranks) {
 #'
 #' @returns A list of values with file names as names and GSEA results as values.
 run_all_gsea <- function(input_data_folder, genesets_folder_path, biomart_data, output_dir = NA, absolute = FALSE) {
-  file_names <- list.files(input_data_folder)
-  file_names <- file_names[endsWith(file_names, ".csv")]
-  file_paths <- file.path(input_data_folder, file_names)
+  file_paths <- list.files(input_data_folder, full.names = TRUE)
+  file_paths <- file_paths[endsWith(file_paths, ".csv")]
+  file_names <- list.files(input_data_folder, full.names = FALSE)
   file_names <- file_names[endsWith(file_names, ".csv")]
 
   cat(paste0("Found ", length(file_names), " DEG files.\n"))
 
   cat("Loading genesets...\n")
-  genesets <- load_genesets(genesets_folder_path, biomart_data = biomart_data)
+  genesets <- load_genesets(file_paths, biomart_data = biomart_data)
 
   results <- list()
   for (i in seq_along(file_names)) {

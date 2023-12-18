@@ -16,13 +16,9 @@ RUN add-apt-repository --yes ppa:deadsnakes/ppa && \
 # Install xsv
 RUN XSV_VERSION=$(curl -s "https://api.github.com/repos/BurntSushi/xsv/releases/latest" | grep -Po '"tag_name": "\K[0-9.]+') ; curl -Lo xsv.tar.gz "https://github.com/BurntSushi/xsv/releases/latest/download/xsv-${XSV_VERSION}-x86_64-unknown-linux-musl.tar.gz" ; tar xf xsv.tar.gz -C /usr/local/bin
 
-# Copy the requirements for the python env + the makefile
-COPY requirements.txt makefile ./
-# Make the python env
-RUN make env
-
 # Copy the rest of the files
 COPY . .
 
 # Run the analysis
-CMD make
+CMD make -f executor
+
