@@ -29,7 +29,7 @@ def run_wrapper(keyvalue, input_matrix_path, input_metadata_path, output_dir, de
     run(args, check=True)
 
     # Now we can run run_deseq.R
-    dea_args = ["generanker", output_dir / f"{key}_case", output_dir / f"{key}_control", "--output-file", output_dir / f"{key}_deseq.csv", "deseq_shrinkage", "--id-col", "sample"]
+    dea_args = ["generanker", output_dir / f"{key}_case", output_dir / f"{key}_control", "--output-file", output_dir / f"{key}_deseq.csv", "norm_fold_change", "--id-col", "sample"]
     run(dea_args)
 
     # Delete the useless input files
