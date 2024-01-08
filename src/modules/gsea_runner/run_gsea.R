@@ -51,41 +51,23 @@ library(tidyverse, quietly = TRUE)
 # This suppresses the messages from readr::read_table
 options(readr.num_columns = 0)
 
-
-
-load_genesets <- function(files, biomart_data) {
-  #' Load all genesets from FOLDER.
+load_genesets <- function(folder) {
+  #' Load genesets into a list from a folder
   #'
   #' Genesets should have been made by make_genests.py
   #'
-  #' @param files The genesets to load
-  #' @param biomart_data A data.frame with at least the "ensembl_gene_id" and
-  #'   "hgnc_symbol" columns, with the correspondence from ENSG to symbol.
-  #'   Such a table can be retrieved from Biomart with biomaRt.
+  #' @param folder The folder to find files in, all in .csv format.
   #' @returns A list of vectors, each with the gene symbols of that gene set
-  print(files)
+  files <- list.files(folder, full.names = TRUE, recursive = TRUE)
+
+  files <- files[! endsWith(files, "all.txt")]
 
   data <- list()
   for (file in files) {
-    file |> str_remove("\\/data\\.txt$") -> id
-    print(id)
-    data[[ id ]] <- read_table(file, col_names = "ensg")[["ensg"]]
+    file |> str_remove("\\/data\\.txt$") |> str_remove(paste0("^", folder)) -> id
+    data[[ id ]] <- read_table(file)[[1]]
   }
-
-
-  filter_values <- reduce(data, c)
-  filter_values <- unique(filter_values)
-
-  # Convert from ENSG to gene symbol
-  biomart_data |> select(all_of(c("ensembl_gene_id", "hgnc_symbol"))) -> biomart_data
-  ensg_to_symbol <- function(ensgs) {
-    symbols <- biomart_data$hgnc_symbol[biomart_data$ensembl_gene_id %in% ensgs]
-
-    return(symbols)
-  }
-
-  data <- lapply(data, ensg_to_symbol)
-
+  
   return(data)
 }
 
@@ -125,11 +107,13 @@ purge_ensg_versions <- function(data, id_col = "gene_id") {
   data
 }
 
-extract_ranks <- function(deg_file, biomart_data, absolute = FALSE) {
+extract_ranks <- function(deg_file, biomart_data, id_col="sample", rank_col="ranking", absolute = FALSE) {
   #' Make a frame ready for GSEA from a DEG file, made by BioTEA or DESeq2.
   #'
   #' Some compatibility is needed to parse DESeq2 files, as they have no
   #' "SYMBOL" column.
+  #'
+  #' Uses biomart data to retain only coding genes.
   #'
   #' @param deg_file (full) Path to the DEG file that needs to be extracted, as .csv.
   #' @param biomart_data A data.frame with at least the "ensembl_gene_id" and
@@ -137,42 +121,23 @@ extract_ranks <- function(deg_file, biomart_data, absolute = FALSE) {
   #'   Such a table can be retrieved from Biomart with biomaRt.
   #' @param absolute Boolean. If TRUE, will compute the absolute values of the
   #'   statistic instead of the actual ones.
+  #' @param id_col ID of the column with the row/gene ids
+  #' @param rank_col ID of the column with the rankings
   #'
   #' @returns A named vector of gene_names : statistic, ready for fgsea::fgsea
   data <- read_csv(deg_file, show_col_types = FALSE)
-
-  if (! "SYMBOL" %in% colnames(data)) {
-    cat("SYMBOL not found in colnames. Attempting to grab it from ids...\n")
-    if ("gene_id" %in% colnames(data)) {
-      # Purge (possible) versions from the ensembl gene IDs
-      data |> purge_ensg_versions(id_col = "gene_id") -> data
-
-      relevant_data <- biomart_data[biomart_data$ensembl_gene_id %in% data$gene_id, c("ensembl_gene_id", "hgnc_symbol")]
-      data <- merge(
-        data, relevant_data, by.y = "ensembl_gene_id", by.x = "gene_id",
-        all.y = FALSE, all.x = TRUE, sort = FALSE
-      )
-      data |> rename(SYMBOL = hgnc_symbol) -> data
-    } else {
-      stop(paste0("Cannot find id column in ", paste0(colnames(data), collapse = ", ")))
-    }
+  
+  if (! id_col %in% colnames(data)) {
+    stop(paste0("Cannot find ID column ", id_col, " in input data frame"))
+  }
+  if (! rank_col %in% colnames(data)) {
+    stop(paste0("Cannot find ID column ", rank_col, " in input data frame"))
   }
 
+  named_vec <- data[[rank_col]]
+  names(named_vec) <- purge_ensg_versions(data, id_col = id_col)[[id_col]]
 
-  # Patch to use DESeq2 data
-  if ("log2FoldChange" %in% colnames(data)) {
-    cat("Converting 'log2FoldChange' to 'LogFc' - for compatibility...\n")
-    data |> rename(LogFC = log2FoldChange) -> data
-  }
-
-  # The select is so that the na.omit does not kill everything.
-  data |> select(all_of(c("SYMBOL", "LogFC"))) -> data
-  data <- na.omit(data)
-
-  named_vec <- data$LogFC
-  names(named_vec) <- data$SYMBOL
-
-  coding <- biomart_data$hgnc_symbol[biomart_data$gene_biotype == "protein_coding"]
+  coding <- biomart_data$ensembl_gene_id[biomart_data$gene_biotype == "protein_coding"]
 
   named_vec <- named_vec[names(named_vec) %in% coding]
 
@@ -180,7 +145,7 @@ extract_ranks <- function(deg_file, biomart_data, absolute = FALSE) {
     named_vec <- abs(named_vec)
   }
 
-  return(named_vec)
+  named_vec
 }
 
 
@@ -246,7 +211,8 @@ run_all_gsea <- function(input_data_folder, genesets_folder_path, biomart_data, 
   cat(paste0("Found ", length(file_names), " DEG files.\n"))
 
   cat("Loading genesets...\n")
-  genesets <- load_genesets(file_paths, biomart_data = biomart_data)
+  genesets <- load_genesets(genesets_folder_path)
+  cat(paste0("Loaded ", length(genesets), " genesets.\n"))
 
   results <- list()
   for (i in seq_along(file_names)) {
@@ -333,12 +299,12 @@ ensg_data <- biomaRt::getBM(
 )
 
 results <- run_all_gsea(
-  "/home/hedmad/Files/data/mtpdb/input_deg_tables/",
-  "/home/hedmad/Files/data/mtpdb/genesets/bottomup/root/",
+  "/home/hedmad/Files/data/transportome_profiler/deas",
+  "/home/hedmad/Files/data/transportome_profiler/genesets",
   ensg_data
 )
 
-save_results(results, out_dir = "/home/hedmad/Files/data/mtpdb/gsea_output/", skip_plots = TRUE)
+save_results(results, out_dir = "/home/hedmad/Files/data/transportome_profiler/out/enrichments", skip_plots = TRUE)
 
 } # ----------------------------------------------------------------------------
 
@@ -368,6 +334,7 @@ if (sys.nframe() == 0L) {
       output_dir = args$output_dir,
       absolute = args$absolute
     )
+    warnings()
   } else {
     results <- run_all_gsea(
       args$input_deg_folder,
