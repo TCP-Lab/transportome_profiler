@@ -8,4 +8,5 @@ tzdata==2023.3
 colorama==0.4.6
 bonsai @ git+https://github.com/MrHedmad/bonsai@main
 metasplit @ git+https://github.com/MrHedmad/metasplit@main
+gene-ranker @ git+https://github.com/TCP-Lab/gene_ranker@main
 

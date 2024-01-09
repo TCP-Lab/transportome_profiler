@@ -334,6 +334,8 @@ if (FALSE) {
 if (sys.nframe() == 0L) {
   results <- read_results(args$input_gsea_results)
 
+  print(paste0("Found ", length(results), " input results to plot."))
+
   plot_all_results(
     results, args$output_dir, args$width, args$height, args$png, args$res
   )

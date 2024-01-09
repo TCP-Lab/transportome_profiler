@@ -10,7 +10,7 @@ def replace(string, pattern, replacement):
     string = str(string)
     return string.replace(str(pattern), str(replacement))
 
-def run_wrapper(keyvalue, input_matrix_path, input_metadata_path, deseq, output_dir, delimiter):
+def run_wrapper(keyvalue, input_matrix_path, input_metadata_path, output_dir, delimiter):
     key, value = keyvalue
     set_meta = partial(replace, pattern = "<meta>", replacement = input_metadata_path.expanduser().absolute())
     print(f"Processing {key}.")
@@ -29,8 +29,8 @@ def run_wrapper(keyvalue, input_matrix_path, input_metadata_path, deseq, output_
     run(args, check=True)
 
     # Now we can run run_deseq.R
-    deseq_args = ["Rscript", deseq, output_dir / f"{key}_case", output_dir / f"{key}_control", output_dir / f"{key}_deseq.csv", "--case_rownames_col", "sample", "--control_rownames_col", "sample"]
-    run(deseq_args)
+    dea_args = ["generanker", output_dir / f"{key}_case", output_dir / f"{key}_control", "--output-file", output_dir / f"{key}_deseq.csv", "norm_fold_change", "--id-col", "sample"]
+    run(dea_args)
 
     # Delete the useless input files
     os.remove(output_dir / f"{key}_case")
@@ -41,12 +41,11 @@ def main(
         queries = dict,
         input_matrix_path = Path,
         input_metadata_path = Path,
-        deseq = Path,
         output_dir = Path,
         delimiter = ",",
         cpus = None,
 ):
-    run = partial(run_wrapper, input_matrix_path = input_matrix_path, input_metadata_path=input_metadata_path, deseq=deseq, output_dir=output_dir, delimiter=delimiter)
+    run = partial(run_wrapper, input_matrix_path = input_matrix_path, input_metadata_path=input_metadata_path, output_dir=output_dir, delimiter=delimiter)
     print("Spawning pool of workers...")
     with mp.Pool(cpus or mp.cpu_count()) as pool:
         pool.map(run, queries.items())
@@ -61,7 +60,6 @@ if __name__ == "__main__":
     parser.add_argument("input_matrix", type=Path, help="Input (big) expression matrix to subset")
     parser.add_argument("input_metadata", type=Path, help="Input metadata matrix to use to subset")
     parser.add_argument("output_dir", type=Path, help="Output directory to save files to")
-    parser.add_argument("run_deseq_script", type=Path, help="path to the run_deseq.R script.")
     parser.add_argument("--delimiter", default = ",", help="Delimiter for the input")
     parser.add_argument("--cpus", type=int, help="Number of CPUS to use. If unspecified, runs with one thread per available core.")
 
@@ -75,7 +73,6 @@ if __name__ == "__main__":
         input_matrix_path=args.input_matrix,
         input_metadata_path=args.input_metadata,
         output_dir=args.output_dir,
-        deseq = args.run_deseq_script,
         delimiter=args.delimiter,
         cpus=args.cpus
     )
