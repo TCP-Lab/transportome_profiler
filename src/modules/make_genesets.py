@@ -166,7 +166,11 @@ def main(args: dict) -> None:
             direction=PruneDirection(args.prune_direction),
         )
 
-    large_tree.to_files(args.out_dir)
+    if args.json:
+        large_tree.to_node_json((Path(args.out_dir) / "node_json.json").open("w+"))
+    else:
+        large_tree.to_files(args.out_dir)
+
 
     log.info("Finished!")
 
@@ -334,7 +338,7 @@ def generate_gene_list_trees(
     tree_root = tree.create_node(
         name, parent=None, data=dataframe[id_col].drop_duplicates().to_list()
     )
-
+    
     subtree = generate_list(tree, tree_root, dataframe, 0)
 
     tree.paste(subtree, tree_root)
@@ -389,6 +393,7 @@ if __name__ == "__main__":
         default="bottomup",
     )
     parser.add_argument("--verbose", help="Increase verbosity", action="store_true")
+    parser.add_argument("--json", help="Dump a JSON of the tree instead of nested dirs", action="store_true")
 
     args = parser.parse_args()
 
