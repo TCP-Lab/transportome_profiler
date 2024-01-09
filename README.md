@@ -7,99 +7,49 @@ the transportome in Cancer based on the [MTP-DB](https://github.com/TCP-Lab/MTP-
 
 > Read the preprint here: [Profiling the Expression of Transportome Genes in cancer: A systematic approach](https://doi.org/10.1101/2023.07.18.549498)
 
-This is a two-step process. The database is queried for information by the
-script in `src/geneset_maker`. The algorithm generates gene sets ready for use
-by GSEA. We then generate a series of DEG tables with `src/run_dea` based on the
-comparison of gene expression from TCGA (cancer) and GTEx (healthy) tissues.
-Finally, GSEA is called by `src/gsea_runner` in a pre-ranked manner on all the
-DEG tables with all of the genesets, making enrichment tables.
-The enrichment tables are then processed by a script in `src/gsea_runner` to
-make enrichment plots.
+The project follows the [Kerblam! standard](https://github.com/MrHedmad/kerblam).
 
 ## Running the analysis
-You can run the analysis in two ways: locally or in a Docker container.
-In both cases, you must first clone and link the repository locally:
+You can run the analysis pipelines with Kerblam! and `docker`:
 ```bash
 # Clone the repo
 git clone git@github.com:TCP-Lab/transportome_profiler.git
 cd ./transportome_profiler
-# Make housekeeping directories. See the following note.
-./link A_FOLDER_THAT_WILL_CONTAIN_THE_DATA
+
+kerblam data fetch # Fetch the input data not present in the repository
+kerblam run <pipeline>
 ```
-The variable `A_FOLDER_THAT_WILL_CONTAIN_THE_DATA` should be the directory where
-you want the (rather bulky) data to live.
-The directory can be anywhere you want, but
-**DO NOT CHOOSE `./transportome_profiler/data`** as a data directory!
-It is the place where your actual data directory will be linked to by `link`.
 
-### Running in Docker
-You will need to have `docker` installed. Once you do, you can either pull the
-remote container or build a new one locally.
+Kerblam! will build docker containers and run the analysis locally.
+To run without docker, read below.
 
-The script `run_docker` in the root of the repository helps you do just that:
-- There is not (**yet!**) a remote docker container for the analysis. When there will be, run `run_docker --pull` to run the analysis in that.
-- To build and run a docker container locally, run `run_docker`. The docker container will be built and executed immediately after.
+### Pipelines
+The project currently encompasses the following pipelines:
+- `heatmaps`: Create large heatmaps from the expression matrices by using GSEA
+  on computed gene rankings, testing all possible gene lists that can be made
+  from the `MTP-DB`.
+  - The `test` profile makes this pipeline much faster by running on smaller
+    (i.e. sampled) input data (~75% reduction in sample number, only 5000 random genes).
 
-Currently, docker will save everything as root. Run `chown ./data` after it is finished to re-own the files that it generated. Sorry for the inconvenience!
-
-### Running locally
+### Running locally without docker
 You need some requirements to be installed before you can run the analysis locally:
-- `R` version `4.3.0`.
-- `Python` version `3.11`.
+- `R` version `4.3.0+`.
+  - Install R requirements with `./src/helper_scripts/install_r_pkgs.R`.
+- `Python` version `3.11+`.
+  - Install python requirements with `pip install -r ./src/requirements.txt`.
 - The `tree` utility (`sudo apt install tree` on Debian-like or `sudo pacman -Syu tree` on Arch).
-- The `xsv` program, required by [`metasplit`](https://github.com/MrHedmad/metasplit) (`sudo pacman -Syu xsv` on Arch, not packaged by Debian, but [this guide might be useful](https://lindevs.com/install-xsv-on-ubuntu). If you have `cargo` installed, you can simply run `cargo install xsv`).
+- The `xsv` program, required by [`metasplit`](https://github.com/MrHedmad/metasplit)
+  (`sudo pacman -Syu xsv` on Arch, not packaged by Debian, but [this guide might be useful](https://lindevs.com/install-xsv-on-ubuntu).
+  If you have `cargo` installed, you can simply run `cargo install xsv`).
 - A series of R packages that can be installed with `Rscript ./src/helper_scripts/install_R_pkgs.R`
-- Quite a bit of RAM (the full analysis takes > 50 Gb of RAM) and time. If you want to run with less ram (but slower), override the `make` variable `split_threads` with `make split_threads=1`. By default this is 3. If you have a ton of memory and want to run more threads in parallel increase this value. 
-
-`make` handles making and using a Python `venv` when appropriate.
+- Quite a bit of RAM (some steps require > 50 Gb of RAM) and time.
+  Override `N_THREADS` (with `export N_THREADS=...`) to run with less threads.
 
 If you have all the requirements, you can simply:
 ```bash
-# Run the analysis
-make all
-# or just `make`, since `all` is the default.
+kerblam run <pipeline> --local
 ```
 
-#### A note for developers
-This is the same workflow you use to start working on the project on a new PC. You can then simply re-run `make all` as you work.
-
-### Other make targets
-There are several make targets if you do not want to rerun all the steps of the analysis (like `all` does):
-- `make all`: Runs the whole analysis - from the retrieval of the data to the generation of the final output.
-- `make clean`: Cleanup every data file and the output.
-- `make restart`: Cleanup input and output data and the virtual enviroment. To restart the analysis from scratch.
-- `make scrub`: Cleanup just like `restart`, but also remove the soft links made by `./link` and the corresponding data folders. This should leave your disks squeaky clean, just like before you started the analysis.
-- `make paper`: Runs the analysis and rebuilds the paper.
-- `make thin_paper`: Rebuild the paper, without running the analysis. Figures that are not found are replaced by placeholders. Useful when you just want to write the paper without having to run the whole shebang.
-
-# The Manuscript: Transportome Profiler
-To compile the manuscript, you will need a local installation of `texlive` and `biber`.
-Biber should be packaged in most distros. You can google how to install it.
-`texlive` is a bit harder.
-For Arch users, follow the [archwiki article](https://wiki.archlinux.org/title/TeX_Live).
-In general, the recommended way to install `texlive` is to follow the [official TeXlive guide](https://tug.org/texlive/quickinstall.html).
-
-The instruction above are copied here, but you should check if they changed:
-```bash
-cd /tmp/
-wget https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
-zcat < install-tl-unx.tar.gz | tar xf -
-cd install-tl-*
-# Install only the medium image
-perl ./install-tl --no-interaction --scheme=medium
-```
-
-You will probably need to install extra packages to compile successfully.
-The command to do this for `tlmgr` is in `.../transportome_profiler/paper/install_pkgs.sh`:
-```bash
-sudo ./install_pkgs.sh
-```
-I am a weird man online. Suffice to say you should not `sudo` anything without inspecting it manually beforehand.
-
-Once everything is installed, you should simply run `make paper`. `make` will run the analysis (to generate the figures for the manuscript), and then generate the paper itself. Keep reading if you want to *just* compile the manuscript, and not run the analysis proper.
-
-## Just edit the manuscript
-If you just want to edit the manuscript, but do not care about restarting the analysis, you can simply run `make thin_paper`. The paper will be built (with no figures) and saved to `/paper/src/main.pdf`. 
-
-If you have access to pre-built images (from e.g. a previous run) you can just drop them in `/paper/src/resources/figures/generated` and even `make thin_paper` will pick them up and isert them in the output.
+> [!IMPORTANT]
+> The manuscript for this project is also available online in [this repository](https://github.com/TCP-Lab/transportome_profiler_paper).
 
