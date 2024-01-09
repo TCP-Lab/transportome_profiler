@@ -1,7 +1,9 @@
 #? Generate the general heatmap for all transporters
 
-local_mtpdb = ./data/MTPDB.sqlite
-split_threads = 3
+# Number of threads to use to parallelize the ranking process
+N_THREADS = 3
+
+# Shorthands
 mods = ./src/modules
 rexec = Rscript --no-save --no-restore --verbose
 
@@ -18,34 +20,34 @@ rexec = Rscript --no-save --no-restore --verbose
 ./data/ensg_data.csv : ./data/in/ensg_data.csv.gz
 	gunzip -cf $< > $@
 
-## --- Calculate the DEA files from the expression matrix
+## --- Calculate the ranking files from the expression matrix
 ./data/deas/flag.txt: \
 	./data/tcga_target_gtex \
 	./data/selected_metadata \
-	$(mods)/run_dea/select_and_run.py \
+	$(mods)/ranking/select_and_run.py \
 	./data/in/dea_queries.json
 
 	mkdir -p $(@D)
 
-	python $(mods)/run_dea/select_and_run.py \
+	python $(mods)/ranking/select_and_run.py \
 		./data/in/dea_queries.json \
 		./data/tcga_target_gtex \
 		./data/selected_metadata \
 		$(@D) \
-		--cpus $(split_threads)
+		--cpus $(N_THREADS)
 
 	touch $@
 
 ## --- Generate the genesets from the MTPDB
 ./data/genesets/all.txt: \
 		./data/MTPDB.sqlite \
-		$(mods)/geneset_maker/make_genesets.py \
-		$(mods)/geneset_maker/basic_gene_lists.json
+		$(mods)/make_genesets.py \
+		./data/in/basic_gene_lists.json
 
 	rm -rf $(@D)
 	mkdir -p $(@D)
 
-	python $(mods)/geneset_maker/make_genesets.py ./data/MTPDB.sqlite $(mods)/geneset_maker/basic_gene_lists.json \
+	python $(mods)/make_genesets.py ./data/MTPDB.sqlite ./data/in/basic_gene_lists.json \
 		./data/genesets \
 		--prune_direction "topdown" \
 		--prune_similarity 0.9 \
@@ -54,13 +56,13 @@ rexec = Rscript --no-save --no-restore --verbose
 ## --- Run the pre-ranked GSEA
 ./data/out/enrichments/done.flag: \
 		./data/genesets/all.txt \
-		$(mods)/gsea_runner/run_gsea.R \
+		$(mods)/run_gsea.R \
 		./data/deas/flag.txt \
 		./data/ensg_data.csv
 
 	mkdir -p $(@D)
 
-	$(rexec) $(mods)/gsea_runner/run_gsea.R \
+	$(rexec) $(mods)/run_gsea.R \
 		"./data/deas/" "./data/genesets" "$(@D)" \
 		--ensg-hugo-data ./data/ensg_data.csv
 
@@ -69,13 +71,13 @@ rexec = Rscript --no-save --no-restore --verbose
 # --- Run the pre-ranked GSEA, but keep absolute enrichments only
 ./data/out/absolute_enrichments/done.flag: \
 		./data/genesets/all.txt \
-		$(mods)/gsea_runner/run_gsea.R \
+		$(mods)/run_gsea.R \
 		./data/deas/flag.txt \
 		./data/ensg_data.csv
 
 	mkdir -p $(@D)
 
-	$(rexec) $(mods)/gsea_runner/run_gsea.R \
+	$(rexec) $(mods)/run_gsea.R \
 		"./data/deas/" "./data/genesets" "$(@D)" \
 		--ensg-hugo-data ./data/ensg_data.csv \
 		--absolute

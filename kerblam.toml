@@ -8,3 +8,4 @@ version = "0.2.1"
 
 [data.profiles.test]
 "expression_matrix.csv.gz" = "test_expression_matrix.csv.gz"
+
