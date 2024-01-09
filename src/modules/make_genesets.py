@@ -168,9 +168,10 @@ def main(args: dict) -> None:
 
     if args.json:
         large_tree.to_node_json((Path(args.out_dir) / "node_json.json").open("w+"))
+        large_tree.to_representation((Path(args.out_dir) / "representation.txt").open("w+"))
     else:
         large_tree.to_files(args.out_dir)
-
+    
 
     log.info("Finished!")
 
