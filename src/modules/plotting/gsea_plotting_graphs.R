@@ -11,6 +11,9 @@ if (sys.nframe() == 0L) {
       "input_gsea_results", help="Folder with GSEA output .csv files to read.", type="character"
     ) |>
     argparser::add_argument(
+      "genesets", help="JSON file with geneset information", type="character"
+    ) |>
+    argparser::add_argument(
       "output_dir", help = "Output directory to save files in",
       type = "character"
     ) |>
@@ -34,14 +37,16 @@ if (sys.nframe() == 0L) {
   args <- argparser::parse_args(parser)
 }
 
-
-library(tidyverse)
-requireNamespace("RColorBrewer")
-requireNamespace("igraph")
-requireNamespace("uuid")
-library(ggraph) # This needs to be a library() call
-library(grid)
-library(assertthat)
+suppressMessages({
+  library(tidyverse, quietly=TRUE)
+  requireNamespace("RColorBrewer")
+  requireNamespace("igraph")
+  requireNamespace("uuid")
+  requireNamespace("rjson")
+  library(ggraph) # This needs to be a library() call
+  library(grid)
+  library(assertthat)
+})
 
 #' Read a series of .csv files from a directory
 #'
@@ -70,36 +75,13 @@ read_results <- function(input_dir) {
 #'
 #' @param result The data.frame with the GSEA results. Needs at least the
 #'   "pathway", "NES" and "padj" columns, to add the data to the graph.
+#' @param genesets The JSON genesets with the information on the graph structure
 #' @param base_edges A data.frame with base edges
-result_to_graph <- function(result) {
+result_to_graph <- function(result, genesets) {
   # This fun gets a results list (w/o plots) and converts it to a dataframe
   # that can be used by ggraph and igraph
-
-  # Tiny wrapper to get the end of the file name
-  end_of <- function(string) {
-    parts <- str_split_1(string, "\\/")
-    return(parts[length(parts)])
-  }
-
-  remove_leading_backslash <- function(str) {
-    str_remove(str, "^/")
-  }
-
-  # We have to assign unique IDs to every node, so that we have
-  # no ambiguity when rebuilding the graph
-  available_nodes <- sapply(result$pathway, end_of)
-  uuids <- data.frame(
-    paths = sapply(result$pathway, remove_leading_backslash),
-    human_node_name = available_nodes,
-    uuids = uuid::UUIDgenerate(n = length(available_nodes))
-  )
-
-  to_uuid <- function(str) {
-    uuids$uuids[uuids$paths == str]
-  }
-
-  # We can now build the frame of edges, where each row is a source -> sink
-  # edge.
+  genesets_data <- rjson::fromJSON(readr::read_file(genesets))
+  # We can now build the frame of edges, where each row is a source -> sink edge.
   insert <- function(x, item) {
     x[[length(x) + 1]] <- item
 
@@ -107,28 +89,9 @@ result_to_graph <- function(result) {
   }
 
   edges <- list()
-  for (i in seq_along(uuids$paths)) {
-    # For every path, we need to reconstruct the graph
-    parts <- str_split_1(uuids$paths[i], "\\/")
-
-    for (k in seq_along(parts)) {
-      if (length(parts) == 1) {
-        # This is a root node, we need to skip it.
-        next
-      }
-      if (k + 1 > length(parts)) {
-        # We have arrived at the last item in the list. We can skip it.
-        next
-      }
-      new_row <- c(
-        # The current node
-        to_uuid(paste0(parts[1:k], collapse="/")),
-        # The next node
-        to_uuid(paste0(parts[1:(k + 1)], collapse="/"))
-      )
-      assert_that(length(new_row) == 2)
-      edges <- insert(edges, new_row)
-    }
+  for (i in seq_along(genesets_data)) {
+    parent <- genesets_data[[i]]$parent
+    edges[[i]] <- c(parent, names(genesets_data)[i]) 
   }
 
   edges <- as.data.frame(do.call(rbind, edges))
@@ -140,13 +103,23 @@ result_to_graph <- function(result) {
 
   vertice_data <- list()
   vertices <- unique(unlist(edges))
+  vertices <- vertices[!is.null(vertices)]
   for (i in seq_along(vertices)) {
     item <- vertices[i]
-
+    
+    NES <- result[result$pathway == item, "NES"]
+    padj <- result[result$pathway == item, "padj"]
+    if (is.null(NES)) {
+      NES <- 0
+    }
+    if (is.null(padj)) {
+      padj <- 1
+    }
     item_data <- c(
       item,
-      uuids$human_node_name[uuids$uuids == item],
-      unlist(result[result$pathway == paste0("/", uuids$paths[uuids$uuids == item]), c("NES", "padj")])
+      genesets_data[[item]]$name,
+      NES,
+      padj
     )
 
     assert_that(length(item_data) == 4)
@@ -252,9 +225,9 @@ calculate_angle_from_pos <- function(pos_dataframe, specials = NULL) {
   pos_dataframe
 }
 
-plot_result <- function(result, title = "") {
+plot_result <- function(result, genesets_file, title = "") {
 
-  data_graph <- result_to_graph(result)
+  data_graph <- result_to_graph(result, genesets_file)
   colours <- make_colours(c("blue", "gray", "red"), as.numeric(igraph::vertex_attr(data_graph, "NES")))
 
   # "Plot" a graph with just the labels
@@ -300,7 +273,7 @@ plot_result <- function(result, title = "") {
   return(pp)
 }
 
-plot_all_results <- function(results, out_dir, width=10, height=8, png = TRUE, res = 400) {
+plot_all_results <- function(results, out_dir, genesets_file, width=10, height=8, png = TRUE, res = 400) {
   for (i in seq_along(results)) {
     cat(paste0("Saving ", names(results)[i], "...\n"))
     if (png) {
@@ -318,7 +291,7 @@ plot_all_results <- function(results, out_dir, width=10, height=8, png = TRUE, r
         )
     }
     print(
-      plot_result(results[[i]], title = names(results)[i])
+      plot_result(results[[i]], genesets_file, title = names(results)[i])
     )
     graphics.off()
   }
@@ -337,6 +310,6 @@ if (sys.nframe() == 0L) {
   print(paste0("Found ", length(results), " input results to plot."))
 
   plot_all_results(
-    results, args$output_dir, args$width, args$height, args$png, args$res
+    results, args$output_dir, args$genesets, args$width, args$height, args$png, args$res
   )
 }

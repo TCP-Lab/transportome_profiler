@@ -166,12 +166,8 @@ def main(args: dict) -> None:
             direction=PruneDirection(args.prune_direction),
         )
 
-    if args.json:
-        large_tree.to_node_json((Path(args.out_dir) / "node_json.json").open("w+"))
-        large_tree.to_representation((Path(args.out_dir) / "representation.txt").open("w+"))
-    else:
-        large_tree.to_files(args.out_dir)
-    
+    large_tree.to_node_json(Path(args.out_json).open("w+"))
+    large_tree.to_representation(Path(args.out_repr).open("w+"), force_uuid = True) 
 
     log.info("Finished!")
 
@@ -360,7 +356,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "basic_gene_lists", type=Path, help="Gene lists to draw from the database"
     )
-    parser.add_argument("out_dir", type=Path, help="Output folder")
+    parser.add_argument("out_json", type=Path, help="Output tree JSON representation")
+    parser.add_argument("out_repr", type=Path, help="Output tree visual representation")
 
     parser.add_argument(
         "--min_pop_score",

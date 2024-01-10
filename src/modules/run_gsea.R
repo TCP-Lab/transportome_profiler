@@ -15,7 +15,7 @@ if (sys.nframe() == 0L) {
       "input_deg_folder", help="Folder with DEG tables to run GSEA on.", type="character"
     ) |>
     argparser::add_argument(
-      "input_genesets_folder", help = "Folder with input genesets as .txt files",
+      "input_genesets_json", help = "JSON file with genesets tree",
       type = "character"
     ) |>
     argparser::add_argument(
@@ -43,60 +43,31 @@ if (sys.nframe() == 0L) {
 }
 # To here <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-requireNamespace("biomaRt")
-requireNamespace("fgsea")
-requireNamespace("rjson")
-library(tidyverse, quietly = TRUE)
+suppressMessages({
+  requireNamespace("biomaRt")
+  requireNamespace("fgsea")
+  requireNamespace("rjson")
+  library(tidyverse, quietly = TRUE)
+})
 
 # This suppresses the messages from readr::read_table
 options(readr.num_columns = 0)
 
-load_genesets <- function(folder) {
-  #' Load genesets into a list from a folder
-  #'
-  #' Genesets should have been made by make_genests.py
-  #'
-  #' @param folder The folder to find files in, all in .csv format.
-  #' @returns A list of vectors, each with the gene symbols of that gene set
-  files <- list.files(folder, full.names = TRUE, recursive = TRUE)
+#' This takes a node json from `Bonsai` and loads it as gene sets
+#'
+#' @param file The node list file
+#' @param biomart_data A data.frame with at least the "ensembl_gene_id" and
+#'   "hgnc_symbol" columns, with the correspondence from ENSG to symbol.
+#'   Such a table can be retrieved from Biomart with biomaRt.
+#' @returns A list of vectors, each with the gene symbols of that gene set
 
-  files <- files[! endsWith(files, "all.txt")]
-
-  data <- list()
-  for (file in files) {
-    file |> str_remove("\\/data\\.txt$") |> str_remove(paste0("^", folder)) -> id
-    data[[ id ]] <- read_table(file)[[1]]
-  }
-  
-  return(data)
-}
-
-
+# Each entry in the json looks like this:
+# "{id}": {"name": "{name}", "data": [data], "parent": "{id}"}
 load_genesets_from_node_json <- function(file, biomart_data) {
-  #' This takes a node json from `Bonsai` and loads it as gene sets
-  #'
-  #' @param file The node list file
-  #' @param biomart_data A data.frame with at least the "ensembl_gene_id" and
-  #'   "hgnc_symbol" columns, with the correspondence from ENSG to symbol.
-  #'   Such a table can be retrieved from Biomart with biomaRt.
-  #' @returns A list of vectors, each with the gene symbols of that gene set
-
-  # Each entry in the json looks like this:
-  # "{id}": {"name": "{name}", "data": [data], "parent": "{id}"}
   data <- rjson::fromJSON(readr::read_file(file))
 
   # We need a list of id: data
   data <- lapply(data, \(x) {x[["data"]]})
-
-  # Convert from ENSG to gene symbol
-  biomart_data |> select(all_of(c("ensembl_gene_id", "hgnc_symbol"))) -> biomart_data
-  ensg_to_symbol <- function(ensgs) {
-    symbols <- biomart_data$hgnc_symbol[biomart_data$ensembl_gene_id %in% ensgs]
-
-    return(symbols)
-  }
-
-  data <- lapply(data, ensg_to_symbol)
 
   return(data)
 }
@@ -107,24 +78,25 @@ purge_ensg_versions <- function(data, id_col = "gene_id") {
   data
 }
 
+
+#' Make a frame ready for GSEA from a DEG file, made by BioTEA or DESeq2.
+#'
+#' Some compatibility is needed to parse DESeq2 files, as they have no
+#' "SYMBOL" column.
+#'
+#' Uses biomart data to retain only coding genes.
+#'
+#' @param deg_file (full) Path to the DEG file that needs to be extracted, as .csv.
+#' @param biomart_data A data.frame with at least the "ensembl_gene_id" and
+#'   "gene_biotype" columns.
+#'   Such a table can be retrieved from Biomart with biomaRt.
+#' @param absolute Boolean. If TRUE, will compute the absolute values of the
+#'   statistic instead of the actual ones.
+#' @param id_col ID of the column with the row/gene ids
+#' @param rank_col ID of the column with the rankings
+#'
+#' @returns A named vector of gene_names : statistic, ready for fgsea::fgsea
 extract_ranks <- function(deg_file, biomart_data, id_col="sample", rank_col="ranking", absolute = FALSE) {
-  #' Make a frame ready for GSEA from a DEG file, made by BioTEA or DESeq2.
-  #'
-  #' Some compatibility is needed to parse DESeq2 files, as they have no
-  #' "SYMBOL" column.
-  #'
-  #' Uses biomart data to retain only coding genes.
-  #'
-  #' @param deg_file (full) Path to the DEG file that needs to be extracted, as .csv.
-  #' @param biomart_data A data.frame with at least the "ensembl_gene_id" and
-  #'   "gene_biotype" columns.
-  #'   Such a table can be retrieved from Biomart with biomaRt.
-  #' @param absolute Boolean. If TRUE, will compute the absolute values of the
-  #'   statistic instead of the actual ones.
-  #' @param id_col ID of the column with the row/gene ids
-  #' @param rank_col ID of the column with the rankings
-  #'
-  #' @returns A named vector of gene_names : statistic, ready for fgsea::fgsea
   data <- read_csv(deg_file, show_col_types = FALSE)
   
   if (! id_col %in% colnames(data)) {
@@ -162,7 +134,7 @@ extract_ranks <- function(deg_file, biomart_data, id_col="sample", rank_col="ran
 run_gsea <- function(genesets, ranks) {
   result <- fgsea::fgsea(
     pathways = genesets,
-    stats = ranks
+    stats = ranks,
   )
 
   result
@@ -186,14 +158,13 @@ plot_gsea <- function(genesets, ranks) {
 }
 
 
-#' Run GSEA on all DEG tables in a folder, with all genesets from another folder.
+#' Run GSEA on all DEG tables in a folder.
 #'
 #' @param input_data_folder (Full) path to the input data folder with the DEG
 #'   tables to be loaded with `extract_ranks`.
 #' @param output_dir The output directory to save output files to. If NA, does
 #'   not save files, and instead returns a list of results.
-#' @param genesets_folder_path (Full) path to the folder with genesets, as .txt
-#'   files with one gene id per row.
+#' @param genesets_path (Full) path to the file with genesets, as JSON.
 #' @param biomart_data A data.frame with at least the "ensembl_gene_id",
 #'   "hgnc_symbol" and "gene_biotype" columns.
 #'   Such a table can be retrieved from Biomart with biomaRt.
@@ -202,7 +173,7 @@ plot_gsea <- function(genesets, ranks) {
 #'   by sacrificing finding up or down regulated groups.
 #'
 #' @returns A list of values with file names as names and GSEA results as values.
-run_all_gsea <- function(input_data_folder, genesets_folder_path, biomart_data, output_dir = NA, absolute = FALSE) {
+run_all_gsea <- function(input_data_folder, genesets_path, biomart_data, output_dir = NA, absolute = FALSE) {
   file_paths <- list.files(input_data_folder, full.names = TRUE)
   file_paths <- file_paths[endsWith(file_paths, ".csv")]
   file_names <- list.files(input_data_folder, full.names = FALSE)
@@ -211,7 +182,7 @@ run_all_gsea <- function(input_data_folder, genesets_folder_path, biomart_data, 
   cat(paste0("Found ", length(file_names), " DEG files.\n"))
 
   cat("Loading genesets...\n")
-  genesets <- load_genesets(genesets_folder_path)
+  genesets <- load_genesets_from_node_json(genesets_path)
   cat(paste0("Loaded ", length(genesets), " genesets.\n"))
 
   results <- list()
@@ -329,16 +300,15 @@ if (sys.nframe() == 0L) {
   if (args$low_memory) {
     run_all_gsea(
       args$input_deg_folder,
-      args$input_genesets_folder,
+      args$input_genesets_json,
       ensg_data,
       output_dir = args$output_dir,
       absolute = args$absolute
     )
-    warnings()
   } else {
     results <- run_all_gsea(
       args$input_deg_folder,
-      args$input_genesets_folder,
+      args$input_genesets_json,
       ensg_data,
       absolute = args$absolute
     )

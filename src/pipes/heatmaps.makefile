@@ -39,23 +39,20 @@ rexec = Rscript --no-save --no-restore --verbose
 	touch $@
 
 ## --- Generate the genesets from the MTPDB
-./data/genesets/all.txt: \
+./data/genesets.json ./data/genesets_repr.txt: \
 		./data/MTPDB.sqlite \
 		$(mods)/make_genesets.py \
 		./data/in/basic_gene_lists.json
 
-	rm -rf $(@D)
-	mkdir -p $(@D)
-
 	python $(mods)/make_genesets.py ./data/MTPDB.sqlite ./data/in/basic_gene_lists.json \
-		./data/genesets \
+		./data/genesets.json ./data/genesets_repr.txt \
 		--prune_direction "topdown" \
 		--prune_similarity 0.9 \
 		--verbose
 
 ## --- Run the pre-ranked GSEA
 ./data/out/enrichments/done.flag: \
-		./data/genesets/all.txt \
+		./data/genesets.json \
 		$(mods)/run_gsea.R \
 		./data/deas/flag.txt \
 		./data/ensg_data.csv
@@ -63,14 +60,14 @@ rexec = Rscript --no-save --no-restore --verbose
 	mkdir -p $(@D)
 
 	$(rexec) $(mods)/run_gsea.R \
-		"./data/deas/" "./data/genesets" "$(@D)" \
+		"./data/deas/" "./data/genesets.json" "$(@D)" \
 		--ensg-hugo-data ./data/ensg_data.csv
 
 	touch $@
 
 # --- Run the pre-ranked GSEA, but keep absolute enrichments only
 ./data/out/absolute_enrichments/done.flag: \
-		./data/genesets/all.txt \
+		./data/genesets.json \
 		$(mods)/run_gsea.R \
 		./data/deas/flag.txt \
 		./data/ensg_data.csv
@@ -78,29 +75,24 @@ rexec = Rscript --no-save --no-restore --verbose
 	mkdir -p $(@D)
 
 	$(rexec) $(mods)/run_gsea.R \
-		"./data/deas/" "./data/genesets" "$(@D)" \
+		"./data/deas/" "./data/genesets.json" "$(@D)" \
 		--ensg-hugo-data ./data/ensg_data.csv \
 		--absolute
 
 	touch $@
 
-## --- Generate tree representation of the genesets
-/tmp/genesets_tree/tree.txt: ./data/genesets/all.txt
-	mkdir -p $(@D)
-	tree ./data/genesets -df | head -n -2 > $@
-
 ## --- Generate the output GSEA plots from the gsea enrichments
 ALL += ./data/out/figures/enrichments/done.flag
 ./data/out/figures/enrichments/done.flag: \
 		./data/out/enrichments/done.flag \
-		./data/genesets/all.txt \
+		./data/genesets.json \
 		$(mods)/plotting/gsea_plotting_graphs.R \
 		$(mods)/plotting/general_heatmap.R
 
 	mkdir -p $(@D)
 
 	$(rexec) $(mods)/plotting/gsea_plotting_graphs.R \
-		./data/out/enrichments/ \
+		./data/out/enrichments/ ./data/genesets.json \
 		$(@D)
 
 	touch $@
@@ -110,11 +102,12 @@ ALL += ./data/out/figures/enrichments/pancan_heatmap.png
 ./data/out/figures/enrichments/pancan_heatmap.png: \
 		./data/out/enrichments/done.flag \
 		$(mods)/plotting/general_heatmap.R \
-		/tmp/genesets_tree/tree.txt
+		./data/genesets_repr.txt
 
 	$(rexec) $(mods)/plotting/general_heatmap.R \
 		./data/out/enrichments/ \
-		/tmp/genesets_tree/tree.txt \
+		./data/genesets_repr.txt \
+		./data/genesets.json \
 		$@ \
 		--height 15
 
@@ -123,14 +116,14 @@ ALL += ./data/out/figures/enrichments/pancan_heatmap.png
 ALL += ./data/out/figures/absolute_enrichments/done.flag
 ./data/out/figures/absolute_enrichments/done.flag: \
 		./data/out/absolute_enrichments/done.flag \
-		./data/genesets/all.txt \
+		./data/genesets.json \
 		$(mods)/plotting/gsea_plotting_graphs.R \
 		$(mods)/plotting/general_heatmap.R
 
 	mkdir -p $(@D)
 
 	$(rexec) $(mods)/plotting/gsea_plotting_graphs.R \
-		./data/out/absolute_enrichments/ \
+		./data/out/absolute_enrichments/ ./data/genesets.json \
 		$(@D)
 
 	touch $@
@@ -139,11 +132,12 @@ ALL +=./data/out/figures/absolute_enrichments/pancan_heatmap.png
 ./data/out/figures/absolute_enrichments/pancan_heatmap.png: \
 		./data/out/absolute_enrichments/done.flag \
 		$(mods)/plotting/general_heatmap.R \
-		/tmp/genesets_tree/tree.txt
+		./data/genesets_repr.txt
 
 	$(rexec) $(mods)/plotting/general_heatmap.R \
 		./data/out/absolute_enrichments/ \
-		/tmp/genesets_tree/tree.txt \
+		./data/genesets_repr.txt \
+		./data/genesets.json \
 		$@ \
 		--height 15
 
@@ -152,12 +146,13 @@ ALL +=./data/out/figures/combined_heatmap.png
 		./data/out/absolute_enrichments/done.flag \
 		./data/out/enrichments/done.flag \
 		$(mods)/plotting/fused_general_heatmap.R \
-		/tmp/genesets_tree/tree.txt
+		./data/genesets_repr.txt
 
 	$(rexec) $(mods)/plotting/fused_general_heatmap.R \
 		./data/out/enrichments/ \
 		./data/out/absolute_enrichments/ \
-		/tmp/genesets_tree/tree.txt \
+		./data/genesets_repr.txt \
+		./data/genesets.json
 		$@ \
 		--height 15
 

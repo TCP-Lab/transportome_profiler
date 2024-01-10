@@ -1,5 +1,7 @@
  #!/usr/bin/env Rscript
 
+options(error = traceback)
+
 if (! exists("LOCAL_DEBUG")) {
   # Parsing arguments
   requireNamespace("argparser")
@@ -12,6 +14,9 @@ if (! exists("LOCAL_DEBUG")) {
     ) |>
     argparser::add_argument(
       "input_tree", help="A txt file with the folder structure of the tree to be parsed", type="character"
+    ) |>
+    argparser::add_argument(
+      "genesets", help="The JSON file with the genesets", type="character"
     ) |>
     argparser::add_argument(
       "output_file", help = "The path to the output file",
@@ -33,39 +38,26 @@ if (! exists("LOCAL_DEBUG")) {
   args <- argparser::parse_args(parser)
 }
 
-options(tidyverse.quiet = TRUE)
-library(tidyverse)
-requireNamespace("stringi")
-requireNamespace("reshape2")
+suppressMessages({
+  options(tidyverse.quiet = TRUE)
+  library(tidyverse)
+  requireNamespace("stringi")
+  requireNamespace("reshape2")
+})
 
-parse_tree_labels <- function(tree) {
+parse_tree_labels <- function(tree, genesets) {
   #' Parse the raw tree from the file to an usable labels dataframe
   #' 
-  #' The dataframe has the following cols:
-  #' - original: The original, raw tree
-  #' - cropped: The raw tree, with just the paths from the whole_transportome dir
-  #' - pretty: The prettified tree, without the full paths
-  #' - backbone: Just the backbone of the tree, with no paths
-  #' - rev_backbone: Just the backbone of the tree, but reversed.
-  #' - rev_pretty: The prettified tree, but reversed (with the backbone on the
-  #'   right)
-  #' - paths: The full paths to the tree (without the backbone)
-  #' - clean_paths: The relative paths to the tree (without the backbone)
-  #' 
   #' @param tree A vector of lines where each line is from the tree output
+  #' @param genesets The JSON geneset data
   
   result <- data.frame(original = tree, order = length(tree):1)
-  
-  result$cropped <- str_split_i(result$original, "whole_transportome", 2)
-  fix_crop <- result$cropped
-  # The "whole_transportome" is reduced to "". This fixes it.
-  fix_crop[fix_crop == ""] <- "Whole Transportome"
   
   remove_backbone <- function (x) {
     # Remove all backbone chars from an input
     str_remove_all(x, "[└─│├]") |> str_trim()
   }
-  result$paths <- remove_backbone(result$original)
+  result$id <- remove_backbone(result$original)
   
   result$backbone <- str_split_i(result$original, "─ ", 1) |> paste0("─ ")
   result$backbone[1] <- ""
@@ -74,20 +66,29 @@ parse_tree_labels <- function(tree) {
     str_replace_all("├", "┤") |>
     str_replace_all("└", "┘")
   
-  result$pretty <- paste0(result$backbone, str_split_i(fix_crop, "/", -1))
-  result$rev_pretty <- paste0(str_split_i(fix_crop, "/", -1), result$rev_backbone)
+  result$reverse <- paste0(result$id, result$reverse_backbone)
+  
+  result$pretty <- paste0(
+    result$backbone,
+    sapply(result$id, \(id) {genesets[[id]]$name})
+  )
+  result$rev_pretty <- paste0(
+    sapply(result$id, \(id) {genesets[[id]]$name}),
+    result$rev_backbone
+  )
   
   result
 }
 
 if (exists("LOCAL_DEBUG")) {
-  tree <- read_lines("/tmp/geneset_tree/tree.txt")
+  tree <- read_lines("./data/genesets_repr.txt")
   labs <- parse_tree_labels(tree)
 }
 
 main <- function(
     input_dir,
     input_tree,
+    genesets,
     out_file,
     save = TRUE,
     save_png = FALSE,
@@ -98,7 +99,7 @@ main <- function(
 ) {
   # Load and parse the tree labels
   tree <- read_lines(input_tree)
-  labels <- parse_tree_labels(tree)
+  labels <- parse_tree_labels(tree, genesets)
   
   input_files <- list.files(input_dir, ".csv", full.names = TRUE)
   enrichment_data <- lapply(input_files, \(x) {read.csv(x)})
@@ -106,7 +107,9 @@ main <- function(
   # Get the 'pathway' var to look like the paths in the labels
   # this means getting rid of the /whole_transportome leading bit
   enrichment_data <- lapply(enrichment_data, \(frame) {
-    frame$clean_pathway <- str_split_i(frame$pathway, "whole_transportome", 2)
+    
+    frame$pathway_name <- sapply(frame$pathway, \(id) {genesets[[id]]$name}, simplify = TRUE)
+    frame$label <- sapply(frame$pathway, \(id) {labels[labels$id == id, "rev_pretty"]})
     frame
   })
   
@@ -129,17 +132,16 @@ main <- function(
   
   # Set the order of the column samples based on hclust
   # - We need to make a matrix from the input
-  clust_data <- reshape2::dcast(plot_data, id ~ clean_pathway, value.var = "NES")
-  colnames(clust_data)[colnames(clust_data) == "Var.2"] <- "Whole_transportome"
+  clust_data <- reshape2::dcast(plot_data, id ~ pathway, value.var = "NES")
   clust_data |> column_to_rownames("id") -> clust_data
   
   clust <- hclust( dist( clust_data ), method = "ward.D")
   
   # Set the order of the labels. The actual values will be set in the plot
   plot_data$fac_id <- factor(plot_data$id, levels = clust$labels[clust$order])
-  plot_data$fac_cpath <- factor(plot_data$clean_pathway,  levels = labels$cropped[labels$order])
+  plot_data$fac_pathway <- factor(plot_data$pathway,  levels = labels$id[labels$order])
   
-  p <- ggplot(plot_data, aes(fill = NES, x = fac_id, y = fac_cpath, alpha = alpha_from_padj)) +
+  p <- ggplot(plot_data, aes(fill = NES, x = fac_id, y = fac_pathway, alpha = alpha_from_padj)) +
     geom_tile() +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
@@ -147,7 +149,7 @@ main <- function(
     ylab("Gene Set") + xlab("Cohort") +
     scale_fill_gradient2("NES", low = "purple", mid = "darkgray", high = "darkorange") +
     scale_alpha_identity("alpha_from_padj") +
-    scale_y_discrete(breaks = labels$cropped, labels = labels$rev_pretty) +
+    scale_y_discrete(breaks = labels$id, labels = labels$rev_pretty) +
     theme(text = element_text(family = "FiraCode Nerd Font", size = 10))
   
   # Save plot to output
@@ -166,20 +168,24 @@ main <- function(
 }
 
 if (exists("LOCAL_DEBUG")) {
+  genesets <- rjson::fromJSON(readr::read_file("./data/genesets.json"))
   main(
-    input_dir = "/home/hedmad/Desktop/banana/out/enrichments",
-    input_tree = "/tmp/geneset_tree/tree.txt",
-    out_file = "/home/hedmad/Files/repos/transportome_profiler/data/out/figures/full_heatmap.png",
-    save = TRUE,
+    input_dir = "./data/out/enrichments/",
+    input_tree = "./data/genesets_repr.txt",
+    genesets = "./data/genesets.json",
+    out_file = "./data/out/figures/full_heatmap.png",
+    save = FALSE,
     save_png = TRUE,
     alpha = 0.20,
     png_res = 500,
     plot_height = 10
     )
 } else {
+  genesets <- rjson::fromJSON(readr::read_file(args$genesets))
   main(
     input_dir = args$input_gsea_results,
     input_tree = args$input_tree,
+    genesets = genesets,
     out_file = args$output_file,
     save_png = TRUE,
     png_res = args$res,
