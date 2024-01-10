@@ -151,8 +151,8 @@ ALL +=./data/out/figures/combined_heatmap.png
 	$(rexec) $(mods)/plotting/fused_general_heatmap.R \
 		./data/out/enrichments/ \
 		./data/out/absolute_enrichments/ \
+		./data/genesets.json \
 		./data/genesets_repr.txt \
-		./data/genesets.json
 		$@ \
 		--height 15
 
