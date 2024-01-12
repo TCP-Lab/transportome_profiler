@@ -82,12 +82,12 @@ ALL += ./data/out/figures/enrichments/done.flag
 ./data/out/figures/enrichments/done.flag: \
 		./data/out/enrichments/done.flag \
 		./data/genesets.json \
-		$(mods)/plotting/gsea_plotting_graphs.R \
-		$(mods)/plotting/general_heatmap.R
+		$(mods)/plotting/plot_flower_graph.R
 
 	mkdir -p $(@D)
 
-	$(rexec) $(mods)/plotting/gsea_plotting_graphs.R \
+	find ./data/out/enrichments/*.csv |
+	xargs -I {file} $(rexec) $(mods)/plotting/plot_flower_graph.R \
 		./data/out/enrichments/ ./data/genesets.json \
 		$(@D)
 
@@ -113,12 +113,12 @@ ALL += ./data/out/figures/absolute_enrichments/done.flag
 ./data/out/figures/absolute_enrichments/done.flag: \
 		./data/out/absolute_enrichments/done.flag \
 		./data/genesets.json \
-		$(mods)/plotting/gsea_plotting_graphs.R \
+		$(mods)/plotting/plot_flower_graph.R \
 		$(mods)/plotting/general_heatmap.R
 
 	mkdir -p $(@D)
 
-	$(rexec) $(mods)/plotting/gsea_plotting_graphs.R \
+	$(rexec) $(mods)/plotting/plot_flower_graph.R \
 		./data/out/absolute_enrichments/ ./data/genesets.json \
 		$(@D)
 

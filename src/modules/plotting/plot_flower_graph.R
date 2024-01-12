@@ -1,5 +1,10 @@
 #!/usr/bin/env Rscript
 
+#' This script converts GSEA output files from `fgsea` into flower plots.
+#'
+#' Flower plots are the ones with the graph in the circular fashion, with
+#' colored dots as the leaves.
+
 if (sys.nframe() == 0L) {
   # Parsing arguments
   requireNamespace("argparser")
@@ -8,13 +13,13 @@ if (sys.nframe() == 0L) {
 
   parser |>
     argparser::add_argument(
-      "input_gsea_results", help="Folder with GSEA output .csv files to read.", type="character"
+      "input_gsea_result", help=".csv file with GSEA output", type="character"
     ) |>
     argparser::add_argument(
       "genesets", help="JSON file with geneset information", type="character"
     ) |>
     argparser::add_argument(
-      "output_dir", help = "Output directory to save files in",
+      "output_path", help = "Output file to save",
       type = "character"
     ) |>
     argparser::add_argument(
@@ -47,6 +52,7 @@ suppressMessages({
   library(grid)
   library(assertthat)
 })
+
 
 #' Read a series of .csv files from a directory
 #'
@@ -276,43 +282,23 @@ plot_result <- function(result, genesets_file, title = "") {
   return(pp)
 }
 
-plot_all_results <- function(results, out_dir, genesets_file, width=10, height=8, png = TRUE, res = 400) {
-  for (i in seq_along(results)) {
-    cat(paste0("Saving ", names(results)[i], "...\n"))
-    if (png) {
-      png(
-        file.path(out_dir, paste0(names(results)[i], ".png")),
-        width = width, height = height,
-        units = "in",
-        res = res
-      )
-    } else {
-      pdf(
-          file.path(
-          out_dir, paste0(names(results)[i], ".pdf")),
-          width = width, height = height
-        )
-    }
-    print(
-      plot_result(results[[i]], genesets_file, title = names(results)[i])
-    )
-    graphics.off()
-  }
-}
-
-# DEBUGGING ONLY
-if (FALSE) {
-  results <- read_results("/home/hedmad/Files/data/transportome_profiler/out/enrichments/")
-
-  plot_all_results(results, "~/Files/data/mtpdb/graphs/")
-}
-
 if (sys.nframe() == 0L) {
-  results <- read_results(args$input_gsea_results)
+  print(paste0("Plotting flower plot for ", args$input_gsea_result))
 
-  print(paste0("Found ", length(results), " input results to plot."))
-
-  plot_all_results(
-    results, args$output_dir, args$genesets, args$width, args$height, args$png, args$res
+  args$input_gsea_results |>
+    stringr::str_remove("\\.csv") |>
+    stringr::str_split_i() -> fname
+  p <- plot_result(
+    read.csv(args$input_gsea_result),
+    args$genesets,
+    title = fname
   )
+
+  if (args$png) {
+    png(args$output_path, width = args$width, height = args$height, units = "in", res = args$res)
+    print(p)
+    dev.off()
+  } else {
+    pdf(args$output_path, width = args$width, height = args$height)
+  }
 }

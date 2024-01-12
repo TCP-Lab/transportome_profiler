@@ -98,7 +98,7 @@ purge_ensg_versions <- function(data, id_col = "gene_id") {
 #' @returns A named vector of gene_names : statistic, ready for fgsea::fgsea
 extract_ranks <- function(deg_file, biomart_data, id_col="sample", rank_col="ranking", absolute = FALSE) {
   data <- read_csv(deg_file, show_col_types = FALSE)
-  
+
   if (! id_col %in% colnames(data)) {
     stop(paste0("Cannot find ID column ", id_col, " in input data frame"))
   }
@@ -268,6 +268,8 @@ ensg_data <- biomaRt::getBM(
   attributes = c("ensembl_gene_id", "hgnc_symbol", "gene_biotype"),
   mart = hs.embl
 )
+
+write_csv(ensg_data, "./data/ensg_data.csv")
 
 results <- run_all_gsea(
   "/home/hedmad/Files/data/transportome_profiler/deas",
