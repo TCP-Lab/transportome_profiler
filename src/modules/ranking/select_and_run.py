@@ -6,6 +6,7 @@ import os
 
 import multiprocessing as mp
 
+
 def replace(string, pattern, replacement):
     string = str(string)
     return string.replace(str(pattern), str(replacement))
@@ -14,22 +15,29 @@ def run_wrapper(keyvalue, input_matrix_path, input_metadata_path, output_dir, de
     key, value = keyvalue
     set_meta = partial(replace, pattern = "<meta>", replacement = input_metadata_path.expanduser().absolute())
     print(f"Processing {key}.")
+
     # Make the "case" file
+    print(f"Making input file {key}_case")
     args = ["metasplit",]
     args.extend([set_meta(x) for x in value["case"]])
     args.extend([input_matrix_path, output_dir / f"{key}_case", "--ignore_missing", "--input_delimiter", delimiter, "--always_include", "sample"])
     args = [str(x) for x in args]
+    print(f"Executing {' '.join(args)}")
     run(args, check=True)
 
     # Make the "control" file
+    print(f"Making input file {key}_control")
     args = ["metasplit",]
     args.extend([set_meta(x) for x in value["control"]])
     args.extend([input_matrix_path, output_dir / f"{key}_control", "--ignore_missing", "--input_delimiter", delimiter, "--always_include", "sample"])
     args = [str(x) for x in args]
+    print(f"Executing {' '.join(args)}")
     run(args, check=True)
 
     # Now we can run run_deseq.R
     dea_args = ["generanker", output_dir / f"{key}_case", output_dir / f"{key}_control", "--output-file", output_dir / f"{key}_deseq.csv", "norm_fold_change", "--id-col", "sample"]
+    dea_args = [str(x) for x in dea_args]
+    print(f"Executing: {' '.join(dea_args)}")
     run(dea_args)
 
     # Delete the useless input files
@@ -67,7 +75,7 @@ if __name__ == "__main__":
 
     with args.queries_file.open("r") as stream:
         queries = json.load(stream)
-    
+
     main(
         queries=queries,
         input_matrix_path=args.input_matrix,
@@ -76,5 +84,3 @@ if __name__ == "__main__":
         delimiter=args.delimiter,
         cpus=args.cpus
     )
-
-

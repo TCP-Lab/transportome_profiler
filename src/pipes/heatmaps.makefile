@@ -7,23 +7,18 @@ N_THREADS = 3
 mods = ./src/modules
 rexec = Rscript --no-save --no-restore --verbose
 
+## -- Generic rules
 ## --- Decompress sources
-./data/tcga_target_gtex: ./data/in/expression_matrix.csv.gz
-	gunzip -cf $< | xsv fmt -d '\t' > $@
+./data/%: ./data/in/%.gz
+	gunzip -cfv $< > $@
 
-./data/selected_metadata: ./data/in/expression_matrix_metadata.tsv.gz
-	gunzip -cf $< | xsv fmt -d '\t' > $@
-
-./data/MTPDB.sqlite: ./data/in/MTPDB.sqlite.gz
-	gunzip -cf $< > $@
-
-./data/ensg_data.csv : ./data/in/ensg_data.csv.gz
-	gunzip -cf $< > $@
+%.csv: %.tsv
+	xsv fmt -d '\t' $< > $@
 
 ## --- Calculate the ranking files from the expression matrix
 ./data/deas/flag.txt: \
-	./data/tcga_target_gtex \
-	./data/selected_metadata \
+	./data/expression_matrix.csv \
+	./data/expression_matrix_metadata.csv \
 	$(mods)/ranking/select_and_run.py \
 	./data/in/dea_queries.json
 
@@ -31,8 +26,8 @@ rexec = Rscript --no-save --no-restore --verbose
 
 	python $(mods)/ranking/select_and_run.py \
 		./data/in/dea_queries.json \
-		./data/tcga_target_gtex \
-		./data/selected_metadata \
+		./data/expression_matrix.csv \
+		./data/expression_matrix_metadata.csv \
 		$(@D) \
 		--cpus $(N_THREADS)
 
@@ -61,7 +56,8 @@ rexec = Rscript --no-save --no-restore --verbose
 
 	$(rexec) $(mods)/run_gsea.R \
 		"./data/deas/" "./data/genesets.json" "$(@D)" \
-		--ensg-hugo-data ./data/ensg_data.csv
+		--ensg-hugo-data ./data/ensg_data.csv \
+		--save-plots
 
 	touch $@
 
@@ -161,4 +157,3 @@ all: $(ALL)
 
 .PHONY = $(PHONY)
 .DEFAULT_GOAL := all
-

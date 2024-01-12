@@ -57,10 +57,13 @@ suppressMessages({
 #' @returns A list with file names as names and tibbles as values.
 read_results <- function(input_dir) {
   files <- list.files(input_dir)
-  
+
   # Remove flag files
   files <- files[! endsWith(files, ".flag")]
-  
+
+  # Remove non-csv files
+  files <- files[endsWith(files, ".csv")]
+
   res <- list()
   for (i in seq_along(files)) {
     res[[files[i]]] <- read_csv(file.path(input_dir, files[i]), show_col_types = FALSE)
@@ -91,7 +94,7 @@ result_to_graph <- function(result, genesets) {
   edges <- list()
   for (i in seq_along(genesets_data)) {
     parent <- genesets_data[[i]]$parent
-    edges[[i]] <- c(parent, names(genesets_data)[i]) 
+    edges[[i]] <- c(parent, names(genesets_data)[i])
   }
 
   edges <- as.data.frame(do.call(rbind, edges))
@@ -106,7 +109,7 @@ result_to_graph <- function(result, genesets) {
   vertices <- vertices[!is.null(vertices)]
   for (i in seq_along(vertices)) {
     item <- vertices[i]
-    
+
     NES <- result[result$pathway == item, "NES"]
     padj <- result[result$pathway == item, "padj"]
     if (is.null(NES)) {
@@ -262,7 +265,7 @@ plot_result <- function(result, genesets_file, title = "") {
         y = plot_labels$dodged_y,
         label = plot_labels$label
       ), angle = plot_labels$angle,
-      size = 2.5
+      linesize = 2.5
     ) +
     scale_color_manual(values = colours, limits = colours, guide = guide_legend(title = "NES")) +
     theme(legend.position = "bottom", panel.background = element_blank()) +
