@@ -77,79 +77,21 @@ rexec = Rscript --no-save --no-restore --verbose
 
 	touch $@
 
-## --- Generate the output GSEA plots from the gsea enrichments
-ALL += ./data/out/figures/enrichments/done.flag
-./data/out/figures/enrichments/done.flag: \
-		./data/out/enrichments/done.flag \
-		./data/genesets.json \
-		$(mods)/plotting/plot_flower_graph.R
-
-	mkdir -p $(@D)
-
-	find ./data/out/enrichments/*.csv |
-	xargs -I {file} $(rexec) $(mods)/plotting/plot_flower_graph.R \
-		./data/out/enrichments/ ./data/genesets.json \
-		$(@D)
-
-	touch $@
-
 ## --- Make the large heatmap with all the results
-ALL += ./data/out/figures/enrichments/pancan_heatmap.png
-./data/out/figures/enrichments/pancan_heatmap.png: \
-		./data/out/enrichments/done.flag \
-		$(mods)/plotting/general_heatmap.R \
-		./data/genesets_repr.txt
-
-	$(rexec) $(mods)/plotting/general_heatmap.R \
-		./data/out/enrichments/ \
-		./data/genesets_repr.txt \
-		./data/genesets.json \
-		$@ \
-		--height 15
-
-## This is duplicated from above but i'm not sure how to merge them.
-# They are the same plots but with the absolute enrichments.
-ALL += ./data/out/figures/absolute_enrichments/done.flag
-./data/out/figures/absolute_enrichments/done.flag: \
-		./data/out/absolute_enrichments/done.flag \
-		./data/genesets.json \
-		$(mods)/plotting/plot_flower_graph.R \
-		$(mods)/plotting/general_heatmap.R
-
-	mkdir -p $(@D)
-
-	$(rexec) $(mods)/plotting/plot_flower_graph.R \
-		./data/out/absolute_enrichments/ ./data/genesets.json \
-		$(@D)
-
-	touch $@
-
-ALL +=./data/out/figures/absolute_enrichments/pancan_heatmap.png
-./data/out/figures/absolute_enrichments/pancan_heatmap.png: \
-		./data/out/absolute_enrichments/done.flag \
-		$(mods)/plotting/general_heatmap.R \
-		./data/genesets_repr.txt
-
-	$(rexec) $(mods)/plotting/general_heatmap.R \
-		./data/out/absolute_enrichments/ \
-		./data/genesets_repr.txt \
-		./data/genesets.json \
-		$@ \
-		--height 15
-
-ALL +=./data/out/figures/combined_heatmap.png
-./data/out/figures/combined_heatmap.png: \
+ALL +=./data/out/figures/deregulation_heatmap.png
+./data/out/figures/deregulation_heatmap.png: \
 		./data/out/absolute_enrichments/done.flag \
 		./data/out/enrichments/done.flag \
-		$(mods)/plotting/fused_general_heatmap.R \
-		./data/genesets_repr.txt
+		$(mods)/plotting/plot_large_heatmap.R \
+		./data/genesets_repr.txt \
+		./data/genesets.json
 
-	$(rexec) $(mods)/plotting/fused_general_heatmap.R \
+	$(rexec) $(mods)/plotting/plot_large_heatmap.R \
 		./data/out/enrichments/ \
-		./data/out/absolute_enrichments/ \
 		./data/genesets.json \
 		./data/genesets_repr.txt \
 		$@ \
+		--dots_gsea_results ./data/out/absolute_enrichments/ \
 		--height 15
 
 PHONY += all
