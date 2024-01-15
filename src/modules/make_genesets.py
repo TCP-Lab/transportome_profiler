@@ -15,6 +15,8 @@ import pandas as pd
 from bonsai import Node, Tree
 from colorama import Back, Fore, Style
 from tqdm import tqdm
+
+
 ## >>>> Logging setup
 class ColorFormatter(logging.Formatter):
     # Change this dictionary to suit your coloring needs!
@@ -52,9 +54,11 @@ stream_h.setLevel(logging.INFO)
 log.addHandler(stream_h)
 ## <<<< Logging setup
 
+
 class PruneDirection(Enum):
     TOPDOWN = "topdown"
     BOTTOMUP = "bottomup"
+
 
 def calc_similarity(node_a: set, node_b: set) -> float:
     # For compatibility
@@ -167,7 +171,7 @@ def main(args: dict) -> None:
         )
 
     large_tree.to_node_json(Path(args.out_json).open("w+"))
-    large_tree.to_representation(Path(args.out_repr).open("w+"), force_uuid = True) 
+    large_tree.to_representation(Path(args.out_repr).open("w+"), force_uuid=True)
 
     log.info("Finished!")
 
@@ -335,7 +339,7 @@ def generate_gene_list_trees(
     tree_root = tree.create_node(
         name, parent=None, data=dataframe[id_col].drop_duplicates().to_list()
     )
-    
+
     subtree = generate_list(tree, tree_root, dataframe, 0)
 
     tree.paste(subtree, tree_root)
@@ -391,7 +395,11 @@ if __name__ == "__main__":
         default="bottomup",
     )
     parser.add_argument("--verbose", help="Increase verbosity", action="store_true")
-    parser.add_argument("--json", help="Dump a JSON of the tree instead of nested dirs", action="store_true")
+    parser.add_argument(
+        "--json",
+        help="Dump a JSON of the tree instead of nested dirs",
+        action="store_true",
+    )
 
     args = parser.parse_args()
 
