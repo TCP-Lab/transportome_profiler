@@ -1,7 +1,9 @@
 #? Generate the general heatmap for all transporters
 
 # Number of threads to use to parallelize the ranking process
-N_THREADS = 3
+N_THREADS ?= 3
+# Method to use
+RANK_METHOD ?= norm_fold_change
 
 # Shorthands
 mods = ./src/modules
@@ -29,7 +31,8 @@ rexec = Rscript --no-save --no-restore --verbose
 		./data/expression_matrix.csv \
 		./data/expression_matrix_metadata.csv \
 		$(@D) \
-		--cpus $(N_THREADS)
+		--cpus $(N_THREADS) \
+		--method $(RANK_METHOD)
 
 	touch $@
 
@@ -85,6 +88,8 @@ ALL +=./data/out/figures/deregulation_heatmap.png
 		$(mods)/plotting/plot_large_heatmap.R \
 		./data/genesets_repr.txt \
 		./data/genesets.json
+
+	mkdir -p $(@D)
 
 	$(rexec) $(mods)/plotting/plot_large_heatmap.R \
 		./data/out/enrichments/ \

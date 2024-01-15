@@ -112,6 +112,11 @@ extract_ranks <- function(deg_file, biomart_data, id_col="sample", rank_col="ran
   coding <- biomart_data$ensembl_gene_id[biomart_data$gene_biotype == "protein_coding"]
 
   named_vec <- named_vec[names(named_vec) %in% coding]
+    
+  if (any(is.na(named_vec))) {
+    warning("Some values in named vector are NA. Setting to 0")
+    named_vec[is.na(named_vec)] <- 0
+  }
 
   if (absolute) {
     named_vec <- abs(named_vec)
