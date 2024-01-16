@@ -27,8 +27,12 @@ if (! exists("LOCAL_DEBUG")) {
       type = "character"
     ) |>
     argparser::add_argument(
+      "--no_cluster", help = "Skip clustering of x axis labels",
+      flag=TRUE, type = "logical"
+    ) |>
+    argparser::add_argument(
       "--res", help = "Resolution of plot, in pixels per inch.",
-      default= 400, type = "logical"
+      default= 400, type = "numerical"
     ) |>
     argparser::add_argument(
       "--width", help = "Plot width, in inches.",
@@ -89,7 +93,8 @@ gen_plot_data <- function(
     input_tree,
     input_dir,
     genesets,
-    alpha = 0.05
+    alpha = 0.05,
+    cluster_x_axis = FALSE
   ) {
   tree <- read_lines(input_tree)
   labels <- parse_tree_labels(tree, genesets)
@@ -126,13 +131,18 @@ gen_plot_data <- function(
   # - We need to make a matrix from the input
   # - This is fine to be ran on just one type of data, based on what we want to
   #   sort by. I choose to run it on the relative data.
-  clust_data <- reshape2::dcast(plot_data, id ~ pathway, value.var = "NES")
-  clust_data |> column_to_rownames("id") -> clust_data
-  
-  clust <- hclust( dist( clust_data ), method = "ward.D")
-  
-  # Set the order of the labels. The actual values will be set in the plot
-  plot_data$fac_id <- factor(plot_data$id, levels = clust$labels[clust$order])
+  if (cluster_x_axis) {
+    clust_data <- reshape2::dcast(plot_data, id ~ pathway, value.var = "NES")
+    clust_data |> column_to_rownames("id") -> clust_data
+    
+    clust <- hclust( dist( clust_data ), method = "ward.D")
+    
+    # Set the order of the labels. The actual values will be set in the plot
+    plot_data$fac_id <- factor(plot_data$id, levels = clust$labels[clust$order])
+  } else {
+    # If not clustered, resort to alphabetical clustering
+    plot_data$fac_id <- factor(plot_data$id, levels = plot_data$id[order(plot_data$pathway)])
+  }
   plot_data$fac_pathway <- factor(plot_data$pathway,  levels = labels$id[labels$order])
   
   plot_data$show <- FALSE
@@ -176,6 +186,7 @@ main <- function(
     genesets_file,
     out_file,
     input_dot_dir = NULL,
+    no_cluster = FALSE,
     save_png = FALSE,
     png_res = 300,
     plot_width = 10,
@@ -183,7 +194,12 @@ main <- function(
     alpha = 0.20
 ) {
   genesets <- jsonlite::fromJSON(read_file(genesets_file))
-  relative_plot_data <- gen_plot_data(input_tree = input_tree, input_dir = input_dir, genesets = genesets)
+  relative_plot_data <- gen_plot_data(
+    input_tree = input_tree,
+    input_dir = input_dir,
+    genesets = genesets,
+    cluster_x_axis = (! no_cluster)
+  )
   large_plot <- create_large_heatmap(relative_plot_data)
   
   if (! is.null(input_dot_dir) ) {
@@ -224,6 +240,7 @@ if (exists("LOCAL_DEBUG")) {
     genesets_file = args$genesets,
     out_file = args$output_file,
     input_dot_dir = args$dots_gsea_results,
+    no_cluster = args$no_cluster,
     save_png = TRUE,
     png_res = args$res,
     plot_width = args$width,
