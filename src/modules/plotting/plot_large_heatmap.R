@@ -31,6 +31,10 @@ if (! exists("LOCAL_DEBUG")) {
       flag=TRUE, type = "logical"
     ) |>
     argparser::add_argument(
+      "--alpha", help = "Alpha level to plot at",
+      default=0.05, type = "numerical"
+    ) |>
+    argparser::add_argument(
       "--res", help = "Resolution of plot, in pixels per inch.",
       default= 400, type = "numerical"
     ) |>
@@ -241,6 +245,7 @@ if (exists("LOCAL_DEBUG")) {
     out_file = args$output_file,
     input_dot_dir = args$dots_gsea_results,
     no_cluster = args$no_cluster,
+    alpha = args$alpha,
     save_png = TRUE,
     png_res = args$res,
     plot_width = args$width,
