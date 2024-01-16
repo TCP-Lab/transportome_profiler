@@ -97,6 +97,8 @@ ALL +=./data/out/figures/deregulation_heatmap.png
 		./data/genesets_repr.txt \
 		$@ \
 		--dots_gsea_results ./data/out/absolute_enrichments/ \
+		--alpha 0.20 \
+		--no_cluster \
 		--height 15
 
 PHONY += all

@@ -1,5 +1,5 @@
  #!/usr/bin/env Rscript
-
+#nolint start
 options(warn = 1)
 
 if (! exists("LOCAL_DEBUG")) {
@@ -145,7 +145,7 @@ gen_plot_data <- function(
     plot_data$fac_id <- factor(plot_data$id, levels = clust$labels[clust$order])
   } else {
     # If not clustered, resort to alphabetical clustering
-    plot_data$fac_id <- factor(plot_data$id, levels = plot_data$id[order(plot_data$pathway)])
+    plot_data$fac_id <- factor(plot_data$id, levels = sort(unique(plot_data$id)))
   }
   plot_data$fac_pathway <- factor(plot_data$pathway,  levels = labels$id[labels$order])
   
