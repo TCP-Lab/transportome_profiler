@@ -5,7 +5,10 @@
 This repository contains the code for the analysis on the expression profile of
 the transportome in Cancer based on the [MTP-DB](https://github.com/TCP-Lab/MTP-DB).
 
+> [!NOTE]
 > Read the preprint here: [Profiling the Expression of Transportome Genes in cancer: A systematic approach](https://doi.org/10.1101/2023.07.18.549498)
+> 
+> It's potentially out of date.
 
 The project follows the [Kerblam! standard](https://github.com/MrHedmad/kerblam).
 
