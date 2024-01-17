@@ -138,6 +138,8 @@ def call_portal(project_id: str, number: int = 1_000_000):
     merged_frame = reduce(
         lambda x, y: pd.merge(x, y, on="submitter_id", how="outer"), dataframes
     )
+    # Add the study ID
+    merged_frame["study"] = project_id
     return merged_frame
 
 
