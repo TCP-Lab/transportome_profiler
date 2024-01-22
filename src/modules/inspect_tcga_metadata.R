@@ -4,7 +4,8 @@ suppressMessages({
 
 args <- commandArgs(trailingOnly = TRUE)
 
-data <- read_csv(args[1])
+# Ignore also missing staging values
+data <- read_csv(args[1], na = c("", "NA", "NX", "TX", "MX"))
 
 # Compute missing values for every tumor type for every variable
 data |> group_by(study) |>
