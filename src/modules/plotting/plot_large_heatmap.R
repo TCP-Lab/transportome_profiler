@@ -31,6 +31,10 @@ if (! exists("LOCAL_DEBUG")) {
       flag=TRUE, type = "logical"
     ) |>
     argparser::add_argument(
+      "--extra_title", help = "Extra title to add to the figure",
+      type = "character", default = NULL
+    ) |>
+    argparser::add_argument(
       "--alpha", help = "Alpha level to plot at",
       default=0.05, type = "numerical"
     ) |>
@@ -156,13 +160,20 @@ gen_plot_data <- function(
 }
 
 create_large_heatmap <- function(
-    plot_data
+    plot_data,
+    extra_title = NULL
 ) {
+  fig_title <- if (!is.null(extra_title)) {
+    paste0("Deregulation Overview - ", extra_title)
+  } else {
+    "Deregulation Overview"
+  }
+
   p <- ggplot(plot_data, aes(fill = NES, x = fac_id, y = fac_pathway, alpha = alpha_from_padj)) +
     geom_tile() +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
-    ggtitle("Deregulation Overview") +
+    ggtitle(fig_title) +
     ylab("Gene Set") + xlab("Cohort") +
     scale_fill_gradientn( # not a typo - it is really called gradientn
       "NES",
@@ -191,6 +202,7 @@ main <- function(
     out_file,
     input_dot_dir = NULL,
     no_cluster = FALSE,
+    extra_title = NULL,
     save_png = FALSE,
     png_res = 300,
     plot_width = 10,
@@ -204,7 +216,7 @@ main <- function(
     genesets = genesets,
     cluster_x_axis = (! no_cluster)
   )
-  large_plot <- create_large_heatmap(relative_plot_data)
+  large_plot <- create_large_heatmap(relative_plot_data, extra_title)
   
   if (! is.null(input_dot_dir) ) {
     dot_plot_data <- gen_plot_data(input_tree = input_tree, input_dir = input_dot_dir, genesets = genesets)
@@ -245,6 +257,7 @@ if (exists("LOCAL_DEBUG")) {
     out_file = args$output_file,
     input_dot_dir = args$dots_gsea_results,
     no_cluster = args$no_cluster,
+    extra_title = args$extra_title,
     alpha = args$alpha,
     save_png = TRUE,
     png_res = args$res,
