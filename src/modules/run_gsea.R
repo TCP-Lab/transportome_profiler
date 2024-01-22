@@ -3,6 +3,8 @@
 # This script runs GSEA on all the DEG tables with all the genesets
 # and saves the resulting deg tables to an output folder.
 
+set.seed(42)
+
 # If you are running this from RStudio, you can skip this >>>>>>>>>>>>>>>>>>
 if (sys.nframe() == 0L) {
   # Parsing arguments
