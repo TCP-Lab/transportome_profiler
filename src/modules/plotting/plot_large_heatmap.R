@@ -1,5 +1,4 @@
- #!/usr/bin/env Rscript
-#nolint start
+#!/usr/bin/env Rscript
 options(warn = 1)
 
 if (! exists("LOCAL_DEBUG")) {
@@ -68,9 +67,9 @@ parse_tree_labels <- function(tree, genesets) {
   #' @param tree A vector of lines where each line is from the tree output
   #' @param genesets The JSON geneset data
   
-  result <- data.frame(original = tree, order = length(tree):1)
+  result <- data.frame(original = tree, order = rev(seq_along(tree)))
   
-  remove_backbone <- function (x) {
+  remove_backbone <- function(x) {
     # Remove all backbone chars from an input
     str_remove_all(x, "[└─│├]") |> str_trim()
   }
@@ -98,12 +97,12 @@ parse_tree_labels <- function(tree, genesets) {
 }
 
 gen_plot_data <- function(
-    input_tree,
-    input_dir,
-    genesets,
-    alpha = 0.05,
-    cluster_x_axis = FALSE
-  ) {
+  input_tree,
+  input_dir,
+  genesets,
+  alpha = 0.05,
+  cluster_x_axis = FALSE
+) {
   tree <- read_lines(input_tree)
   labels <- parse_tree_labels(tree, genesets)
   
@@ -122,8 +121,10 @@ gen_plot_data <- function(
   # the enrichment frames
   enrichments <- lapply(seq_along(enrichments), function(i) {
     frame <- enrichments[[i]]
-    frame$id <- str_remove_all(input_files, ".csv")[i] |> str_split_i("/", -1) |>
-      str_remove_all("_deseq") |> str_replace_all("_", " ") # Further clean the inputs
+    frame$id <- str_remove_all(input_files, ".csv")[i] |>
+      str_split_i("/", -1) |>
+      str_remove_all("_deseq") |>
+      str_replace_all("_", " ") # Further clean the inputs
     
     frame
   })
@@ -141,9 +142,9 @@ gen_plot_data <- function(
   #   sort by. I choose to run it on the relative data.
   if (cluster_x_axis) {
     clust_data <- reshape2::dcast(plot_data, id ~ pathway, value.var = "NES")
-    clust_data |> column_to_rownames("id") -> clust_data
+    clust_data <- clust_data |> column_to_rownames("id")
     
-    clust <- hclust( dist( clust_data ), method = "ward.D")
+    clust <- hclust(dist(clust_data), method = "ward.D")
     
     # Set the order of the labels. The actual values will be set in the plot
     plot_data$fac_id <- factor(plot_data$id, levels = clust$labels[clust$order])
@@ -160,8 +161,8 @@ gen_plot_data <- function(
 }
 
 create_large_heatmap <- function(
-    plot_data,
-    extra_title = NULL
+  plot_data,
+  extra_title = NULL
 ) {
   fig_title <- if (!is.null(extra_title)) {
     paste0("Deregulation Overview - ", extra_title)
@@ -196,18 +197,18 @@ add_dots <- function(
 
 
 main <- function(
-    input_dir,
-    input_tree,
-    genesets_file,
-    out_file,
-    input_dot_dir = NULL,
-    no_cluster = FALSE,
-    extra_title = NULL,
-    save_png = FALSE,
-    png_res = 300,
-    plot_width = 10,
-    plot_height = 6,
-    alpha = 0.20
+  input_dir,
+  input_tree,
+  genesets_file,
+  out_file,
+  input_dot_dir = NULL,
+  no_cluster = FALSE,
+  extra_title = NULL,
+  save_png = FALSE,
+  png_res = 300,
+  plot_width = 10,
+  plot_height = 6,
+  alpha = 0.20
 ) {
   genesets <- jsonlite::fromJSON(read_file(genesets_file))
   relative_plot_data <- gen_plot_data(
@@ -218,7 +219,7 @@ main <- function(
   )
   large_plot <- create_large_heatmap(relative_plot_data, extra_title)
   
-  if (! is.null(input_dot_dir) ) {
+  if (! is.null(input_dot_dir)) {
     dot_plot_data <- gen_plot_data(input_tree = input_tree, input_dir = input_dot_dir, genesets = genesets)
     large_plot <- add_dots(large_plot, dot_plot_data)
   }
@@ -248,7 +249,7 @@ if (exists("LOCAL_DEBUG")) {
     alpha = 0.20,
     png_res = 500,
     plot_height = 10
-    )
+  )
 } else {
   main(
     input_dir = args$input_gsea_results,
