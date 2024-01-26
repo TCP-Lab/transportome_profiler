@@ -6,6 +6,8 @@ import os
 
 import multiprocessing as mp
 
+from gene_ranker.ranking_methods import RANKING_METHODS
+
 
 def replace(string, pattern, replacement):
     string = str(string)
@@ -134,13 +136,7 @@ if __name__ == "__main__":
         "--method",
         type=str,
         help="Method to use for generanker",
-        choices=(
-            "fold_change",
-            "deseq_shrinkage",
-            "norm_cohen_d",
-            "norm_fold_change",
-            "norm_hedges_g",
-        ),
+        choices=RANKING_METHODS.keys(),
         default="norm_fold_change",
     )
 
