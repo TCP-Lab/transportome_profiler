@@ -178,7 +178,7 @@ create_large_heatmap <- function(
     ylab("Gene Set") + xlab("Cohort") +
     scale_fill_gradientn( # not a typo - it is really called gradientn
       "NES",
-      colours = c("purple", "gray", "gray", "darkorange")
+      colours = c("purple", "skyblue", "gray", "lightgoldenrod", "darkorange")
     ) + 
     scale_alpha_identity("alpha_from_padj") +
     scale_y_discrete(breaks = plot_data$fac_pathway, labels = plot_data$label) +
