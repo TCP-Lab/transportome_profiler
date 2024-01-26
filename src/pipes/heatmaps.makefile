@@ -44,7 +44,7 @@ rexec = Rscript --no-save --no-restore --verbose
 
 	python $(mods)/make_genesets.py ./data/MTPDB.sqlite ./data/in/basic_gene_lists.json \
 		./data/genesets.json ./data/genesets_repr.txt \
-		--prune_direction "topdown" \
+		--prune_direction "bottomup" \
 		--prune_similarity 0.9 \
 		--verbose
 
