@@ -43,6 +43,7 @@ import subprocess as sb
 from random import sample
 from pathlib import Path
 import os
+import tempfile
 
 import logging
 
@@ -196,24 +197,21 @@ def metasample(
 
     compressor.flush()
 
-    temp = Path("/home/hedmad/temp_metasample")
-
-    log.debug("Executing xsv - selecting columns")
-    compressed_str = ",".join(compressor.compressed)
-    xsv_select(input, compressed_str, include_header=True, output_file=temp)
-    log.debug("Executing xsv - sampling rows")
-    exec(
-        [
-            "xsv",
-            "sample",
-            "-o",
-            f"{output.as_posix()}",
-            f"{row_sample_size}",
-            f"{temp.as_posix()}",
-        ]
-    )
-
-    os.remove(temp)
+    with tempfile.NamedTemporaryFile() as temp:
+        log.debug("Executing xsv - selecting columns")
+        compressed_str = ",".join(compressor.compressed)
+        xsv_select(input, compressed_str, include_header=True, output_file=Path(temp.name))
+        log.debug("Executing xsv - sampling rows")
+        exec(
+            [
+                "xsv",
+                "sample",
+                "-o",
+                f"{output.as_posix()}",
+                f"{row_sample_size}",
+                f"{temp.name}",
+            ]
+        )
 
     print("Done!")
 
