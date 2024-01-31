@@ -7,4 +7,4 @@ version = "0.3.0"
 "https://github.com/TCP-Lab/MTP-DB/releases/latest/download/MTPDB.sqlite.gz" = "MTPDB.sqlite.gz"
 
 [data.profiles.test]
-"expression_matrix.csv.gz" = "test_expression_matrix.csv.gz"
+"expression_matrix.tsv.gz" = "test_expression_matrix.tsv.gz"

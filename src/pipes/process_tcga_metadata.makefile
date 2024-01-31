@@ -1,5 +1,7 @@
 .DELETE_ON_ERROR:
 
+#? Generate the TCGA metadata for the clinical stratification pipeline
+
 rexec = Rscript --no-save --no-restore --verbose
 
 # Generic decompression and conversion rules

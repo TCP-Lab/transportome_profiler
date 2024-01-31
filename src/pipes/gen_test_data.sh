@@ -16,5 +16,8 @@ echo "Running metasample"
     ./data/expression_matrix_metadata.csv sample \
     "25%" 5000
 
+echo "Reformatting as .tsv"
+xsv fmt -t '\t' ./data/test_expression_matrix.csv > ./data/test_expression_matrix.tsv
+
 echo "Compressing and saving as input file"
-gzip -cv ./data/test_expression_matrix.csv > ./data/in/test_expression_matrix.csv.gz
+gzip -cv ./data/test_expression_matrix.tsv > ./data/in/test_expression_matrix.tsv.gz
