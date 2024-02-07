@@ -1,0 +1,10 @@
+{
+    "rank_method": "norm_fold_change",
+    "threads": 3,
+    "save_extra_plots": false,
+    "prune_similarity": 0.9,
+    "prune_direction": "bottomup",
+    "run_unweighted": false,
+    "alpha_threshold": 0.20,
+    "cluster_heatmap_cols": false
+}
