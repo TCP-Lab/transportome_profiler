@@ -1,6 +1,10 @@
 .DELETE_ON_ERROR:
 
 #? Generate the TCGA metadata for the clinical stratification pipeline
+#?
+#? This pulls in fresh-from-the-server clinical data and parses it to
+#? produce the "harmonized_metadata.csv" file with the GTEX + TCGA clinical
+#? metadata.
 
 rexec = Rscript --no-save --no-restore --verbose
 
@@ -14,7 +18,7 @@ rexec = Rscript --no-save --no-restore --verbose
 ./data/tcga_clinical_metadata.csv: \
 	./src/modules/metadata/preprocess_tcga_clinical_metadata.R \
 	./data/raw_tcga_clinical_metadata.csv
-	
+
 	mkdir -p $(@D)
 	$(rexec) $< ./data/raw_tcga_clinical_metadata.csv > $@
 
@@ -45,4 +49,3 @@ all: $(ALL)
 
 .PHONY = $(PHONY)
 .DEFAULT_GOAL := all
-

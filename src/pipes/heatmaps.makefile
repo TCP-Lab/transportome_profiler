@@ -1,4 +1,8 @@
 #? Generate the general heatmap for all transporters
+#?
+#? This takes in the whole expression matrix, splits it, runs ranking
+#? against the splits, runs GSEA against the ranks with genesets from
+#? the MTP-DB and produces the large pancancer heatmaps.
 
 # Number of threads to use to parallelize the ranking process
 N_THREADS ?= 3
