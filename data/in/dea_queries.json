@@ -15,28 +15,36 @@
             "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=Breast&_sample_type=[Normal Tissue,Solid Tissue Normal]&_sample_type!=Cell Line"
         ]
     },
-    "Female_ro_cancer": {
+    "Cervix_cancer": {
         "case": [
-            "<meta>@sample?_study=TCGA&_primary_site=[Cervix,Cervix Uteri,Uterus,Endometrium,Vagina]&_sample_type!=[Solid Tissue Normal,Control Analyte]"
+            "<meta>@sample?_study=TCGA&_primary_site=[Cervix,Cervix Uteri,Vagina]&_sample_type!=[Solid Tissue Normal,Control Analyte]"
         ],
         "control": [
-            "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Cervix,Cervix Uteri,Uterus,Endometrium,Vagina]&_sample_type=[Normal Tissue,Solid Tissue Normal]&_sample_type!=Cell Line"
+            "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Cervix,Cervix Uteri,Vagina]&_sample_type=[Normal Tissue,Solid Tissue Normal]&_sample_type!=Cell Line"
+        ]
+    },
+    "Uterine_cancer": {
+        "case": [
+            "<meta>@sample?_study=TCGA&_primary_site=[Uterus,Endometrium]&_sample_type!=[Solid Tissue Normal,Control Analyte]"
+        ],
+        "control": [
+            "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Uterus,Endometrium]&_sample_type=[Normal Tissue,Solid Tissue Normal]&_sample_type!=Cell Line"
         ]
     },
     "Brain_cancer": {
         "case": [
-            "<meta>@sample?_study=TCGA&_primary_site=[Brain,Pituitary]&_sample_type!=[Solid Tissue Normal,Control Analyte]"
+            "<meta>@sample?_study=TCGA&_primary_site=[Brain]&_sample_type!=[Solid Tissue Normal,Control Analyte]"
         ],
         "control": [
-            "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Brain,Pituitary]&_sample_type=[Normal Tissue,Solid Tissue Normal]&_sample_type!=Cell Line"
+            "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Brain]&_sample_type=[Normal Tissue,Solid Tissue Normal]&_sample_type!=Cell Line"
         ]
     },
     "Liver_cancer": {
         "case": [
-            "<meta>@sample?_study=TCGA&_primary_site=[Bile duct,Liver]&_sample_type!=[Solid Tissue Normal,Control Analyte]"
+            "<meta>@sample?_study=TCGA&_primary_site=[Liver]&_sample_type!=[Solid Tissue Normal,Control Analyte]"
         ],
         "control": [
-            "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Bile duct,Liver]&_sample_type=[Normal Tissue,Solid Tissue Normal]&_sample_type!=Cell Line"
+            "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Liver]&_sample_type=[Normal Tissue,Solid Tissue Normal]&_sample_type!=Cell Line"
         ]
     },
     "Head_n_Neck_cancer": {
@@ -57,10 +65,10 @@
     },
     "Ovarian_cancer": {
         "case": [
-            "<meta>@sample?_study=TCGA&_primary_site=[Fallopian Tube,Ovary]&_sample_type!=[Solid Tissue Normal,Control Analyte]"
+            "<meta>@sample?_study=TCGA&_primary_site=[Ovary]&_sample_type!=[Solid Tissue Normal,Control Analyte]"
         ],
         "control": [
-            "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Fallopian Tube,Ovary]&_sample_type=[Normal Tissue,Solid Tissue Normal]&_sample_type!=Cell Line"
+            "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Ovary]&_sample_type=[Normal Tissue,Solid Tissue Normal]&_sample_type!=Cell Line"
         ]
     },
     "Prostate_cancer": {
@@ -81,10 +89,10 @@
     },
     "Colorectal_cancer": {
         "case": [
-            "<meta>@sample?_study=TCGA&_primary_site=[Colon,Rectum]&_sample_type!=[Solid Tissue Normal,Control Analyte]"
+            "<meta>@sample?_study=TCGA&_primary_site=[Colon]&_sample_type!=[Solid Tissue Normal,Control Analyte]"
         ],
         "control": [
-            "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Colon,Rectum]&_sample_type=[Normal Tissue,Solid Tissue Normal]&_sample_type!=Cell Line"
+            "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Colon]&_sample_type=[Normal Tissue,Solid Tissue Normal]&_sample_type!=Cell Line"
         ]
     },
     "Testicular_cancer": {
@@ -149,22 +157,6 @@
         ],
         "control": [
             "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=Stomach&_sample_type=[Normal Tissue,Solid Tissue Normal]&_sample_type!=Cell Line"
-        ]
-    },
-    "Intestinal_cancer": {
-        "case": [
-            "<meta>@sample?_study=TCGA&_primary_site=Small Intestine&_sample_type!=[Solid Tissue Normal,Control Analyte]"
-        ],
-        "control": [
-            "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=Small Intestine&_sample_type=[Normal Tissue,Solid Tissue Normal]&_sample_type!=Cell Line"
-        ]
-    },
-    "Salivary_cancer": {
-        "case": [
-            "<meta>@sample?_study=TCGA&_primary_site=Salivary Gland&_sample_type!=[Solid Tissue Normal,Control Analyte]"
-        ],
-        "control": [
-            "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=Salivary Gland&_sample_type=[Normal Tissue,Solid Tissue Normal]&_sample_type!=Cell Line"
         ]
     }
 }
