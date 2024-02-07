@@ -76,7 +76,8 @@ rexec = Rscript --no-save --no-restore --verbose
 	$(rexec) $(mods)/run_gsea.R \
 		"./data/deas/" "./data/genesets.json" "$(@D)" \
 		--ensg-hugo-data ./data/ensg_data.csv \
-		--absolute
+		--absolute \
+		--unweighted
 
 	touch $@
 

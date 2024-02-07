@@ -37,6 +37,10 @@ if (sys.nframe() == 0L) {
       flag = TRUE, type = "logical"
     ) |>
     argparser::add_argument(
+      "--unweighted", help = "If specified, runs GSEA in an unweighted manner",
+      flag = TRUE, type = "logical"
+    ) |>
+    argparser::add_argument(
       "--save-plots", help = "If specified, also save GSEA plots alongside tables.",
       flag = TRUE, type = "logical"
     ) -> parser
@@ -114,7 +118,7 @@ extract_ranks <- function(deg_file, biomart_data, id_col="sample", rank_col="ran
   coding <- biomart_data$ensembl_gene_id[biomart_data$gene_biotype == "protein_coding"]
 
   named_vec <- named_vec[names(named_vec) %in% coding]
-    
+
   if (any(is.na(named_vec))) {
     warning("Some values in named vector are NA. Setting to 0")
     named_vec[is.na(named_vec)] <- 0
@@ -138,10 +142,11 @@ extract_ranks <- function(deg_file, biomart_data, id_col="sample", rank_col="ran
 #' @param ranks A named list of gene names: statistic to use as ranked list for gsea.
 #'
 #' @returns A table with GSEA results. See fgsea:fgsea for details.
-run_gsea <- function(genesets, ranks) {
+run_gsea <- function(genesets, ranks, unweighted = FALSE) {
   result <- fgsea::fgsea(
     pathways = genesets,
     stats = ranks,
+    gseaParam = if (unweighted) {0} else {1}
   )
 
   result
@@ -180,7 +185,7 @@ plot_gsea <- function(genesets, ranks) {
 #'   by sacrificing finding up or down regulated groups.
 #'
 #' @returns A list of values with file names as names and GSEA results as values.
-run_all_gsea <- function(input_data_folder, genesets_path, biomart_data, output_dir = NA, absolute = FALSE) {
+run_all_gsea <- function(input_data_folder, genesets_path, biomart_data, output_dir = NA, absolute = FALSE, unweighted = FALSE) {
   file_paths <- list.files(input_data_folder, full.names = TRUE)
   file_paths <- file_paths[endsWith(file_paths, ".csv")]
   file_names <- list.files(input_data_folder, full.names = FALSE)
@@ -198,12 +203,12 @@ run_all_gsea <- function(input_data_folder, genesets_path, biomart_data, output_
     ranks <- extract_ranks(file_paths[i], biomart_data, absolute = absolute)
 
     if (! is.na(output_dir)) {
-      result <- run_gsea(genesets, ranks)
+      result <- run_gsea(genesets, ranks, unweighted)
 
       cat(paste0("Saving data to ", paste0(file.path(output_dir, file_names[i]), ".csv"), "\n"))
       save_result(result, output_dir, file_names[i])
     } else {
-      results[[file_names[i]]] <- run_gsea(genesets, ranks)
+      results[[file_names[i]]] <- run_gsea(genesets, ranks, unweighted)
       results[[paste0("plot_", file_names[[i]])]] <- plot_gsea(genesets, ranks)
     }
   }
@@ -312,14 +317,16 @@ if (sys.nframe() == 0L) {
       args$input_genesets_json,
       ensg_data,
       output_dir = args$output_dir,
-      absolute = args$absolute
+      absolute = args$absolute,
+      unweighted = args$unweighted
     )
   } else {
     results <- run_all_gsea(
       args$input_deg_folder,
       args$input_genesets_json,
       ensg_data,
-      absolute = args$absolute
+      absolute = args$absolute,
+      unweighted = args$unweighted
     )
 
     save_results(results, out_dir = args$output_dir, skip_plots = !args$save_plots)
