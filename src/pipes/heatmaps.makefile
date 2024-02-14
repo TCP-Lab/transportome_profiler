@@ -1,9 +1,34 @@
 #? Generate the general heatmap for all transporters
+#?
+#? This takes in the whole expression matrix, splits it, runs ranking
+#? against the splits, runs GSEA against the ranks with genesets from
+#? the MTP-DB and produces the large pancancer heatmaps.
 
+
+OPTS=./data/in/heatmaps_runtime_options.json
 # Number of threads to use to parallelize the ranking process
-N_THREADS ?= 3
+N_THREADS ?= $(shell cat $(OPTS) | jq -r '.threads')
 # Method to use
-RANK_METHOD ?= norm_fold_change
+RANK_METHOD ?= $(shell cat $(OPTS) | jq -r '.rank_method')
+PRUNE_SIMILARITY ?= $(shell cat $(OPTS) | jq -r '.prune_similarity')
+PRUNE_DIRECTION ?= $(shell cat $(OPTS) | jq -r '.prune_direction')
+ALPHA_THRESHOLD ?= $(shell cat $(OPTS) | jq -r '.alpha_threshold')
+
+# Option switches
+SAVE_EXTRA_PLOTS ?= $(shell cat $(OPTS) | jq -r '.save_extra_plots')
+ifeq ($(SAVE_EXTRA_PLOTS), true)
+_gsea_runtime_flags += "--save-plots"
+endif
+
+RUN_UNWEIGHTED ?= $(shell cat $(OPTS) | jq -r '.run_unweighted')
+ifeq ($(RUN_UNWEIGHTED), true)
+_gsea_runtime_flags += "--unweighted"
+endif
+
+CLUSTER_COLS ?= $(shell cat $(OPTS) | jq -r '.cluster_heatmap_cols')
+ifeq ($(CLUSTER_COLS), false)
+_heatmap_plot_flags += "--no_cluster"
+endif
 
 # Shorthands
 mods = ./src/modules
@@ -44,8 +69,8 @@ rexec = Rscript --no-save --no-restore --verbose
 
 	python $(mods)/make_genesets.py ./data/MTPDB.sqlite ./data/in/basic_gene_lists.json \
 		./data/genesets.json ./data/genesets_repr.txt \
-		--prune_direction "bottomup" \
-		--prune_similarity 0.9 \
+		--prune_direction $(PRUNE_DIRECTION) \
+		--prune_similarity $(PRUNE_SIMILARITY) \
 		--verbose
 
 ## --- Run the pre-ranked GSEA
@@ -60,7 +85,7 @@ rexec = Rscript --no-save --no-restore --verbose
 	$(rexec) $(mods)/run_gsea.R \
 		"./data/deas/" "./data/genesets.json" "$(@D)" \
 		--ensg-hugo-data ./data/ensg_data.csv \
-		--save-plots
+		$(_gsea_runtime_flags)
 
 	touch $@
 
@@ -77,7 +102,7 @@ rexec = Rscript --no-save --no-restore --verbose
 		"./data/deas/" "./data/genesets.json" "$(@D)" \
 		--ensg-hugo-data ./data/ensg_data.csv \
 		--absolute \
-		--unweighted
+		$(_gsea_runtime_flags)
 
 	touch $@
 
@@ -100,8 +125,8 @@ ALL +=./data/out/figures/deregulation_heatmap.png
 		--dots_gsea_results ./data/out/absolute_enrichments/ \
 		--alpha 0.20 \
 		--extra_title "alpha 0.20, metric $(RANK_METHOD)" \
-		--no_cluster \
-		--height 15
+		--height 15 \
+		$(_heatmap_plot_flags)
 
 PHONY += all
 all: $(ALL)

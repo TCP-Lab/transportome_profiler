@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
 #? Make the test expression data from the TCGA/GTEX dataset
+#?
+#? This prepares the data for `--profile test`.
+#? It essentially downsamples the input data, however preserving the
+#? proportions of numerosities of every tumor type.
+#?
+#? This makes the analysis very quick, for testing purposes.
 
 echo "Extracting sources"
 gunzip -cv ./data/in/expression_matrix.tsv.gz > ./data/expression_matrix.tsv
