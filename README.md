@@ -40,7 +40,7 @@ You need some requirements to be installed before you can run the analysis local
   - Install R requirements with `./src/helper_scripts/install_r_pkgs.R`.
 - `Python` version `3.11+`.
   - Install python requirements with `pip install -r ./src/requirements.txt`.
-- The `tree` utility (`sudo apt install tree` on Debian-like or `sudo pacman -Syu tree` on Arch).
+- The `jq` utility (that you can find [here](https://jqlang.github.io/jq/)).
 - The `xsv` program, required by [`metasplit`](https://github.com/MrHedmad/metasplit)
   (`sudo pacman -Syu xsv` on Arch, not packaged by Debian, but [this guide might be useful](https://lindevs.com/install-xsv-on-ubuntu).
   If you have `cargo` installed, you can simply run `cargo install xsv`).
