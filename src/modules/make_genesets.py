@@ -97,7 +97,7 @@ def prune(tree: Tree, similarity: float, direction: PruneDirection) -> Tree:
         leaves = tree.leaves()
 
         # Sort them
-        leaves.sort(key=lambda x: tree.depth_of(x.id), reverse=reverse_sort)
+        leaves.sort(key=lambda x: f"{'/'.join(tree.get_path_of(x.id))}", reverse=reverse_sort)
 
         # Prune
         for node in tqdm(leaves):
