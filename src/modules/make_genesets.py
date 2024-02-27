@@ -10,12 +10,16 @@ from enum import Enum
 from logging import StreamHandler
 from pathlib import Path
 from sqlite3 import Connection, connect
+import random
+import numpy
 
 import pandas as pd
 from bonsai import Node, Tree
 from colorama import Back, Fore, Style
 from tqdm import tqdm
 
+random.seed(1)
+numpy.random.seed(1)
 
 ## >>>> Logging setup
 class ColorFormatter(logging.Formatter):
@@ -97,7 +101,10 @@ def prune(tree: Tree, similarity: float, direction: PruneDirection) -> Tree:
         leaves = tree.leaves()
 
         # Sort them
-        leaves.sort(key=lambda x: f"{tree.depth_of(x.id):09}+{'/'.join(tree.get_path_of(x.id))}", reverse=reverse_sort)
+        leaves.sort(
+            key=lambda x: f"{tree.depth_of(x.id):09}+{'/'.join(tree.get_path_of(x.id))}",
+            reverse=reverse_sort
+        )
 
         # Prune
         for node in tqdm(leaves):
