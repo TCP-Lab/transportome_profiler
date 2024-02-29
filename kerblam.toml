@@ -1,10 +1,14 @@
 [meta]
-version = "0.4.0"
+version = "1.0.0-rc.1"
 
 [data.remote]
+# Pancancer data
 "https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGtex_gene_expected_count.gz" = "expression_matrix.tsv.gz"
 "https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGTEX_phenotype.txt.gz" = "expression_matrix_metadata.tsv.gz"
 "https://github.com/TCP-Lab/MTP-DB/releases/latest/download/MTPDB.sqlite.gz" = "MTPDB.sqlite.gz"
+
+# GEO datasets
+"https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE121842&format=file&file=GSE121842%5Fall%2Ecounts%2Eexp%2Etxt%2Egz" = "GSE121842.tsv.gz"
 
 [data.profiles.test]
 "expression_matrix.tsv.gz" = "test_expression_matrix.tsv.gz"
