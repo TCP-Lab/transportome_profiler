@@ -9,6 +9,7 @@ version = "1.0.0-rc.1"
 
 # GEO datasets
 "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE121842&format=file&file=GSE121842%5Fall%2Ecounts%2Eexp%2Etxt%2Egz" = "GSE121842.tsv.gz"
+"https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE107422&format=file" = "GSE107422_RAW.tar"
 
 [data.profiles.test]
 "expression_matrix.tsv.gz" = "test_expression_matrix.tsv.gz"
