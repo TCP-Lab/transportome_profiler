@@ -37,6 +37,12 @@ data/geo/GSE107422_clean.csv: data/in/GSE107422_RAW.tar
 		panid "unique_id:refseq_rna_id>ensg:ensg" | sponge | \
 		xsv search -s ensg "ENSG" > $@
 
+ALL += data/geo/GSE201284_clean.csv
+data/geo/GSE201284_clean.csv: data/GSE201284.csv
+	mkdir -p $(@D)
+	cat $< | panid "gene_id:hgnc_symbol>ensg:ensg" | sponge | \
+		xsv search -s ensg "ENSG" > $@
+
 PHONY += all
 all: $(ALL)
 
