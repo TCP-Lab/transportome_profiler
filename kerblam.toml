@@ -11,6 +11,7 @@ version = "1.0.0-rc.1"
 "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE121842&format=file&file=GSE121842%5Fall%2Ecounts%2Eexp%2Etxt%2Egz" = "GSE121842.tsv.gz"
 "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE107422&format=file" = "GSE107422_RAW.tar"
 "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE201284&format=file&file=GSE201284%5Fprocessed%5Fcounts%2Etxt%2Egz" = "GSE201284.tsv.gz"
+"https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE159857&format=file&file=GSE159857%5FREZ%2EJuly2017%2Ecoding%5Fgenes%2Eqn%2Esubmission%2Exls%2Egz" = "GSE159857.xls.gz"
 
 [data.profiles.test]
 "expression_matrix.tsv.gz" = "test_expression_matrix.tsv.gz"

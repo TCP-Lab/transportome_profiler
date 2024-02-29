@@ -45,6 +45,7 @@ You need some requirements to be installed before you can run the analysis local
   (`sudo pacman -Syu xsv` on Arch, not packaged by Debian, but [this guide might be useful](https://lindevs.com/install-xsv-on-ubuntu).
   If you have `cargo` installed, you can simply run `cargo install xsv`).
 - Follow the extra installation guide for [`generanker`](https://github.com/TCP-Lab/gene_ranker) (namely installing [fast-cohen](https://github.com/MrHedmad/fast-cohen))
+- The `xls2csv` utility (on arch `yay -Syu perl-xls2csv`)
 - A series of R packages that can be installed with `Rscript ./src/helper_scripts/install_R_pkgs.R`
 - Quite a bit of RAM (some steps require > 50 Gb of RAM) and time.
   Override `N_THREADS` (with `export N_THREADS=...`) to run with less threads.
