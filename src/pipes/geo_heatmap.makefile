@@ -3,6 +3,8 @@
 #? The main task of this pipeline is to preprocess the data that comes in
 #? in a bajillion different formats.
 
+DELETE_ON_ERROR:
+
 # Shorthands
 mods = ./src/modules
 rexec = Rscript --no-save --no-restore --verbose
@@ -19,15 +21,15 @@ rexec = Rscript --no-save --no-restore --verbose
 	xls2csv -x $< -c $@
 
 # GSE121842
-ALL += ./data/geo/GSE121842_clean.csv
-data/geo/GSE121842_clean.csv: data/GSE121842.csv
+GEO += ./data/geo/GSE121842.csv
+data/geo/GSE121842.csv: data/GSE121842.csv
 	mkdir -p $(@D)
 	cat $< | panid "GeneID:hgnc_symbol>ensg:ensg" | sponge | xsv select !GeneType | \
 		xsv search -s ensg "ENSG" > $@
 	
 # GSE107422
-ALL += data/geo/GSE107422_clean.csv
-data/geo/GSE107422_clean.csv: data/in/GSE107422_RAW.tar
+GEO += data/geo/GSE107422.csv
+data/geo/GSE107422.csv: data/in/GSE107422_RAW.tar
 	mkdir -p $(@D)
 	# This is the worst file I've ever seen.
 	# The tar has a bunch of .tsv (but named .txt) gzip-compressed files
@@ -40,17 +42,28 @@ data/geo/GSE107422_clean.csv: data/in/GSE107422_RAW.tar
 		panid "unique_id:refseq_rna_id>ensg:ensg" | sponge | \
 		xsv search -s ensg "ENSG" > $@
 
-ALL += data/geo/GSE201284_clean.csv
-data/geo/GSE201284_clean.csv: data/GSE201284.csv
+GEO += data/geo/GSE201284.csv
+data/geo/GSE201284.csv: data/GSE201284.csv
 	mkdir -p $(@D)
 	cat $< | panid "gene_id:hgnc_symbol>ensg:ensg" | sponge | \
 		xsv search -s ensg "ENSG" > $@
 
-ALL += data/geo/GSE159857_clean.csv
-data/geo/GSE159857_clean.csv: data/GSE159857.csv
+GEO += data/geo/GSE159857.csv
+data/geo/GSE159857.csv: data/GSE159857.csv
 	mkdir -p $(@D)
 	cat $< | panid "GeneSymbol:hgnc_symbol>ensg:ensg" | sponge | \
 		xsv search -s ensg "ENSG" > $@
+
+data/geo/%.metadata.series: data/geo/%.csv
+	python src/modules/geo_data/get_series.py `basename $< .csv` > $@
+
+data/geo/%.metadata: data/geo/%.metadata.series data/in/series_coordinates.json
+	cat $< | python src/modules/geo_data/meta_from_series.py \
+		$$(jq .$$(basename $@ .metadata).id data/in/series_coordinates.json -r) \
+		$$(jq .$$(basename $@ .metadata).var data/in/series_coordinates.json -r) > $@	
+
+
+ALL += data/geo/GSE159857.metadata
 
 
 PHONY += all
