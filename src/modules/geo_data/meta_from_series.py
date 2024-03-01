@@ -29,13 +29,13 @@ def main(input_stream, output_stream, args):
 
     id = data[args.id_col]
     metadata_cols = []
-    for col in args.meta_cols:
+    for i, col in enumerate(args.meta_cols):
         if col not in data:
             raise ValueError(f"Meta col {col} not in input file")
         if len(data[col]) != len(id):
             raise ValueError(f"Meta col {col} has bad length: expected {len(id)}, got {len(data[col])}")
 
-        metadata_cols.append([col] + data[col])
+        metadata_cols.append([f"var_{i}"] + data[col])
     
     # Join together the values
     id = ["sample_id"] + id

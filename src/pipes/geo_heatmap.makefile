@@ -21,7 +21,7 @@ rexec = Rscript --no-save --no-restore --verbose
 	xls2csv -x $< -c $@
 
 # GSE121842
-GEO += ./data/geo/GSE121842.csv
+GEO += data/geo/GSE121842.csv
 data/geo/GSE121842.csv: data/GSE121842.csv
 	mkdir -p $(@D)
 	cat $< | panid "GeneID:hgnc_symbol>ensg:ensg" | sponge | xsv select !GeneType | \
@@ -57,13 +57,22 @@ data/geo/GSE159857.csv: data/GSE159857.csv
 data/geo/%.metadata.series: data/geo/%.csv
 	python src/modules/geo_data/get_series.py `basename $< .csv` > $@
 
-data/geo/%.metadata: data/geo/%.metadata.series data/in/series_coordinates.json
+data/geo/%.metadata.unaligned: data/geo/%.metadata.series data/in/series_coordinates.json
 	cat $< | python src/modules/geo_data/meta_from_series.py \
-		$$(jq .$$(basename $@ .metadata).id data/in/series_coordinates.json -r) \
-		$$(jq .$$(basename $@ .metadata).var data/in/series_coordinates.json -r) > $@	
+		$$(jq ".$$(basename $@ .metadata).id? // .id" data/in/series_coordinates.json -r) \
+		$$(jq ".$$(basename $@ .metadata).var? // .var" data/in/series_coordinates.json -r) > $@	
 
+data/geo/%.metadata: data/geo/%.metadata.unaligned data/geo/%.csv
+	# The recipy order is important, first the metadata, then the csv
+	python src/modules/geo_data/heuristically_align_metadata.py $^ > $@
 
-ALL += data/geo/GSE159857.metadata
+ALL += data/all_geo_data.csv
+data/all_geo_data.csv: $(GEO)
+	./src/helper_scripts/fuse_csv $^ > $@
+
+ALL += data/all_geo_data.metadata
+data/all_geo_data.metadata: $(GEO:.csv=.metadata)
+	./src/helper_scripts/fuse_csv $^ > $@
 
 
 PHONY += all

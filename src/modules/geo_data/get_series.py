@@ -1,12 +1,20 @@
 import sys
 
-BASE_URL = "https://ftp.ncbi.nlm.nih.gov/geo/series/{truncated}nnn/{acc}/matrix/{acc}_series_matrix.txt.gz"
+BASE_URL = "https://ftp.ncbi.nlm.nih.gov/geo/series/{}nnn/{}/matrix/{}_series_matrix.txt.gz"
 
 import shutil
 import urllib.request
 from contextlib import closing
 import io
 from gzip import GzipFile
+
+# Everything is an exception. Some series have many matrix files.
+# This fixes these ambiguities.
+# Fuck me.
+EXCEPTIONS = {
+    # This has both RNA-seq and miRNA, and we want the metadata for RNA-Seq
+    "GSE121842": "GSE121842-GPL20795"
+}
 
 def eprint(*args, **kwargs):
     print(*args, **kwargs, file = sys.stderr)
@@ -22,7 +30,12 @@ def fetch_ftp(url):
 
 def main(output_stream, args):
     truncated = args.accession[:-3]
-    url = BASE_URL.format(truncated=truncated, acc=args.accession)
+    accession = args.accession if args.accession not in EXCEPTIONS else  EXCEPTIONS[args.accession]
+    url = BASE_URL.format(
+        truncated,
+        args.accession,
+        accession
+    )
 
     data = fetch_ftp(url)
 
