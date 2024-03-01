@@ -57,13 +57,15 @@ data/geo/GSE159857.csv: data/GSE159857.csv
 data/geo/%.metadata.series: data/geo/%.csv
 	python src/modules/geo_data/get_series.py `basename $< .csv` > $@
 
-data/geo/%.metadata.unaligned: data/geo/%.metadata.series data/in/series_coordinates.json
+COORDS = data/in/config/series_coordinates.json
+
+data/geo/%.metadata.unaligned: data/geo/%.metadata.series $(COORDS)
 	cat $< | python src/modules/geo_data/meta_from_series.py \
-		$$(jq ".$$(basename $@ .metadata).id? // .id" data/in/series_coordinates.json -r) \
-		$$(jq ".$$(basename $@ .metadata).var? // .var" data/in/series_coordinates.json -r) > $@	
+		$$(jq ".$$(basename $@ .metadata).id? // .id" $(COORDS) -r) \
+		$$(jq ".$$(basename $@ .metadata).var? // .var" $(COORDS) -r) > $@	
 
 data/geo/%.metadata: data/geo/%.metadata.unaligned data/geo/%.csv
-	# The recipy order is important, first the metadata, then the csv
+	# The recipe order is important, first the metadata, then the csv
 	python src/modules/geo_data/heuristically_align_metadata.py $^ > $@
 
 ALL += data/all_geo_data.csv

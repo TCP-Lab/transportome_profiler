@@ -5,11 +5,9 @@ import Levenshtein
 
 
 def find_match(item, possibilities):
-    scores = {p: Levenshtein.distance(p, item) for p in possibilities}
+    scores = {p: Levenshtein.jaro_winkler(p, item) for p in possibilities}
     
     return max(scores, key=scores.get)
-
-
 
 
 def eprint(*args, **kwargs):
@@ -18,7 +16,8 @@ def eprint(*args, **kwargs):
 def main(args):
     with args.data.open("r") as stream:
         header = stream.readline().split(",")
-        header = [x.strip('"') for x in header]
+        header = [x.strip().strip('"') for x in header]
+        header = [x for x in header if x != "ensg"]
     
     meta = pd.read_csv(args.metadata)
     metadata = meta["sample_id"]
