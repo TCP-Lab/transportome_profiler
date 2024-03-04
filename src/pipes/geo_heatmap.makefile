@@ -1,9 +1,8 @@
 #? Generate a heatmap from the GEO samples
-#? 
+#?
 #? The main task of this pipeline is to preprocess the data that comes in
 #? in a bajillion different formats.
 
-DELETE_ON_ERROR:
 
 # Shorthands
 mods = ./src/modules
@@ -26,7 +25,7 @@ data/geo/GSE121842.csv: data/GSE121842.csv
 	mkdir -p $(@D)
 	cat $< | panid "GeneID:hgnc_symbol>ensg:ensg" | sponge | xsv select !GeneType | \
 		xsv search -s ensg "ENSG" > $@
-	
+
 # GSE107422
 GEO += data/geo/GSE107422.csv
 data/geo/GSE107422.csv: data/in/GSE107422_RAW.tar
@@ -59,14 +58,15 @@ data/geo/%.metadata.series: data/geo/%.csv
 
 COORDS = data/in/config/series_coordinates.json
 
-data/geo/%.metadata.unaligned: data/geo/%.metadata.series $(COORDS)
+.PRECIOUS: data/geo/%.metadata.raw
+
+data/geo/%.metadata.raw : data/geo/%.metadata.series $(COORDS)
 	cat $< | python src/modules/geo_data/meta_from_series.py \
 		$$(jq ".$$(basename $@ .metadata).id? // .id" $(COORDS) -r) \
-		$$(jq ".$$(basename $@ .metadata).var? // .var" $(COORDS) -r) > $@	
+		$$(jq ".$$(basename $@ .metadata).var? // .var" $(COORDS) -r) > $@
 
-data/geo/%.metadata: data/geo/%.metadata.unaligned data/geo/%.csv
-	# The recipe order is important, first the metadata, then the csv
-	python src/modules/geo_data/heuristically_align_metadata.py $^ > $@
+data/geo/%.metadata: data/geo/%.metadata.raw
+	python src/modules/geo_data/fix_geo_metadata.py $< > $@
 
 ALL += data/all_geo_data.csv
 data/all_geo_data.csv: $(GEO)
