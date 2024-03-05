@@ -62,7 +62,7 @@ rexec = Rscript --no-save --no-restore --verbose
 	touch $@
 
 ## --- Generate the genesets from the MTPDB
-./data/genesets.json ./data/genesets_repr.txt: \
+./data/genesets.json ./data/genesets_repr.txt &: \
 		./data/MTPDB.sqlite \
 		$(mods)/make_genesets.py \
 		./data/in/config/gene_lists/basic.json
