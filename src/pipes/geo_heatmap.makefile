@@ -3,6 +3,8 @@
 #? The main task of this pipeline is to preprocess the data that comes in
 #? in a bajillion different formats.
 
+.ONESHELL:
+
 OPTS=./data/in/config/heatmaps_runtime_options.json
 
 # Number of threads to use to parallelize the ranking process
@@ -20,6 +22,7 @@ rexec = Rscript --no-save --no-restore --verbose
 ## -- Generic rules
 ## --- Decompress sources
 ./data/%: ./data/in/%.gz
+	mkdir -p $(@D)
 	gunzip -cfv $< > $@
 
 %.csv: %.tsv
@@ -28,67 +31,26 @@ rexec = Rscript --no-save --no-restore --verbose
 %.csv: %.xls
 	xls2csv -x $< -c $@
 
-# GSE121842
-GEO += data/geo/GSE121842.csv
-data/geo/GSE121842.csv: data/GSE121842.csv
-	mkdir -p $(@D)
-	cat $< | panid "GeneID:hgnc_symbol>ensg:ensg" | sponge | xsv select !GeneType | \
-		xsv search -s ensg "ENSG" | sponge | src/helper_scripts/log_values | sponge > $@
-
-# GSE107422
-#GEO += data/geo/GSE107422.csv
-#data/geo/GSE107422.csv: data/in/GSE107422_RAW.tar
-#	mkdir -p $(@D)
-#	# This is the worst file I've ever seen.
-#	# The tar has a bunch of .tsv (but named .txt) gzip-compressed files
-#	# with the colnames: unique_id	<name_of_sample>
-#	# where "unique_id" is a frankenstein code with (seemingly) this pattern:
-#	# gi|<some number>|ref|<refseq ID?>
-#	# ...
-#	# Who did this?
-#	python src/modules/geo_data/prep_GSE107422.py $< | sponge | \
-#		panid "unique_id:refseq_rna_id>ensg:ensg" | sponge | \
-#		xsv search -s ensg "ENSG" > $@
-
-#GEO += data/geo/GSE201284.csv
-#data/geo/GSE201284.csv: data/GSE201284.csv
-#	mkdir -p $(@D)
-#	cat $< | panid "gene_id:hgnc_symbol>ensg:ensg" | sponge | \
-#		xsv search -s ensg "ENSG" > $@
-
-data/geo/GSE159857.csv: data/GSE159857.csv
-	mkdir -p $(@D)
-	cat $< | panid "GeneSymbol:hgnc_symbol>ensg:ensg" | sponge | \
-		xsv search -s ensg "ENSG" > $@
-
-data/geo/%.metadata.series: data/geo/%.csv
-	python src/modules/geo_data/get_series.py `basename $< .csv` > $@
-
-COORDS = data/in/config/series_coordinates.json
-data/geo/%.metadata.raw : data/geo/%.metadata.series $(COORDS)
-	cat $< | python src/modules/geo_data/meta_from_series.py \
-		$$(jq ".$$(basename $@ .metadata).id? // .id" $(COORDS) -r) \
-		$$(jq ".$$(basename $@ .metadata).var? // .var" $(COORDS) -r) > $@
-
-data/geo/%.metadata: data/geo/%.metadata.raw
+data/geo/%.meta.csv: data/geo/%.rawmeta.csv
 	python src/modules/geo_data/fix_geo_metadata.py $< > $@
 
-GEO += data/geo/GSE159857_LUAD.csv
-GEO += data/geo/GSE159857_LUSC.csv
-data/geo/GSE159857_LUAD.csv data/geo/GSE159857_LUAD.metadata \
-	data/geo/GSE159857_LUSC.csv data/geo/GSE159857_LUSC.metadata: \
-	data/geo/GSE159857.metadata data/geo/GSE159857.csv
-	metasplit "$<@sample_id?type=LUAD" data/geo/GSE159857.csv data/geo/GSE159857_LUAD.csv --always_include ensg
-	metasplit "$<@sample_id?type=LUSC" data/geo/GSE159857.csv data/geo/GSE159857_LUSC.csv --always_include ensg
+# GSE159857 is special: it has both LUAD and LUSC samples.
+data/geo/GSE159857_LUAD.counts.csv data/geo/GSE159857_LUAD.meta.csv \
+	data/geo/GSE159857_LUSC.counts.csv data/geo/GSE159857_LUSC.meta.csv: \
+	data/geo/GSE159857.meta.csv data/geo/GSE159857.counts.csv
+	metasplit "$<@run_accession?type=LUAD" data/geo/GSE159857.counts.csv data/geo/GSE159857_LUAD.counts.csv --always_include gene_id
+	metasplit "$<@run_accession?type=LUSC" data/geo/GSE159857.counts.csv data/geo/GSE159857_LUSC.counts.csv --always_include gene_id
 
-	cat $< | xsv search LUAD > data/geo/GSE159857_LUAD.metadata
-	cat $< | xsv search LUSC > data/geo/GSE159857_LUSC.metadata
+	cat $< | xsv search LUAD > data/geo/GSE159857_LUAD.meta.csv
+	cat $< | xsv search LUSC > data/geo/GSE159857_LUSC.meta.csv
 
-data/geo/%.dea.csv: data/geo/%.metadata data/geo/%.csv
+data/geo/%.dea.csv: data/geo/%.meta.csv data/geo/%.counts.csv
 	# Run metasplit on the data to separate case and controls
-	metasplit "$<@sample_id?var_0=case" $(word 2, $^) $@.case --always_include ensg
-	metasplit "$<@sample_id?var_0=control" $(word 2, $^) $@.control --always_include ensg
-	generanker --id-col ensg $@.case $@.control $(RANK_METHOD) > $@
+	metasplit "$<@run_accession?status=case" $(word 2, $^) $@.case.unlogged --always_include gene_id
+	metasplit "$<@run_accession?status=control" $(word 2, $^) $@.control.unlogged --always_include gene_id
+	cat $@.case.unlogged | src/helper_scripts/log_values > $@.case
+	cat $@.control.unlogged | src/helper_scripts/log_values > $@.control
+	generanker --id-col gene_id $@.case $@.control $(RANK_METHOD) > $@
 	rm $@.case $@.control
 
 ## --- Generate the genesets from the MTPDB
@@ -119,9 +81,11 @@ data/geo/%.dea.csv: data/geo/%.metadata data/geo/%.csv
 		--absolute \
 		$(_gsea_runtime_flags)
 
+# A list of all GSEs that we have.
+GEO = GSE22260 GSE29580 GSE121842 GSE159857 GSE159857_LUAD GSE159857_LUSC
 # Make the requirements for this aggregative rule
-gseas = $(addprefix data/out/geo_enrichments/, $(notdir $(GEO:.csv=.gsea.csv)))
-abs_gseas = $(addprefix data/out/absolute_geo_enrichments/, $(notdir $(GEO:.csv=.gsea.csv)))
+gseas = $(addprefix data/out/geo_enrichments/,$(addsuffix .gsea.csv,$(GEO)))
+abs_gseas = $(addprefix data/out/absolute_geo_enrichments/, $(addsuffix .gsea.csv,$(GEO)))
 
 ## --- Make the large heatmap with all the results
 ALL +=./data/out/figures/geo_deregulation_heatmap.png

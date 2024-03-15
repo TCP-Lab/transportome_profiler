@@ -102,7 +102,7 @@ purge_ensg_versions <- function(data, id_col = "gene_id") {
 #' @param rank_col ID of the column with the rankings
 #'
 #' @returns A named vector of gene_names : statistic, ready for fgsea::fgsea
-extract_ranks <- function(deg_file, biomart_data, id_col="ensg", rank_col="ranking", absolute = FALSE) {
+extract_ranks <- function(deg_file, biomart_data, id_col="gene_id", rank_col="ranking", absolute = FALSE) {
   data <- read_csv(deg_file, show_col_types = FALSE)
 
   if (! id_col %in% colnames(data)) {

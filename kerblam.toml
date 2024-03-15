@@ -7,9 +7,15 @@ version = "1.0.0-rc.1"
 "https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGTEX_phenotype.txt.gz" = "expression_matrix_metadata.tsv.gz"
 "https://github.com/TCP-Lab/MTP-DB/releases/latest/download/MTPDB.sqlite.gz" = "MTPDB.sqlite.gz"
 
-# GEO datasets
-"https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE121842&format=file&file=GSE121842%5Fall%2Ecounts%2Eexp%2Etxt%2Egz" = "GSE121842.tsv.gz"
-"https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE159857&format=file&file=GSE159857%5FREZ%2EJuly2017%2Ecoding%5Fgenes%2Eqn%2Esubmission%2Exls%2Egz" = "GSE159857.xls.gz"
+# GEO datasets recomputes from Zenodo
+"https://zenodo.org/records/10822272/files/GSE121842_expected_count.csv.gz" = "geo/GSE121842.counts.csv.gz"
+"https://zenodo.org/records/10822272/files/GSE121842_metadata.csv.gz" =  "geo/GSE121842.rawmeta.csv.gz"
+"https://zenodo.org/records/10822272/files/GSE159857_expected_count.csv.gz" =  "geo/GSE159857.counts.csv.gz"
+"https://zenodo.org/records/10822272/files/GSE159857_metadata.csv.gz" =  "geo/GSE159857.rawmeta.csv.gz"
+"https://zenodo.org/records/10822272/files/GSE22260_expected_count.csv.gz" =  "geo/GSE22260.counts.csv.gz"
+"https://zenodo.org/records/10822272/files/GSE22260_metadata.csv.gz" =  "geo/GSE22260.rawmeta.csv.gz"
+"https://zenodo.org/records/10822272/files/GSE29580_expected_count.csv.gz" =  "geo/GSE29580.counts.csv.gz"
+"https://zenodo.org/records/10822272/files/GSE29580_metadata.csv.gz" =  "geo/GSE29580.rawmeta.csv.gz"
 
 # Discarded GEO datasets
 # These are ready to preprocess, but for some reason or the other they are
