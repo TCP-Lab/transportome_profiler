@@ -5,7 +5,7 @@
 #? the MTP-DB and produces the large pancancer heatmaps.
 
 
-OPTS=./data/in/heatmaps_runtime_options.json
+OPTS=./data/in/config/heatmaps_runtime_options.json
 # Number of threads to use to parallelize the ranking process
 N_THREADS ?= $(shell cat $(OPTS) | jq -r '.threads')
 # Method to use
@@ -47,12 +47,12 @@ rexec = Rscript --no-save --no-restore --verbose
 	./data/expression_matrix.csv \
 	./data/expression_matrix_metadata.csv \
 	$(mods)/ranking/select_and_run.py \
-	./data/in/dea_queries.json
+	./data/in/config/DEA_queries/dea_queries.json
 
 	mkdir -p $(@D)
 
 	python $(mods)/ranking/select_and_run.py \
-		./data/in/dea_queries.json \
+		./data/in/config/DEA_queries/dea_queries.json \
 		./data/expression_matrix.csv \
 		./data/expression_matrix_metadata.csv \
 		$(@D) \
@@ -62,12 +62,12 @@ rexec = Rscript --no-save --no-restore --verbose
 	touch $@
 
 ## --- Generate the genesets from the MTPDB
-./data/genesets.json ./data/genesets_repr.txt: \
+./data/genesets.json ./data/genesets_repr.txt &: \
 		./data/MTPDB.sqlite \
 		$(mods)/make_genesets.py \
-		./data/in/basic_gene_lists.json
+		./data/in/config/gene_lists/basic.json
 
-	python $(mods)/make_genesets.py ./data/MTPDB.sqlite ./data/in/basic_gene_lists.json \
+	python $(mods)/make_genesets.py ./data/MTPDB.sqlite ./data/in/config/gene_lists/basic.json \
 		./data/genesets.json ./data/genesets_repr.txt \
 		--prune_direction $(PRUNE_DIRECTION) \
 		--prune_similarity $(PRUNE_SIMILARITY) \

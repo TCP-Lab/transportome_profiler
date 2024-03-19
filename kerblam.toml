@@ -1,10 +1,29 @@
 [meta]
-version = "0.4.0"
+version = "1.0.0-rc.1"
 
 [data.remote]
+# Pancancer data
 "https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGtex_gene_expected_count.gz" = "expression_matrix.tsv.gz"
 "https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGTEX_phenotype.txt.gz" = "expression_matrix_metadata.tsv.gz"
 "https://github.com/TCP-Lab/MTP-DB/releases/latest/download/MTPDB.sqlite.gz" = "MTPDB.sqlite.gz"
+
+# GEO datasets recomputes from Zenodo
+"https://zenodo.org/records/10822272/files/GSE121842_expected_count.csv.gz" = "geo/GSE121842.counts.csv.gz"
+"https://zenodo.org/records/10822272/files/GSE121842_metadata.csv.gz" =  "geo/GSE121842.rawmeta.csv.gz"
+"https://zenodo.org/records/10822272/files/GSE159857_expected_count.csv.gz" =  "geo/GSE159857.counts.csv.gz"
+"https://zenodo.org/records/10822272/files/GSE159857_metadata.csv.gz" =  "geo/GSE159857.rawmeta.csv.gz"
+"https://zenodo.org/records/10822272/files/GSE22260_expected_count.csv.gz" =  "geo/GSE22260.counts.csv.gz"
+"https://zenodo.org/records/10822272/files/GSE22260_metadata.csv.gz" =  "geo/GSE22260.rawmeta.csv.gz"
+"https://zenodo.org/records/10822272/files/GSE29580_expected_count.csv.gz" =  "geo/GSE29580.counts.csv.gz"
+"https://zenodo.org/records/10822272/files/GSE29580_metadata.csv.gz" =  "geo/GSE29580.rawmeta.csv.gz"
+
+# Discarded GEO datasets
+# These are ready to preprocess, but for some reason or the other they are
+# not suitable for DEAs.
+# GSE107422 - There are no healthy samples
+#"https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE107422&format=file" = "GSE107422_RAW.tar"
+# GSE201284 - Healthy samples are of blood, not tissue
+#"https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE201284&format=file&file=GSE201284%5Fprocessed%5Fcounts%2Etxt%2Egz" = "GSE201284.tsv.gz"
 
 [data.profiles.test]
 "expression_matrix.tsv.gz" = "test_expression_matrix.tsv.gz"

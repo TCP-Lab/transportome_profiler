@@ -1,8 +1,12 @@
 env/
 # Symlinks and/or local data folders
-data/
-data
 paper/resources/images/generated
+
+# Input data
+data/*
+!data/in/
+data/in/*
+!data/in/config/
 
 ## Python gitignore
 # Byte-compiled / optimized / DLL files
