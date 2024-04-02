@@ -66,18 +66,20 @@ data/geo/%.dea.csv: data/geo/%.meta.csv data/geo/%.counts.csv
 		--verbose
 
 ## -- Run the pre-ranked GSEA
-./data/out/geo_enrichments/%.gsea.csv: data/geo/%.dea.csv ./data/genesets.json
+./data/out/geo_enrichments/%.gsea.csv: data/geo/%.dea.csv ./data/genesets.json \
+		./data/ensg_data.csv
 	mkdir -p $(@D)
 	$(rexec) $(mods)/run_gsea_once.R \
 		$< "./data/genesets.json" $@ \
-		--ensg-hugo-data data/in/ensg_data.csv \
+		--ensg-hugo-data data/ensg_data.csv \
 		$(_gsea_runtime_flags)
 
-./data/out/absolute_geo_enrichments/%.gsea.csv: data/geo/%.dea.csv ./data/genesets.json
+./data/out/absolute_geo_enrichments/%.gsea.csv: data/geo/%.dea.csv ./data/genesets.json \
+		./data/ensg_data.csv
 	mkdir -p $(@D)
 	$(rexec) $(mods)/run_gsea_once.R \
 		$< "./data/genesets.json" $@ \
-		--ensg-hugo-data data/in/ensg_data.csv \
+		--ensg-hugo-data data/ensg_data.csv \
 		--absolute \
 		$(_gsea_runtime_flags)
 
@@ -107,6 +109,7 @@ ALL +=./data/out/figures/geo_deregulation_heatmap.png
 		--alpha 0.20 \
 		--extra_title "alpha 0.20, metric $(RANK_METHOD)" \
 		--height 15 \
+		--renames data/in/config/geo_renames.json \
 		$(_heatmap_plot_flags)
 
 PHONY += all

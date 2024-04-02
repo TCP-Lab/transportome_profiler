@@ -4,9 +4,9 @@ options(warn = 1)
 if (! exists("LOCAL_DEBUG")) {
   # Parsing arguments
   requireNamespace("argparser")
-  
+
   parser <- argparser::arg_parser("Plot a large heatmat with relative and absolute GSEA output.")
-  
+
   parser |>
     argparser::add_argument(
       "input_gsea_results", help="Folder with GSEA output .csv files to read.", type="character"
@@ -46,10 +46,14 @@ if (! exists("LOCAL_DEBUG")) {
       default = 10, type = "numerical"
     ) |>
     argparser::add_argument(
+      "--renames", help = "JSON file with renames to apply to sample names when plotting",
+      default = NULL, type = "character"
+    ) |>
+    argparser::add_argument(
       "--height", help = "Plot height, in inches.",
       default = 10, type = "numerical"
     ) -> parser
-  
+
   args <- argparser::parse_args(parser)
 }
 
@@ -63,27 +67,27 @@ suppressMessages({
 
 parse_tree_labels <- function(tree, genesets) {
   #' Parse the raw tree from the file to an usable labels dataframe
-  #' 
+  #'
   #' @param tree A vector of lines where each line is from the tree output
   #' @param genesets The JSON geneset data
-  
+
   result <- data.frame(original = tree, order = rev(seq_along(tree)))
-  
+
   remove_backbone <- function(x) {
     # Remove all backbone chars from an input
     str_remove_all(x, "[└─│├]") |> str_trim()
   }
   result$id <- remove_backbone(result$original)
-  
+
   result$backbone <- str_split_i(result$original, "─ ", 1) |> paste0("─ ")
   result$backbone[1] <- ""
-  
+
   result$rev_backbone <- stringi::stri_reverse(result$backbone) |>
     str_replace_all("├", "┤") |>
     str_replace_all("└", "┘")
-  
+
   result$reverse <- paste0(result$id, result$reverse_backbone)
-  
+
   result$pretty <- paste0(
     result$backbone,
     sapply(result$id, \(id) {genesets[[id]]$name})
@@ -92,7 +96,7 @@ parse_tree_labels <- function(tree, genesets) {
     sapply(result$id, \(id) {genesets[[id]]$name}),
     result$rev_backbone
   )
-  
+
   result
 }
 
@@ -100,15 +104,16 @@ gen_plot_data <- function(
   input_tree,
   input_dir,
   genesets,
+  renames = NULL,
   alpha = 0.05,
   cluster_x_axis = FALSE
 ) {
   tree <- read_lines(input_tree)
   labels <- parse_tree_labels(tree, genesets)
-  
+
   input_files <- list.files(input_dir, ".csv$", full.names = TRUE)
   enrichments <- lapply(input_files, function(x) {read.csv(x)})
-  
+
   # Get the 'pathway' var to look like the paths in the labels
   # this means getting rid of the /whole_transportome leading bit
   enrichments <- lapply(enrichments, \(frame) {
@@ -116,7 +121,7 @@ gen_plot_data <- function(
     frame$label <- sapply(frame$pathway, \(id) {labels[labels$id == id, "rev_pretty"]})
     frame
   })
-  
+
   # For the heatmap we will need a melted matrix. So I first combine all
   # the enrichment frames
   enrichments <- lapply(seq_along(enrichments), function(i) {
@@ -125,17 +130,17 @@ gen_plot_data <- function(
       str_split_i("/", -1) |>
       str_remove_all("_deseq") |>
       str_replace_all("_", " ") # Further clean the inputs
-    
+
     frame
   })
-  
+
   # We can now join all the frames together
   plot_data <- reduce(enrichments, rbind)
-  
+
   # Set the alpha values manually
   plot_data$alpha_from_padj <- 0.40
   plot_data$alpha_from_padj[plot_data$padj < alpha] <- 1
-  
+
   # Set the order of the column samples based on hclust
   # - We need to make a matrix from the input
   # - This is fine to be ran on just one type of data, based on what we want to
@@ -143,20 +148,23 @@ gen_plot_data <- function(
   if (cluster_x_axis) {
     clust_data <- reshape2::dcast(plot_data, id ~ pathway, value.var = "NES")
     clust_data <- clust_data |> column_to_rownames("id")
-    
+
     clust <- hclust(dist(clust_data), method = "ward.D")
-    
+
     # Set the order of the labels. The actual values will be set in the plot
     plot_data$fac_id <- factor(plot_data$id, levels = clust$labels[clust$order])
   } else {
     # If not clustered, resort to alphabetical clustering
     plot_data$fac_id <- factor(plot_data$id, levels = sort(unique(plot_data$id)))
   }
+  # If we need to rename the factors, do it now
+  plot_data$fac_id <- plyr::revalue(plot_data$fac_id, renames)
+
   plot_data$fac_pathway <- factor(plot_data$pathway,  levels = labels$id[labels$order])
-  
+
   plot_data$show <- FALSE
   plot_data$show[plot_data$padj < alpha] <- TRUE
-  
+
   plot_data
 }
 
@@ -179,11 +187,11 @@ create_large_heatmap <- function(
     scale_fill_gradientn( # not a typo - it is really called gradientn
       "NES",
       colours = c("purple", "skyblue", "gray", "lightgoldenrod", "darkorange")
-    ) + 
+    ) +
     scale_alpha_identity("alpha_from_padj") +
     scale_y_discrete(breaks = plot_data$fac_pathway, labels = plot_data$label) +
     theme(text = element_text(family = "FiraCode Nerd Font", size = 10))
-  
+
   p
 }
 
@@ -208,22 +216,39 @@ main <- function(
   png_res = 300,
   plot_width = 10,
   plot_height = 6,
-  alpha = 0.20
+  alpha = 0.20,
+  renames = NULL
 ) {
   genesets <- jsonlite::fromJSON(read_file(genesets_file))
+
+  if (! is.null(renames)) {
+    # This gives a named list. We need a named vector
+    renames <- jsonlite::read_json(renames)
+    nms <- names(renames)
+    renames <- unlist(renames)
+    names(renames) <- nms
+  }
+
   relative_plot_data <- gen_plot_data(
     input_tree = input_tree,
     input_dir = input_dir,
     genesets = genesets,
+    renames = renames,
     cluster_x_axis = (! no_cluster)
   )
+
   large_plot <- create_large_heatmap(relative_plot_data, extra_title)
-  
+
   if (! is.null(input_dot_dir)) {
-    dot_plot_data <- gen_plot_data(input_tree = input_tree, input_dir = input_dot_dir, genesets = genesets)
+    dot_plot_data <- gen_plot_data(
+      input_tree = input_tree,
+      input_dir = input_dot_dir,
+      genesets = genesets,
+      renames = renames
+    )
     large_plot <- add_dots(large_plot, dot_plot_data)
   }
-  
+
   # Save plot to output
   if (is.null(out_file)) {
     print(large_plot)
@@ -263,7 +288,7 @@ if (exists("LOCAL_DEBUG")) {
     save_png = TRUE,
     png_res = args$res,
     plot_width = args$width,
-    plot_height = args$height
+    plot_height = args$height,
+    renames = args$renames
   )
 }
-
