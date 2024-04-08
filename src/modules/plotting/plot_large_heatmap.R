@@ -47,7 +47,7 @@ if (! exists("LOCAL_DEBUG")) {
     ) |>
     argparser::add_argument(
       "--renames", help = "JSON file with renames to apply to sample names when plotting",
-      default = NULL, type = "character"
+      default = NA, type = "character"
     ) |>
     argparser::add_argument(
       "--height", help = "Plot height, in inches.",
@@ -108,6 +108,12 @@ gen_plot_data <- function(
   alpha = 0.05,
   cluster_x_axis = FALSE
 ) {
+  cat(paste0(
+    "Generating plot data from input", input_tree,
+    ", reading dir ", input_dir,
+    " at alpha ", alpha,
+    "\n"
+  ))
   tree <- read_lines(input_tree)
   labels <- parse_tree_labels(tree, genesets)
 
@@ -217,16 +223,20 @@ main <- function(
   plot_width = 10,
   plot_height = 6,
   alpha = 0.20,
-  renames = NULL
+  renames = NA
 ) {
+  cat("Reading in genesets\n")
   genesets <- jsonlite::fromJSON(read_file(genesets_file))
 
-  if (! is.null(renames)) {
+  if (! is.na(renames)) {
+    cat("Reading in renames\n")
     # This gives a named list. We need a named vector
     renames <- jsonlite::read_json(renames)
     nms <- names(renames)
     renames <- unlist(renames)
     names(renames) <- nms
+  } else {
+    renames <- NULL
   }
 
   relative_plot_data <- gen_plot_data(
