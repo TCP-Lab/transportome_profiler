@@ -103,7 +103,7 @@ def prune(tree: Tree, similarity: float, direction: PruneDirection) -> Tree:
         # Sort them
         leaves.sort(
             key=lambda x: f"{tree.depth_of(x.id):09}+{'/'.join(tree.get_path_of(x.id))}",
-            reverse=reverse_sort
+            reverse=reverse_sort,
         )
 
         # Prune
@@ -214,6 +214,7 @@ def make_large_tables(conn: Connection, sets: dict) -> dict[pd.DataFrame]:
         "SELECT name FROM sqlite_master WHERE type='table';"
     ).fetchall()
     possible_tables = list(map(lambda x: x[0], possible_tables))
+    possible_tables.sort()
 
     queries = sets.get("queries", None)
 
