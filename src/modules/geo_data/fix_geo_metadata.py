@@ -183,6 +183,14 @@ OPERATIONS: dict[str, Callable] = {
             follow_regmap({"Adenoma$": "LUAD", "Squamus$": "LUSC"}),
         ),
     ),
+    "GSE60052": chain(
+        apply_to(
+            "source_name_ch1",
+            "status",
+            follow_map({"normal": "control", "tumor": "case"}),
+        ),
+        set_to("type", "SCLC"),
+    ),
 }
 
 

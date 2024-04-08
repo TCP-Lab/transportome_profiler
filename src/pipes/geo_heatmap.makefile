@@ -35,6 +35,7 @@ data/geo/%.meta.csv: data/geo/%.rawmeta.csv
 	python src/modules/geo_data/fix_geo_metadata.py $< > $@
 
 # GSE159857 is special: it has both LUAD and LUSC samples.
+# This rule splits it into the two parts
 data/geo/GSE159857_LUAD.counts.csv data/geo/GSE159857_LUAD.meta.csv \
 	data/geo/GSE159857_LUSC.counts.csv data/geo/GSE159857_LUSC.meta.csv: \
 	data/geo/GSE159857.meta.csv data/geo/GSE159857.counts.csv
@@ -84,7 +85,7 @@ data/geo/%.dea.csv: data/geo/%.meta.csv data/geo/%.counts.csv
 		$(_gsea_runtime_flags)
 
 # A list of all GSEs that we have.
-GEO = GSE22260 GSE29580 GSE121842 GSE159857_LUAD GSE159857_LUSC
+GEO = GSE22260 GSE29580 GSE121842 GSE159857_LUAD GSE159857_LUSC GSE60052
 # Make the requirements for this aggregative rule
 gseas = $(addprefix data/out/geo_enrichments/,$(addsuffix .gsea.csv,$(GEO)))
 abs_gseas = $(addprefix data/out/absolute_geo_enrichments/, $(addsuffix .gsea.csv,$(GEO)))
@@ -106,8 +107,8 @@ ALL +=./data/out/figures/geo_deregulation_heatmap.png
 		./data/genesets_repr.txt \
 		$@ \
 		--dots_gsea_results ./data/out/absolute_geo_enrichments/ \
-		--alpha 0.20 \
-		--extra_title "alpha 0.20, metric $(RANK_METHOD)" \
+		--alpha $(ALPHA_THRESHOLD) \
+		--extra_title "alpha $(ALPHA_THRESHOLD), metric $(RANK_METHOD)" \
 		--height 15 \
 		--renames data/in/config/geo_renames.json \
 		$(_heatmap_plot_flags)
