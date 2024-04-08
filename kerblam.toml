@@ -7,6 +7,9 @@ version = "1.0.0-rc.1"
 "https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGTEX_phenotype.txt.gz" = "expression_matrix_metadata.tsv.gz"
 "https://github.com/TCP-Lab/MTP-DB/releases/download/1.24.09/MTPDB.sqlite.gz" = "MTPDB.sqlite.gz"
 
+# ENSG data
+"https://gist.githubusercontent.com/MrHedmad/b625febffa6d983399894e1f72d438d7/raw/0652d18fd294b88caf67d4470cf8436263b38089/ensg_data.csv" = "data/in/ensg_data.csv"
+
 # GEO datasets recomputes from Zenodo
 "https://zenodo.org/records/10822272/files/GSE121842_expected_count.csv.gz" = "geo/GSE121842.counts.csv.gz"
 "https://zenodo.org/records/10822272/files/GSE121842_metadata.csv.gz" =  "geo/GSE121842.rawmeta.csv.gz"

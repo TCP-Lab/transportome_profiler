@@ -41,6 +41,11 @@ rexec = Rscript --no-save --no-restore --verbose
 %.csv: %.tsv
 	xsv fmt -d '\t' $< > $@
 
+# If we have the input data as-is in the data/in folder, but we need it in
+# data/ we can just copy it.
+./data/%: ./data/in/%
+	cp $< $@
+
 ## --- Calculate the ranking files from the expression matrix
 ./data/deas/flag.txt: \
 	./data/expression_matrix.csv \
