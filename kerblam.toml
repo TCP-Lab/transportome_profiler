@@ -3,8 +3,8 @@ version = "1.0.0-rc.1"
 
 [data.remote]
 # Pancancer data
-"https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGtex_gene_expected_count.gz" = "expression_matrix.tsv.gz"
-"https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGTEX_phenotype.txt.gz" = "expression_matrix_metadata.tsv.gz"
+"https://zenodo.org/records/10944168/files/expression_matrix.tsv.gz" = "expression_matrix.tsv.gz"
+"https://zenodo.org/records/10944168/files/expression_matrix_metadata.tsv.gz" = "expression_matrix_metadata.tsv.gz"
 "https://github.com/TCP-Lab/MTP-DB/releases/download/1.24.09/MTPDB.sqlite.gz" = "MTPDB.sqlite.gz"
 
 # ENSG data
