@@ -5,7 +5,7 @@ version = "1.0.0-rc.1"
 # Pancancer data
 "https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGtex_gene_expected_count.gz" = "expression_matrix.tsv.gz"
 "https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGTEX_phenotype.txt.gz" = "expression_matrix_metadata.tsv.gz"
-"https://github.com/TCP-Lab/MTP-DB/releases/latest/download/MTPDB.sqlite.gz" = "MTPDB.sqlite.gz"
+"https://github.com/TCP-Lab/MTP-DB/releases/download/1.24.09/MTPDB.sqlite.gz" = "MTPDB.sqlite.gz"
 
 # GEO datasets recomputes from Zenodo
 "https://zenodo.org/records/10822272/files/GSE121842_expected_count.csv.gz" = "geo/GSE121842.counts.csv.gz"
