@@ -234,7 +234,8 @@ def make_large_tables(conn: Connection, sets: dict) -> dict[pd.DataFrame]:
             log.debug(f"Loading table {table_name} with query {query}.")
             loaded_tables.append(pd.read_sql(query, conn))
 
-        large_tables[set_name] = pd.concat(loaded_tables, ignore_index=True, sort=True)
+        large_table = pd.concat(loaded_tables, ignore_index=True, sort=True)
+        large_tables[set_name] = large_table.sort_values("ensg", axis = 0)
 
     return large_tables
 
