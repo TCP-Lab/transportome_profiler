@@ -102,7 +102,7 @@ def prune(tree: Tree, similarity: float, direction: PruneDirection) -> Tree:
 
         # Sort them
         leaves.sort(
-            key=lambda x: f"{tree.depth_of(x.id):09}+{'/'.join(tree.get_path_of(x.id))}",
+            key=lambda x: f"{tree.depth_of(x.id):09}+{'/'.join(','.join(x.data))}",
             reverse=reverse_sort,
         )
 
