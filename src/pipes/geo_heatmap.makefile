@@ -85,7 +85,8 @@ data/geo/%.dea.csv: data/geo/%.meta.csv data/geo/%.counts.csv
 		$(_gsea_runtime_flags)
 
 # A list of all GSEs that we have.
-GEO = GSE22260 GSE29580 GSE121842 GSE159857_LUAD GSE159857_LUSC GSE60052
+GEO = GSE22260 GSE29580 GSE121842 GSE159857_LUAD GSE159857_LUSC GSE60052 \
+	  GSE254461 GSE103001
 # Make the requirements for this aggregative rule
 gseas = $(addprefix data/out/geo_enrichments/,$(addsuffix .gsea.csv,$(GEO)))
 abs_gseas = $(addprefix data/out/absolute_geo_enrichments/, $(addsuffix .gsea.csv,$(GEO)))

@@ -191,6 +191,26 @@ OPERATIONS: dict[str, Callable] = {
         ),
         set_to("type", "SCLC"),
     ),
+    "GSE254461": chain(
+        apply_to(
+            "title",
+            "status",
+            follow_regmap({"[cC]ancer tissue": "case", "Healthy": "control"})
+        ),
+        apply_to(
+            "title",
+            "type",
+            follow_regmap({"LGG": "LGG", "GBM": "GBM", "BRCA": "BRCA", "COAD": "COAD", "KI": "KI", "LIV": "LIV", "UT": "UT"})
+        )
+    ),
+    "GSE103001": chain(
+        apply_to(
+            "characteristics_ch1",
+            "status",
+            follow_regmap({"normal$": "control", "carcinoma$": "case"})
+        ),
+        set_to("type", "BRCA")
+    )
 }
 
 
