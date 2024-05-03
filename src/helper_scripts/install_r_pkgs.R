@@ -3,15 +3,15 @@
 options(repos = "http://cloud.r-project.org/")
 
 install <- function(pkg) {
-    if ( ! require(pkg, character.only = TRUE)) {
+    if (!require(pkg, character.only = TRUE)) {
         install.packages(pkg)
-   } else {
+    } else {
         cat(paste0("Skipping ", pkg, " as it is already installed.\n"))
     }
 }
 
 install_bioc <- function(pkg) {
-    if ( ! require(pkg, character.only = TRUE)) {
+    if (!require(pkg, character.only = TRUE)) {
         BiocManager::install(pkg)
     } else {
         cat(paste0("Skipping ", pkg, " as it is already installed.\n"))
@@ -31,4 +31,4 @@ install("grid")
 install("reshape2")
 install("rjson")
 install_bioc("glmGamPoi")
-
+install("extrafont")
