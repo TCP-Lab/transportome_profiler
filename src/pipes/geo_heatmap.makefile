@@ -28,8 +28,8 @@ rexec = Rscript --no-save --no-restore --verbose
 %.csv: %.tsv
 	xsv fmt -d '\t' $< > $@
 
-%.csv: %.xls
-	xls2csv -x $< -c $@
+data/%: data/in/%
+	mv $< $@
 
 data/geo/%.meta.csv: data/geo/%.rawmeta.csv
 	python src/modules/geo_data/fix_geo_metadata.py $< > $@
@@ -39,20 +39,32 @@ data/geo/%.meta.csv: data/geo/%.rawmeta.csv
 data/geo/GSE159857_LUAD.counts.csv data/geo/GSE159857_LUAD.meta.csv \
 	data/geo/GSE159857_LUSC.counts.csv data/geo/GSE159857_LUSC.meta.csv: \
 	data/geo/GSE159857.meta.csv data/geo/GSE159857.counts.csv
-	metasplit "$<@run_accession?type=LUAD" data/geo/GSE159857.counts.csv data/geo/GSE159857_LUAD.counts.csv --always_include gene_id
-	metasplit "$<@run_accession?type=LUSC" data/geo/GSE159857.counts.csv data/geo/GSE159857_LUSC.counts.csv --always_include gene_id
+	metasplit "$<@ena_run?type=LUAD" data/geo/GSE159857.counts.csv data/geo/GSE159857_LUAD.counts.csv --always_include gene_id
+	metasplit "$<@ena_run?type=LUSC" data/geo/GSE159857.counts.csv data/geo/GSE159857_LUSC.counts.csv --always_include gene_id
 
 	cat $< | xsv search LUAD > data/geo/GSE159857_LUAD.meta.csv
 	cat $< | xsv search LUSC > data/geo/GSE159857_LUSC.meta.csv
 
 data/geo/%.dea.csv: data/geo/%.meta.csv data/geo/%.counts.csv
 	# Run metasplit on the data to separate case and controls
-	metasplit "$<@run_accession?status=case" $(word 2, $^) $@.case.unlogged --always_include gene_id
-	metasplit "$<@run_accession?status=control" $(word 2, $^) $@.control.unlogged --always_include gene_id
+	metasplit "$<@ena_run?status=case" $(word 2, $^) $@.case.unlogged --always_include gene_id
+	metasplit "$<@ena_run?status=control" $(word 2, $^) $@.control.unlogged --always_include gene_id
 	cat $@.case.unlogged | src/helper_scripts/log_values > $@.case
 	cat $@.control.unlogged | src/helper_scripts/log_values > $@.control
 	generanker --id-col gene_id $@.case $@.control $(RANK_METHOD) > $@
 	rm $@.case $@.control
+
+# GSE254461 is specialer: it has a bunch of different tumor types
+# This rule splits it into the two parts
+data/geo/GSE254461_BRCA.counts.csv data/geo/GSE254461_BRCA.meta.csv \
+	data/geo/GSE254461_KI.counts.csv data/geo/GSE254461_KI.meta.csv \
+	data/geo/GSE254461_LIV.counts.csv data/geo/GSE254461_LIV.meta.csv \
+	data/geo/GSE254461_COAD.counts.csv data/geo/GSE254461_COAD.meta.csv: \
+	data/geo/GSE254461.meta.csv data/geo/GSE254461.counts.csv
+	for id in BRCA KI LIV COAD; do
+		metasplit "$<@ena_run?type=$$id" data/geo/GSE254461.counts.csv data/geo/GSE254461_$${id}.counts.csv --always_include gene_id
+		cat $< | xsv search $$id > data/geo/GSE254461_$${id}.meta.csv
+	done
 
 ## --- Generate the genesets from the MTPDB
 ./data/genesets.json ./data/genesets_repr.txt: \
@@ -86,7 +98,7 @@ data/geo/%.dea.csv: data/geo/%.meta.csv data/geo/%.counts.csv
 
 # A list of all GSEs that we have.
 GEO = GSE22260 GSE29580 GSE121842 GSE159857_LUAD GSE159857_LUSC GSE60052 \
-	  GSE254461 GSE103001
+	  GSE254461_BRCA GSE254461_KI GSE254461_LIV GSE254461_COAD GSE103001
 # Make the requirements for this aggregative rule
 gseas = $(addprefix data/out/geo_enrichments/,$(addsuffix .gsea.csv,$(GEO)))
 abs_gseas = $(addprefix data/out/absolute_geo_enrichments/, $(addsuffix .gsea.csv,$(GEO)))

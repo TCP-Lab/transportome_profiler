@@ -3,5 +3,11 @@
     "GSE29580.gsea": "GSE29580 - COAD",
     "GSE22260.gsea": "GSE22260 - PRAD",
     "GSE159857 LUAD.gsea": "GSE159857 - LUAD",
-    "GSE159857 LUSC.gsea": "GSE159857 - LUSC"
+    "GSE159857 LUSC.gsea": "GSE159857 - LUSC",
+    "GSE254461 BRCA.gsea": "GSE254461 - BRCA",
+    "GSE254461 KI.gsea": "GSE254461 - Kidney",
+    "GSE254461 LIV.gsea": "GSE254461 - Liver",
+    "GSE254461 COAD.gsea": "GSE254461 - COAD",
+    "GSE60052.gsea": "GSE60052.gsea - LUSC",
+    "GSE103001.gsea": "GSE103001 - BRCA"
 }

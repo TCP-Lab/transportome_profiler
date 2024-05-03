@@ -195,7 +195,7 @@ OPERATIONS: dict[str, Callable] = {
         apply_to(
             "title",
             "status",
-            follow_regmap({"[cC]ancer tissue": "case", "Healthy": "control"})
+            follow_regmap({"[cC]ancer tissue|Meningioma|[Cc]arcinoma": "case", "Healthy": "control"})
         ),
         apply_to(
             "title",
