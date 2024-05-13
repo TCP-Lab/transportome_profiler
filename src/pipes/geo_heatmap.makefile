@@ -52,7 +52,7 @@ data/geo/%.dea.csv: data/geo/%.meta.csv data/geo/%.counts.csv
 	cat $@.case.unlogged | src/helper_scripts/log_values > $@.case
 	cat $@.control.unlogged | src/helper_scripts/log_values > $@.control
 	generanker --id-col gene_id $@.case $@.control $(RANK_METHOD) > $@
-	rm $@.case $@.control
+	rm $@.case $@.control $@.case.unlogged $@.control.unlogged
 
 # GSE254461 is specialer: it has a bunch of different tumor types
 # This rule splits it into the two parts
@@ -98,7 +98,8 @@ data/geo/GSE254461_BRCA.counts.csv data/geo/GSE254461_BRCA.meta.csv \
 
 # A list of all GSEs that we have.
 GEO = GSE22260 GSE29580 GSE121842 GSE159857_LUAD GSE159857_LUSC GSE60052 \
-	  GSE254461_BRCA GSE254461_KI GSE254461_LIV GSE254461_COAD GSE103001
+	  GSE254461_BRCA GSE254461_KI GSE254461_LIV GSE254461_COAD GSE103001 \
+	  GSE119224 GSE151352 GSE159260 GSE234927
 # Make the requirements for this aggregative rule
 gseas = $(addprefix data/out/geo_enrichments/,$(addsuffix .gsea.csv,$(GEO)))
 abs_gseas = $(addprefix data/out/absolute_geo_enrichments/, $(addsuffix .gsea.csv,$(GEO)))
@@ -131,3 +132,5 @@ all: $(ALL)
 
 .PHONY = $(PHONY)
 .DEFAULT_GOAL := all
+
+#.PRECIOUS = *.gsea.csv

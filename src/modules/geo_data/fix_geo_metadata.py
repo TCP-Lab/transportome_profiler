@@ -210,6 +210,38 @@ OPERATIONS: dict[str, Callable] = {
             follow_regmap({"normal$": "control", "carcinoma$": "case"})
         ),
         set_to("type", "BRCA")
+    ),
+    "GSE119224": chain(
+        apply_to(
+            "characteristics_ch1",
+            "status",
+            follow_map({"disease: Adjacent controls": "control", "disease: pancreatic cancer": "case"})
+        ),
+        set_to("type", "PDAC")
+    ),
+    "GSE151352": chain(
+        apply_to(
+            "characteristics_ch1_5",
+            "status",
+            follow_map({"tissue: normal brain": "control", "tissue: brain tumor": "case"})
+        ),
+        set_to("type", "GBM")
+    ),
+    "GSE159260": chain(
+        apply_to(
+            "source_name_ch1",
+            "status",
+            follow_map({"Healthy brain tissue": "control", "brain tumour": "case"})
+        ),
+        set_to("type", "GBM")
+    ),
+    "GSE234927": chain(
+        apply_to(
+            "source_name_ch1",
+            "status",
+            follow_regmap({"PDAC": "case", "PADC": "control"})
+        ),
+        set_to("type", "PDAC")
     )
 }
 

@@ -8,6 +8,10 @@
     "GSE254461 KI.gsea": "GSE254461 - Kidney",
     "GSE254461 LIV.gsea": "GSE254461 - Liver",
     "GSE254461 COAD.gsea": "GSE254461 - COAD",
-    "GSE60052.gsea": "GSE60052.gsea - LUSC",
-    "GSE103001.gsea": "GSE103001 - BRCA"
+    "GSE60052.gsea": "GSE60052 - LUSC",
+    "GSE103001.gsea": "GSE103001 - BRCA",
+    "GSE151352.gsea": "GSE151352 - GBM",
+    "GSE159260.gsea": "GSE159260 - GBM",
+    "GSE119224.gsea": "GSE119224 - PDAC",
+    "GSE234927.gsea": "GSE234927 - PDAC"
 }
