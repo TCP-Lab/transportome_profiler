@@ -34,6 +34,9 @@ version = "1.0.0-rc.1"
 "https://zenodo.org/records/11183835/files/GSE234927_expected_count.csv.gz" = "geo/GSE234927.counts.csv.gz"
 "https://zenodo.org/records/11183835/files/GSE234927_metadata.csv.gz" = "geo/GSE234927.rawmeta.csv.gz"
 
+# Final computed datasets
+# TODO: Add them here when we finish them
+
 # Discarded GEO datasets
 # These are ready to preprocess, but for some reason or the other they are
 # not suitable for DEAs.
