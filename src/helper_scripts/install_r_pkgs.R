@@ -3,7 +3,7 @@
 options(repos = "http://cloud.r-project.org/")
 
 install <- function(pkg) {
-    if (!require(pkg, character.only = TRUE)) {
+    if (!requireNamespace(pkg, quietly=TRUE)) {
         install.packages(pkg)
     } else {
         cat(paste0("Skipping ", pkg, " as it is already installed.\n"))
@@ -11,7 +11,7 @@ install <- function(pkg) {
 }
 
 install_bioc <- function(pkg) {
-    if (!require(pkg, character.only = TRUE)) {
+    if (!requireNamespace(pkg, quietly = TRUE)) {
         BiocManager::install(pkg)
     } else {
         cat(paste0("Skipping ", pkg, " as it is already installed.\n"))
