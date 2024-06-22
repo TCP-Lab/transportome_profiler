@@ -71,21 +71,47 @@ ensg_data <- read_csv(
     "/home/hedmad/Files/repos/tprof/data/ensg_data.csv"
 )
 
-strip_ensg_version <- function(x) {
-    str_split_1(x, "\\.")[1]
+#' This list is used to rename tumor types. Syntax is "OLD" = "NEW"
+#' regex is NOT supported.
+tt_renames <- list(
+    "Head_n_Neck_cancer_deseq" = "Head and Neck"
+)
+
+
+
+{
+    # This removes the version from an ensembl ID
+    strip_ensg_version <- function(x) {
+        str_split_1(x, "\\.")[1]
+    }
+
+    assert_that(are_equal(strip_ensg_version("ENSG0000.12"), "ENSG0000"))
+    assert_that(are_equal(strip_ensg_version("ENSG0000.1"), "ENSG0000"))
 }
 
-assert_that(are_equal(strip_ensg_version("ENSG0000.12"), "ENSG0000"))
-assert_that(are_equal(strip_ensg_version("ENSG0000.1"), "ENSG0000"))
-
+#' Perform basic data preparation before starting processing
+#'
+#' This strips the (eventual) ensembl id version from the data IDs and
+#' moves the ID to row names both to use native R and to standardize the
+#' name of the column in further processing.
 prep_data <- function(data, id_col = "sample") {
     data[[id_col]] <- map(data[[id_col]], strip_ensg_version)
     data |> column_to_rownames(id_col)
 }
 
-pdata <- prep_data(data)
-
-extract_top_dysregulated <- function(data, n = 100, thr = 1, gene_filter = NULL) {
+#' Extract the top dysregulated genes from the data
+#'
+#' This can apply three types of filters:
+#' - One, it filters based on the score, keeping genes strictly above or equal `thr`
+#'   (for upregulated) or below or equal `-thr` (for downregulated)
+#' - Two, it further narrows down the number of genes keeping only the top-N
+#'   in the list, sorted by score (or |score|).
+#' - Three, it keeps only genes that are specified in `gene_filter`, discarding
+#'   all the rest.
+#'
+#' To turn off the filters, set `n` to `Inf` (the default), `gene_filter` to
+#' `NULL` (the default) and `thr` to `0`.
+extract_top_dysregulated <- function(data, thr = 1, n = Inf, gene_filter = NULL) {
     types <- list()
 
     if (!is.null(gene_filter)) {
@@ -99,10 +125,10 @@ extract_top_dysregulated <- function(data, n = 100, thr = 1, gene_filter = NULL)
         tum_data <- data |> rownames_to_column("names") |> select(c(!!id, names)) |>
             rename(value = !!id)
 
-        tum_data <- tum_data |> filter(abs(value) > thr)
+        tum_data <- tum_data |> filter(abs(value) >= thr)
 
         tum_up <- tum_data |> filter(value > 0)
-        tum_down <- tum_data |> filter(value < 0)
+        tum_down <- tum_data |> filter(value <= 0)
 
         types[[id]][["down"]] <- sort_by(tum_down$names, tum_down$value) |> head(n = n)
         types[[id]][["up"]] <- sort_by(tum_up$names, decreasing=TRUE, tum_up$value) |> head(n = n)
@@ -111,82 +137,113 @@ extract_top_dysregulated <- function(data, n = 100, thr = 1, gene_filter = NULL)
     types
 }
 
-top_dys <- extract_top_dysregulated(pdata, thr=1, gene_filter = names, n=Inf)
 
-transpose_dataframe <- function(x) {
-    old_cols <- colnames(x)
-    old_rows <- rownames(x)
+{
+    #' This does `t(data_frame(...))` but properly keeps the rownames and colnames
+    #' put, which `t()` does not do (since it casts the DF to a matrix).
+    transpose_dataframe <- function(x) {
+        old_cols <- colnames(x)
+        old_rows <- rownames(x)
 
-    x_mtrx <- as.matrix(x)
+        x_mtrx <- as.matrix(x)
 
-    x_t_mtrx <- t(x_mtrx)
+        x_t_mtrx <- t(x_mtrx)
 
-    x_t <- as.data.frame(x_t_mtrx)
+        x_t <- as.data.frame(x_t_mtrx)
 
-    colnames(x_t) <- old_rows
-    rownames(x_t) <- old_cols
+        colnames(x_t) <- old_rows
+        rownames(x_t) <- old_cols
 
-    x_t
-}
-
-assert_that(are_equal(
-    transpose_dataframe(data.frame(some = c(1, 2, 3), stuff = c(5, 6, NA), row.names=c("A", "B", "C"))),
-    data.frame(A=c(1,5), B=c(2,6), C=c(3,NA), row.names= c("some", "stuff"))
-))
-
-#' This is the only function from UpSetR that I use, so I stole it
-#' I had to edit it in the end, so good thing that I stole it.
-#' It's 'fromList' originally
-#'
-#' I edited this so much that now I probably do it backwards: i first set
-#' the values to 0 and 1, and then I update them with real values.
-#' Perhaps there's a better way...
-prep_for_upset <- function(input, values) {
-    elements <- unique(unlist(input))
-    data <- unlist(lapply(input, function(x) {
-        x <- as.vector(match(elements, x))
-    }))
-    data[is.na(data)] <- as.integer(0)
-    data[data != 0] <- as.integer(1)
-    data <- data.frame(matrix(data, ncol = length(input), byrow = F))
-    row.names(data) <- elements
-    data <- data[which(rowSums(data) != 0), ]
-    colnames(data) <- names(input)
-
-    # Convert the 1s to actual numbers
-    for (col in colnames(data)) {
-        if (! col %in% names(values)) {
-            next
-        }
-
-        rep_positions <- data[[col]] == 1
-        data[[col]][rep_positions] <- values[row.names(data), col][rep_positions]
+        x_t
     }
 
-    return(data)
+    assert_that(are_equal(
+        transpose_dataframe(
+            data.frame(some = c(1, 2, 3), stuff = c(5, 6, NA), row.names=c("A", "B", "C"))
+        ),
+        data.frame(A=c(1,5), B=c(2,6), C=c(3,NA), row.names= c("some", "stuff"))
+    ))
 }
 
-assert_that(
-    are_equal(
-        prep_for_upset(
-            list(
-                test_tumor = c("A", "B", "C"),
-                other_tumor = c("A", "D")
-            ),
-            data.frame(
+{
+    #' This is the only function from UpSetR that I use, so I stole it
+    #' I had to edit it in the end, so good thing that I stole it.
+    #' It's 'fromList' originally, converting lists of IDs to a matrix of logical
+    #' values.
+    #'
+    #' I edited this so much that now I probably do it backwards: i first set
+    #' the values to 0 and 1, and then I update them with real values.
+    #' Perhaps there's a better way?
+    #'
+    #' This takes a list of lists (such as that produced by top_dys) with up and
+    #' down regulated genes, and the original matrix with real values, and
+    #' creates a matrix suitable for upset plots.
+    #'
+    #' See the assert statements below
+    prep_for_upset <- function(input) {
+        elements <- unique(unlist(input))
+        data <- unlist(lapply(input, function(x) {
+            x <- as.vector(match(elements, x))
+        }))
+        data[is.na(data)] <- as.integer(0)
+        data[data != 0] <- as.integer(1)
+        data <- data.frame(matrix(data, ncol = length(input), byrow = F))
+        row.names(data) <- elements
+        data <- data[which(rowSums(data) != 0), ]
+        colnames(data) <- names(input)
+
+        return(data)
+    }
+
+    update_to_real <- function(upset_data, values) {
+
+        # TODO: This looks a lot like matrix multiplication to me.
+        # The upset_data is a matrix, and so is values.
+        # We could just multiply the two and obtain this same effect.
+        # Maybe look into it?
+        for (col in colnames(upset_data)) {
+            if (! col %in% names(values)) {
+                next
+            }
+
+            rep_positions <- upset_data[[col]] == 1
+            upset_data[[col]][rep_positions] <- values[row.names(upset_data), col][rep_positions]
+        }
+
+        upset_data
+    }
+
+    assert_that(
+        are_equal(
+            prep_for_upset(
+                list(
+                    test_tumor = c("A", "B", "C"),
+                    other_tumor = c("A", "D")
+                )
+            ) |> update_to_real(
+                data.frame(
                 test_tumor = c("A" = 10, "B" =12.2, "C"=11, "D"=-25),
                 other_tumor = c("A" = 2, "B" =6, "C"=100, "D"=-20)
+                )
+            ),
+            data.frame(
+                test_tumor = c(10,12.2,11,0),
+                other_tumor=c(2,0,0,-20),
+                row.names=c("A", "B", "C", "D")
             )
-        ),
-        data.frame(
-            test_tumor = c(10,12.2,11,0),
-            other_tumor=c(2,0,0,-20),
-            row.names=c("A", "B", "C", "D")
         )
     )
-)
+}
 
-gen_plot_data <- function(data, values) {
+
+#' This does the heavy lifting of converting the prepped data to
+#' data suitable for plotting. It applies a series of transformations
+#' and re-binds up- and down-regulated genes together to allow for
+#' ggplot to plot them.
+#'
+#' If values is not `NULL`, uses `update_to_real` to update the upset data
+#' with the values in `values`. Otherwise, leaves them binarized.
+gen_plot_data <- function(data, values = NULL) {
     filtered_data_up <- list()
     filtered_data_down <- list()
     for (name in names(data)) {
@@ -194,11 +251,16 @@ gen_plot_data <- function(data, values) {
         filtered_data_down[[name]] <- data[[name]][["down"]]
     }
 
-    # This should not work. It only works bc there are no genes that are up
+    # TODO: This should not work. It only works bc there are no genes that are up
     # in some tt and down in another.
 
-    prep_for_upset(filtered_data_up, values) -> dt_up
-    prep_for_upset(filtered_data_down, values) -> dt_down
+    if (! is.null(values)) {
+        prep_for_upset(filtered_data_up) |> update_to_real(values) -> dt_up
+        prep_for_upset(filtered_data_down) |> update_to_real(values) -> dt_down
+    } else {
+        prep_for_upset(filtered_data_up) -> dt_up
+        prep_for_upset(filtered_data_down) -> dt_down
+    }
 
     dt_up$direction <- "up"
     dt_down$direction <- "down"
@@ -212,24 +274,22 @@ gen_plot_data <- function(data, values) {
     dt
 }
 
-plot_dysregulation <- function(data) {
+plot_dysregulation <- function(data, min_intersection_size = 5) {
     dt <- gen_plot_data(data)
 
-    p <- upset(
-        dt, names(data),
-        min_size = 5,
-        base_annotations = list(
-            'Intersection size' = intersection_size(
-                mapping = aes(fill = direction),
-                text=list(
-                    vjust=-1,
-                    hjust=-1,
-                    angle=90
+    suppressWarnings({
+        p <- upset(
+            dt, names(data),
+            min_size = min_intersection_size,
+            base_annotations = list(
+                'Intersection size' = intersection_size(
+                    mapping = aes(fill = direction)
                 )
-            )
-        ),
-        set_sizes=FALSE
-    )
+            ),
+            set_sizes=FALSE
+        )
+    })
+
 
     p <- p + ggtitle(paste0(
         "Overlap between top ",
@@ -239,30 +299,48 @@ plot_dysregulation <- function(data) {
     p
 }
 
-plot_dysregulation(top_dys)
-
-select_initial <- function(x) {
-    str_split_1(x, "_")[1]
-}
-
-tt_renames <- list(
-    "Head_n_Neck_cancer_deseq" = "Head and Neck"
-)
-
-rename_tumor_type <- function(x) {
-    print(x)
-    if (x %in% names(tt_renames)) {
-        return(tt_renames[[x]])
+{
+    select_initial <- function(x) {
+        str_split_1(x, "_")[1]
     }
-    return(select_initial(x))
+
+    assert_that(are_equal(select_initial("some_nice_text"), "some"))
+
+
+    make_tumor_type_renamer <- function(tt_map) {
+        wrap <- function(x) {
+            if (x %in% names(tt_map)) {
+                return(tt_map[[x]])
+            }
+            return(select_initial(x))
+        }
+
+        wrap
+    }
+
+    assert_that(are_equal(
+        make_tumor_type_renamer(
+            list("original" = "new")
+        )("original"),
+        "new"
+    ))
+    assert_that(are_equal(
+        make_tumor_type_renamer(
+            list("original"= "new")
+        )("wow_how_nice"),
+        select_initial("wow_how_nice")
+    ))
 }
 
-
+#' Plot the shared genes map
+#'
+#' This is probably better handled by ComplexHeatmap, but it grew organically
+#' so I'm not changing it at this time.
 plot_shared_genes <- function(
         data,
         data_renames,
         values,
-        types_renames_fn = rename_tumor_type,
+        types_renames_fn = NULL,
         n_genes = 50
     ) {
     dt <- gen_plot_data(data, values) |> tibble() |> arrange(name)
@@ -327,7 +405,9 @@ plot_shared_genes <- function(
     dot_dt$hgnc_symbol <- factor(dot_dt$hgnc_symbol, levels=bar_x_values)
     dot_dt$variable <- factor(dot_dt$variable, levels=colnames(dot_dt_clust)[col.ord])
 
-    levels(dot_dt$variable) <- sapply(levels(dot_dt$variable), types_renames_fn)
+    if (!is.null(types_renames_fn)) {
+        levels(dot_dt$variable) <- sapply(levels(dot_dt$variable), types_renames_fn)
+    }
 
     dot_plot <- ggplot(
         dot_dt,
@@ -358,4 +438,10 @@ plot_shared_genes <- function(
     print(combined)
 }
 
-plot_shared_genes(top_dys, ensg_data, pdata)
+pdata <- prep_data(data)
+
+top_dys <- extract_top_dysregulated(pdata, thr=1, gene_filter = names)
+
+plot_dysregulation(top_dys, 3)
+
+plot_shared_genes(top_dys, ensg_data, pdata, types_renames_fn = make_tumor_type_renamer(tt_renames))
