@@ -398,6 +398,12 @@ if (!exists("LOCAL_DEBUG")) {
             default = NULL,
         ) |>
         argparser::add_argument(
+            "--expr_thr",
+            help = "Expression threshold on the (absolute) measure to be considered dysregulated in a tumor type",
+            type = "numerical",
+            default = 1.5,
+        ) |>
+        argparser::add_argument(
             "--res",
             help = "Resolution of plot, in pixels per inch.",
             default = 400, type = "numerical"
@@ -440,6 +446,8 @@ main <- function(args) {
     
     #' This list is used to rename tumor types. Syntax is "OLD" = "NEW"
     #' regex is NOT supported.
+    #' 
+    #' This is the only hardwired variable
     tt_renames <- list(
         "Head_n_Neck_cancer_deseq" = "Head and Neck"
     )
@@ -448,7 +456,7 @@ main <- function(args) {
     
     pdata <- prep_data(data)
     
-    top_dys <- extract_top_dysregulated(pdata, thr=1.5, gene_filter = selected_genes)
+    top_dys <- extract_top_dysregulated(pdata, thr=args$expr_thr, gene_filter = selected_genes)
     
     #plot_dysregulation(top_dys, 3)
     
