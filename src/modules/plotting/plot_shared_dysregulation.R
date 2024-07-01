@@ -1,56 +1,5 @@
 options(warn = 1)
 
-if (!exists("LOCAL_DEBUG")) {
-  # Parsing arguments
-  requireNamespace("argparser")
-
-  parser <- argparser::arg_parser("Plot a shared dysregulation plot")
-
-  parser |>
-    argparser::add_argument(
-      "output_file",
-      help = "The path to the output file",
-      type = "character"
-    ) |>
-    argparser::add_argument(
-      "input_results",
-      help = "Folder with output .tar.gz files to read.", type = "character",
-      nargs = Inf
-    ) |>
-    argparser::add_argument(
-      "--extra_title",
-      help = "Extra title to add to the figure",
-      type = "character", default = NULL
-    ) |>
-    argparser::add_argument(
-      "--res",
-      help = "Resolution of plot, in pixels per inch.",
-      default = 400, type = "numerical"
-    ) |>
-    argparser::add_argument(
-      "--png",
-      help = "Save png plot instead of pdf",
-      flag = TRUE
-    ) |>
-    argparser::add_argument(
-      "--width",
-      help = "Plot width, in inches.",
-      default = 10, type = "numerical"
-    ) |>
-    argparser::add_argument(
-      "--height",
-      help = "Plot height, in inches.",
-      default = 10, type = "numerical"
-    ) |>
-  argparser::add_argument(
-    "--renames",
-    help = "JSON file with renames to apply to sample names when plotting",
-    default = NULL, type = "character"
-  ) -> parser
-
-  args <- argparser::parse_args(parser)
-}
-
 suppressMessages({
     options(tidyverse.quiet = TRUE)
     library(tidyverse)
@@ -60,24 +9,6 @@ suppressMessages({
     library(patchwork)
     requireNamespace("gridExtra")
 })
-
-data <- read_csv(
-  "/home/hedmad/Files/repos/tprof/data/extracted_results/deseq_shrinkage_deas.csv",
-  show_col_types = FALSE
-)
-names <- read_file("/home/hedmad/Files/repos/tprof/names.txt") |>
-    str_split_1(",") |> str_remove_all("\"") |> str_remove_all("\\n")
-ensg_data <- read_csv(
-    "/home/hedmad/Files/repos/tprof/data/ensg_data.csv"
-)
-
-#' This list is used to rename tumor types. Syntax is "OLD" = "NEW"
-#' regex is NOT supported.
-tt_renames <- list(
-    "Head_n_Neck_cancer_deseq" = "Head and Neck"
-)
-
-
 
 {
     # This removes the version from an ensembl ID
@@ -438,10 +369,96 @@ plot_shared_genes <- function(
     print(combined)
 }
 
-pdata <- prep_data(data)
+if (!exists("LOCAL_DEBUG")) {
+    # Parsing arguments
+    requireNamespace("argparser")
+    
+    parser <- argparser::arg_parser("Plot a shared dysregulation plot")
+    
+    parser |>
+        argparser::add_argument(
+            "output_file",
+            help = "Path to the output file",
+            type = "character"
+        ) |>
+        argparser::add_argument(
+            "input_result",
+            help = "Input results to parse", type = "character"
+        ) |>
+        argparser::add_argument(
+            "ensg_to_hugo",
+            help = "Map from ENSGs to HUGO symbols",
+            type = "character",
+            default = NULL,
+        ) |>
+        argparser::add_argument(
+            "--selected_genes",
+            help = "File with comma-separated list of ENSGs to select before plotting",
+            type = "character",
+            default = NULL,
+        ) |>
+        argparser::add_argument(
+            "--res",
+            help = "Resolution of plot, in pixels per inch.",
+            default = 400, type = "numerical"
+        ) |>
+        argparser::add_argument(
+            "--png",
+            help = "Save png plot instead of pdf",
+            flag = TRUE
+        ) |>
+        argparser::add_argument(
+            "--width",
+            help = "Plot width, in inches.",
+            default = 9, type = "numerical"
+        ) |>
+        argparser::add_argument(
+            "--height",
+            help = "Plot height, in inches.",
+            default = 16, type = "numerical"
+        ) |>
+        argparser::add_argument(
+            "--renames",
+            help = "JSON file with renames to apply to sample names when plotting",
+            default = NULL, type = "character"
+        ) -> parser
+    
+    args <- argparser::parse_args(parser)
+}
 
-top_dys <- extract_top_dysregulated(pdata, thr=1, gene_filter = names)
+main <- function(args) {
+    data <- read_csv(
+        args$input_result,
+        show_col_types = FALSE
+    )
+    selected_genes <- if (!is.null(args$selected_genes)) {
+        read_file(args$selected_genes) |>
+            str_split_1(",") |> str_remove_all("\"") |> str_remove_all("\\n")
+    } else {
+        NULL
+    }
+    
+    #' This list is used to rename tumor types. Syntax is "OLD" = "NEW"
+    #' regex is NOT supported.
+    tt_renames <- list(
+        "Head_n_Neck_cancer_deseq" = "Head and Neck"
+    )
+    
+    ensg_data <- read_csv(args$ensg_to_hugo)
+    
+    pdata <- prep_data(data)
+    
+    top_dys <- extract_top_dysregulated(pdata, thr=1.5, gene_filter = selected_genes)
+    
+    #plot_dysregulation(top_dys, 3)
+    
+    if (args$png) {
+        png(filename = args$output_file, width=args$width, height = args$height, units = "in", res=args$res)
+    } else {
+        pdf(file = args$output_file, width=args$width, height = args$height)
+    }
+    plot_shared_genes(top_dys, ensg_data, pdata, types_renames_fn = make_tumor_type_renamer(tt_renames))
+    dev.off()
+}
 
-plot_dysregulation(top_dys, 3)
-
-plot_shared_genes(top_dys, ensg_data, pdata, types_renames_fn = make_tumor_type_renamer(tt_renames))
+main(args)
