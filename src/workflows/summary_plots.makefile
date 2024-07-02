@@ -19,7 +19,9 @@ data/extracted_results/%_deas.csv data/extracted_results/%_geo.csv &: data/in/re
 	mkdir -p ${@D}
 	python src/preprocess_result.py $< $(@D)
 
-ALL = $(addprefix data/extracted_results/,$(addsuffix _deas.csv,${ALL_RES}) $(addsuffix _geo.csv,${ALL_RES}))
+ALL_DEAS = $(addprefix data/extracted_results/,$(addsuffix _deas.csv,${ALL_RES}) $(addsuffix _geo.csv,${ALL_RES}))
+
+ALL = ${ALL_DEAS}
 
 # We have to choose just one tarball to extract the genesets from
 # This is pretty arbitrary
@@ -36,6 +38,12 @@ data/out/plots/shared_dysregulation.png: data/extracted_results/deseq_shrinkage_
 	mkdir -p ${@D}
 	${rexec} ${mods}/plotting/plot_shared_dysregulation.R $@ $< data/in/ensg_data.csv \
 		--selected_genes data/filter_genes.txt --png --res 400
+
+ALL += data/out/plots/continuous_congruency_colorectal.png
+data/out/plots/continuous_congruency_colorectal.png: ${ALL_DEAS} data/filter_genes.txt \
+		${mods}/plotting/plot_ranks.R
+	mkdir -$ ${@D}
+	${rexec} ${mods}/plotting/plot_ranks.R
 
 PHONY += all
 all: $(ALL)
