@@ -29,13 +29,13 @@ data/genesets.json: data/in/results/deseq_shrinkage.tar
 data/filter_genes.txt: data/genesets.json
 	cat $< | jq -r '.[] | select(.name == "whole_transportome").data | @csv' > $@
 
-ALL += data/out/plots/shared_dysregulation.pdf
-data/out/plots/shared_dysregulation.pdf: data/extracted_results/deseq_shrinkage_deas.csv \
+ALL += data/out/plots/shared_dysregulation.png
+data/out/plots/shared_dysregulation.png: data/extracted_results/deseq_shrinkage_deas.csv \
 		data/filter_genes.txt ${mods}/plotting/plot_shared_dysregulation.R \
 		data/in/ensg_data.csv
 	mkdir -p ${@D}
 	${rexec} ${mods}/plotting/plot_shared_dysregulation.R $@ $< data/in/ensg_data.csv \
-		--selected_genes data/filter_genes.txt
+		--selected_genes data/filter_genes.txt --png --res 400
 
 PHONY += all
 all: $(ALL)
