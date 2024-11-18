@@ -69,6 +69,9 @@ def calc_similarity(node_a: set, node_b: set) -> float:
     node_a = set(node_a)
     node_b = set(node_b)
 
+    # This is the Sorens-Dice coefficient. It was chosen because it is very easy to compute
+    # and it's really similar to the Jaccard index anyway.
+    # It empirically worked pretty well.
     return 2 * (len(node_a.intersection(node_b)) / (len(node_a) + len(node_b)))
 
 
