@@ -17,10 +17,18 @@
     },
     "Cervix_cancer": {
         "case": [
-            "<meta>@sample?_study=TCGA&_primary_site=[Cervix,Cervix Uteri,Vagina]&_sample_type!=[Solid Tissue Normal,Control Analyte]"
+            "<meta>@sample?_study=TCGA&_primary_site=[Cervix,Cervix Uteri]&_sample_type!=[Solid Tissue Normal,Control Analyte]"
         ],
         "control": [
-            "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Cervix,Cervix Uteri,Vagina]&_sample_type=[Normal Tissue,Solid Tissue Normal]"
+            "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Cervix,Cervix Uteri]&_sample_type=[Normal Tissue,Solid Tissue Normal]"
+        ]
+    },
+    "Vaginal_cancer": {
+        "case": [
+            "<meta>@sample?_study=TCGA&_primary_site=[Vagina]&_sample_type!=[Solid Tissue Normal,Control Analyte]"
+        ],
+        "control": [
+            "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Vagina]&_sample_type=[Normal Tissue,Solid Tissue Normal]"
         ]
     },
     "Uterine_cancer": {
@@ -111,12 +119,20 @@
             "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Thyroid Gland,Thyroid]&_sample_type=[Normal Tissue,Solid Tissue Normal]"
         ]
     },
-    "Lymphoma": {
+    "blood_cancer": {
         "case": [
-            "<meta>@sample?_study=TCGA&_primary_site=[Blood,White blood cell,Bone Marrow]&_sample_type!=[Solid Tissue Normal,Control Analyte]"
+            "<meta>@sample?_study=TCGA&_primary_site=[Blood,White blood cell]&_sample_type!=[Solid Tissue Normal,Control Analyte]"
         ],
         "control": [
-            "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Blood,White blood cell,Bone Marrow]&_sample_type=[Normal Tissue,Solid Tissue Normal]"
+            "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Blood,White blood cell]&_sample_type=[Normal Tissue,Solid Tissue Normal]"
+        ]
+    },
+    "bone_marrow_cancer": {
+        "case": [
+            "<meta>@sample?_study=TCGA&_primary_site=[Bone Marrow]&_sample_type!=[Solid Tissue Normal,Control Analyte]"
+        ],
+        "control": [
+            "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Bone Marrow]&_sample_type=[Normal Tissue,Solid Tissue Normal]"
         ]
     },
     "Kidney_cancer": {
@@ -135,7 +151,7 @@
             "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=Bladder&_sample_type=[Normal Tissue,Solid Tissue Normal]"
         ]
     },
-    "Pancreas_cancer": {
+    "Pancreatic_cancer": {
         "case": [
             "<meta>@sample?_study=TCGA&_primary_site=Pancreas&_sample_type!=[Solid Tissue Normal,Control Analyte]"
         ],
