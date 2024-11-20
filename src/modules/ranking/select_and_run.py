@@ -74,9 +74,9 @@ def run_wrapper(
         output_dir / f"{key}_control",
         "--output-file",
         output_dir / f"{key}_deseq.csv",
-        method,
         "--id-col",
         "sample",
+        method,
     ]
     dea_args = [str(x) for x in dea_args]
     print(f"Executing: {' '.join(dea_args)}")
