@@ -119,7 +119,7 @@
             "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Thyroid Gland,Thyroid]&_sample_type=[Normal Tissue,Solid Tissue Normal]"
         ]
     },
-    "blood_cancer": {
+    "Blood_cancer": {
         "case": [
             "<meta>@sample?_study=TCGA&_primary_site=[Blood,White blood cell]&_sample_type!=[Solid Tissue Normal,Control Analyte]"
         ],
@@ -127,7 +127,7 @@
             "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Blood,White blood cell]&_sample_type=[Normal Tissue,Solid Tissue Normal]"
         ]
     },
-    "bone_marrow_cancer": {
+    "Bone_marrow_cancer": {
         "case": [
             "<meta>@sample?_study=TCGA&_primary_site=[Bone Marrow]&_sample_type!=[Solid Tissue Normal,Control Analyte]"
         ],
