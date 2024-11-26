@@ -29,9 +29,9 @@
         ]
     },
     "queries": {
-        "channels": "SELECT DISTINCT channels.ensg, gating_mechanism, carried_solute, (pore_loops > 0) AS pore_forming FROM channels LEFT JOIN (SELECT pore_loops, ensg FROM structure) AS structure ON structure.ensg = channels.ensg;",
+        "channels": "SELECT DISTINCT channels.ensg, gating_mechanism, carried_solute, (pore_loops > 0) AS pore_forming FROM channels LEFT JOIN (SELECT pore_loops, role, ensg FROM structure) AS structure ON structure.ensg = channels.ensg;",
         "channels_no_pores": "SELECT DISTINCT channels.ensg, gating_mechanism, carried_solute FROM channels;",
-        "solute_carriers": "SELECT DISTINCT solute_carriers.ensg, carried_solute, port_type, is_secondary FROM solute_carriers;"
+        "solute_carriers": "SELECT DISTINCT solute_carriers.ensg, carried_solute, port_type, is_secondary, direction FROM solute_carriers;"
     },
     "structure": [
         ["root", "whole_transportome"],
