@@ -47,3 +47,6 @@ version = "1.0.0-rc.1"
 
 [data.profiles.test]
 "expression_matrix.tsv.gz" = "test_expression_matrix.tsv.gz"
+
+[data.profiles.tissues]
+"./config/gene_lists/basic.json" = "./config/gene_lists/tissue_level.json"

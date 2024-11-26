@@ -212,21 +212,10 @@ def make_large_tables(conn: Connection, sets: dict) -> dict[pd.DataFrame]:
             the resulting data.
     """
     assert type(sets.get("genesets", None)) == dict, "Genesets dictionary not found."
-    # Test if the specified table names are available
-    possible_tables = conn.execute(
-        "SELECT name FROM sqlite_master WHERE type='table';"
-    ).fetchall()
-    possible_tables = list(map(lambda x: x[0], possible_tables))
-    possible_tables.sort()
-
     queries = sets.get("queries", None)
 
     large_tables = {}
     for set_name, tables in sets["genesets"].items():
-        if not all(map(lambda x: x in possible_tables, tables)):
-            invalid = tables[not map(lambda x: x in possible_tables, tables)]
-            raise ValueError(f"Invalid input tables {invalid}")
-
         loaded_tables = []
         for table_name in tables:
             query = (
