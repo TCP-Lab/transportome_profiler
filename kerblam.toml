@@ -8,7 +8,7 @@ version = "1.0.0-rc.1"
 "https://github.com/TCP-Lab/MTP-DB/releases/download/1.24.09/MTPDB.sqlite.gz" = "MTPDB.sqlite.gz"
 
 # ENSG data
-"https://gist.githubusercontent.com/MrHedmad/b625febffa6d983399894e1f72d438d7/raw/0652d18fd294b88caf67d4470cf8436263b38089/ensg_data.csv" = "ensg_data.csv"
+"https://zenodo.org/records/14225008/files/ensg_data.csv" = "ensg_data.csv"
 
 # GEO datasets recomputes from Zenodo
 "https://zenodo.org/records/11108100/files/GSE121842_expected_count.csv.gz" = "geo/GSE121842.counts.csv.gz"
