@@ -280,7 +280,7 @@ def generate_gene_list_trees(
 
         valid_cols = []
         for current_col in list(frame.columns):
-            if sum(frame[current_col].isna()) / len(frame.index) < min_pop_score:
+            if sum(frame[current_col].isna()) / len(frame.index) > 1 - min_pop_score:
                 log.debug(f"Layer {layer} -- col {current_col} ... SKIPPED (too empty)")
                 continue
             valid_cols.append(current_col)
