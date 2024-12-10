@@ -4,15 +4,15 @@ from __future__ import annotations
 """This script makes gene lists apt for GSEA from the db"""
 import json
 import logging
+import random
 from collections import Counter
 from copy import copy
 from enum import Enum
 from logging import StreamHandler
 from pathlib import Path
 from sqlite3 import Connection, connect
-import random
-import numpy
 
+import numpy
 import pandas as pd
 from bonsai import Node, Tree
 from colorama import Back, Fore, Style
@@ -20,6 +20,7 @@ from tqdm import tqdm
 
 random.seed(1)
 numpy.random.seed(1)
+
 
 ## >>>> Logging setup
 class ColorFormatter(logging.Formatter):
@@ -224,10 +225,12 @@ def make_large_tables(conn: Connection, sets: dict) -> dict[pd.DataFrame]:
                 else f"SELECT * FROM {table_name};"
             )
             log.debug(f"Loading table {table_name} with query {query}.")
-            loaded_tables.append(pd.read_sql(query, conn))
+            loaded_table = pd.read_sql(query, conn)
+            loaded_table = loaded_table.reindex(sorted(loaded_table.columns), axis=1)
+            loaded_tables.append(loaded_table)
 
         large_table = pd.concat(loaded_tables, ignore_index=True, sort=True)
-        large_tables[set_name] = large_table.sort_values("ensg", axis = 0)
+        large_tables[set_name] = large_table.sort_values("ensg", axis=0)
 
     return large_tables
 
@@ -326,7 +329,7 @@ def generate_gene_list_trees(
                 # Add back the ID col
                 recurse_cols = list(frame.columns)
                 recurse_cols.remove(current_col)
-                new_data = dataframe.loc[dataframe[current_col] == value, recurse_cols]
+                new_data = frame.loc[frame[current_col] == value, recurse_cols]
 
                 tree = generate_list(tree, node_id, new_data, layer=layer + 1)
 
