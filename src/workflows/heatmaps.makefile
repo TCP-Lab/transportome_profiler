@@ -75,6 +75,7 @@ rexec = Rscript --no-save --no-restore --verbose
 		./data/genesets.json ./data/genesets_repr.txt \
 		--prune_direction $(PRUNE_DIRECTION) \
 		--prune_similarity $(PRUNE_SIMILARITY) \
+		--min_recurse_set_size 0 \
 		--verbose
 
 ## --- Run the pre-ranked GSEA
