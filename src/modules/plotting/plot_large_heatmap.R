@@ -63,6 +63,7 @@ suppressMessages({
   requireNamespace("stringi")
   requireNamespace("reshape2")
   extrafont::loadfonts()
+  library(patchwork)
 })
 
 parse_tree_labels <- function(tree, genesets) {
@@ -201,6 +202,30 @@ create_large_heatmap <- function(
   p
 }
 
+create_set_size_plot <- function(plot_data) {
+    # Select just one category - they all share the same set size
+    filtered_plot_data <- plot_data |> filter(fac_id == levels(plot_data$fac_id)[1])
+    filtered_plot_data$fac_id <- "Set\nsize"
+    filtered_plot_data$fac_id <- filtered_plot_data$fac_id |> as.vector() |> as.factor()
+    print(filtered_plot_data)
+    
+    p <- filtered_plot_data |>
+        ggplot(aes(fill = size, x = fac_id, y = fac_pathway)) +
+        geom_tile() +
+        geom_text(aes(label = size), family = "FiraCode Nerd Font", size = 3) +
+        theme_minimal() +
+        scale_fill_gradient(low="#d7ffd4", high = "#10c400", guide = "colourbar") +
+        scale_y_discrete(breaks = filtered_plot_data$fac_pathway, labels = NULL) +
+        theme(
+            text = element_text(family = "FiraCode Nerd Font", size = 10),
+            panel.grid = element_blank()
+        ) +
+        ylab(NULL) + xlab(NULL) +
+        guides(fill = guide_legend(title = "Set size"))
+    
+    p
+}
+
 add_dots <- function(
   original_plot,
   plot_data
@@ -258,6 +283,15 @@ main <- function(
     )
     large_plot <- add_dots(large_plot, dot_plot_data)
   }
+  
+  # Add the set size points
+  set_size_plot <- create_set_size_plot(relative_plot_data)
+  
+  large_plot <- large_plot + plot_spacer() + set_size_plot + plot_layout(
+      ncol = 3, nrow = 1,
+      widths = c(15, -1.1, 2),
+      guides = "collect"
+  ) + theme(legend.position = "right")
 
   # Save plot to output
   if (is.null(out_file)) {
@@ -276,9 +310,10 @@ main <- function(
 
 if (exists("LOCAL_DEBUG")) {
   main(
-    input_dir = "~/Files/repos/transportome_profiler/data/out/enrichments",
-    input_tree = "~/Files/repos/transportome_profiler/data/genesets_repr.txt",
-    genesets_file = "~/Files/repos/transportome_profiler/data/genesets.json",
+    input_dir = "~/Files/repos/tprof/data/out/enrichments",
+    input_tree = "~/Files/repos/tprof/data/genesets_repr.txt",
+    genesets_file = "~/Files/repos/tprof/data/genesets.json",
+    input_dot_dir = "~/Files/repos/tprof/data/out/absolute_enrichments",
     out_file = NULL,
     save_png = TRUE,
     alpha = 0.20,
@@ -302,3 +337,4 @@ if (exists("LOCAL_DEBUG")) {
     renames = args$renames
   )
 }
+
