@@ -207,7 +207,6 @@ create_set_size_plot <- function(plot_data) {
     filtered_plot_data <- plot_data |> filter(fac_id == levels(plot_data$fac_id)[1])
     filtered_plot_data$fac_id <- "Set\nsize"
     filtered_plot_data$fac_id <- filtered_plot_data$fac_id |> as.vector() |> as.factor()
-    print(filtered_plot_data)
     
     p <- filtered_plot_data |>
         ggplot(aes(fill = size, x = fac_id, y = fac_pathway)) +

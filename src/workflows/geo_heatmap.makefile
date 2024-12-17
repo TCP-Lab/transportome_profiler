@@ -70,13 +70,13 @@ data/geo/GSE254461_BRCA.counts.csv data/geo/GSE254461_BRCA.meta.csv \
 ./data/genesets.json ./data/genesets_repr.txt: \
 		./data/MTPDB.sqlite \
 		$(mods)/make_genesets.py \
-		./data/in/config/gene_lists/basic.json
+		./data/in/config/gene_lists/no_experimental_ions.json
 
-	python $(mods)/make_genesets.py ./data/MTPDB.sqlite ./data/in/config/gene_lists/basic.json \
+	python $(mods)/make_genesets.py ./data/MTPDB.sqlite ./data/in/config/gene_lists/no_experimental_ions.json \
 		./data/genesets.json ./data/genesets_repr.txt \
 		--prune_direction $(PRUNE_DIRECTION) \
 		--prune_similarity $(PRUNE_SIMILARITY) \
-		--min_recurse_set_size 0 \ # See heatmaps.makefile for more info
+		--min_recurse_set_size 0 \
 		--verbose
 
 ## -- Run the pre-ranked GSEA

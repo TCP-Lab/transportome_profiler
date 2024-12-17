@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-"""This script makes gene lists apt for GSEA from the db"""
 import json
 import logging
 import random
@@ -212,7 +211,7 @@ def make_large_tables(conn: Connection, sets: dict) -> dict[pd.DataFrame]:
             sets["genesets"] dictionary and as values pandas DataFrames with
             the resulting data.
     """
-    assert type(sets.get("genesets", None)) == dict, "Genesets dictionary not found."
+    assert type(sets.get("genesets", None)) is dict, "Genesets dictionary not found."
     queries = sets.get("queries", None)
 
     large_tables = {}
