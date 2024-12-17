@@ -108,6 +108,12 @@ gen_plot_data <- function(
     combinations
 }
 
+tile_size <- function(x, min_size = 0.5,  max_size = 1) {
+    size <- scales::rescale(x, from = c(0, 1), to = c(min_size, max_size))
+    size[x == 0] <- 0
+    size
+}
+
 create_correlation_heatmap <- function(
         plot_data,
         extra_title = NULL
@@ -119,7 +125,7 @@ create_correlation_heatmap <- function(
     }
     
     p <- ggplot(plot_data, aes(fill = value, x = x, y = y)) +
-        geom_tile() +
+        geom_tile(aes(width = tile_size(value, min_size = 0.3),  tile_size(value, min_size = 0.3))) +
         theme_minimal() +
         theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1)) +
         ggtitle(fig_title) +
@@ -130,7 +136,11 @@ create_correlation_heatmap <- function(
         ) +
         scale_x_discrete(breaks = plot_data$x, labels = plot_data$fac_x) +
         scale_y_discrete(breaks = plot_data$y, labels = plot_data$fac_y, limits = rev(levels(plot_data$y))) +
-        theme(text = element_text(family = "FiraCode Nerd Font", size = 10))
+        theme(
+            text = element_text(family = "FiraCode Nerd Font", size = 10),
+            panel.grid = element_blank(),
+            panel.grid.major = element_line(colour = scales::alpha("black", 0.05))
+        )
     
     p
 }
@@ -158,7 +168,7 @@ main <- function(
     # Save plot to output
     if (is.null(out_file)) {
         print(large_plot)
-        return(NULL)
+        invisible()
     } else {
         if (save_png) {
             png(filename = out_file, width = plot_width, height = plot_height, units = "in", res = png_res)
