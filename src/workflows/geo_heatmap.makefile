@@ -76,6 +76,7 @@ data/geo/GSE254461_BRCA.counts.csv data/geo/GSE254461_BRCA.meta.csv \
 		./data/genesets.json ./data/genesets_repr.txt \
 		--prune_direction $(PRUNE_DIRECTION) \
 		--prune_similarity $(PRUNE_SIMILARITY) \
+		--min_recurse_set_size 0 \ # See heatmaps.makefile for more info
 		--verbose
 
 ## -- Run the pre-ranked GSEA
