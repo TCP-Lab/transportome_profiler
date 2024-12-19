@@ -1,11 +1,11 @@
 [meta]
-version = "1.0.0-rc.1"
+version = "1.2.0"
 
 [data.remote]
 # Pancancer data
 "https://zenodo.org/records/10944168/files/expression_matrix.tsv.gz" = "expression_matrix.tsv.gz"
 "https://zenodo.org/records/10944168/files/expression_matrix_metadata.tsv.gz" = "expression_matrix_metadata.tsv.gz"
-"https://github.com/TCP-Lab/MTP-DB/releases/download/1.24.09/MTPDB.sqlite.gz" = "MTPDB.sqlite.gz"
+"https://github.com/TCP-Lab/MTP-DB/releases/download/1.24.46/MTPDB.sqlite.gz" = "MTPDB.sqlite.gz"
 
 # ENSG data
 "https://zenodo.org/records/14225008/files/ensg_data.csv" = "ensg_data.csv"
