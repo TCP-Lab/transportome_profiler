@@ -177,6 +177,7 @@ run_one_gsea <- function(input_file_path, genesets_path, biomart_data, output_pa
 
   cat(paste0("Running GSEA on ", input_file_path, "\n"))
   ranks <- extract_ranks(input_file_path, biomart_data, absolute = absolute)
+  ranks <- ranks + rnorm(0, 0.1, n=length(ranks))
 
   result <- run_gsea(genesets, ranks, unweighted)
 

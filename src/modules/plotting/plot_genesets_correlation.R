@@ -124,8 +124,12 @@ create_correlation_heatmap <- function(
         "Geneset Congruency"
     }
     
+    print(plot_data)
+    
+    new_lables <- plot_data$fac_x
+    
     p <- ggplot(plot_data, aes(fill = value, x = x, y = y)) +
-        geom_tile(aes(width = tile_size(value, min_size = 0.3),  tile_size(value, min_size = 0.3))) +
+        geom_tile(aes(width = tile_size(value, min_size = 0.3), height = tile_size(value, min_size = 0.3))) +
         theme_minimal() +
         theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1)) +
         ggtitle(fig_title) +
@@ -134,8 +138,8 @@ create_correlation_heatmap <- function(
             "Congruency",
             colours = c("purple", "skyblue", "lightgoldenrod", "darkorange")
         ) +
-        scale_x_discrete(breaks = plot_data$x, labels = plot_data$fac_x) +
-        scale_y_discrete(breaks = plot_data$y, labels = plot_data$fac_y, limits = rev(levels(plot_data$y))) +
+        scale_x_discrete(labels = plot_data$fac_x) +
+        scale_y_discrete(labels = plot_data$fac_y) +
         theme(
             text = element_text(family = "FiraCode Nerd Font", size = 10),
             panel.grid = element_blank(),
@@ -207,3 +211,13 @@ if (exists("LOCAL_DEBUG")) {
     )
 }
 
+png("/tmp/test.pdf", width = 1600, height = 1600)
+main(
+    input_tree = "~/Files/repos/tprof/data/genesets_repr.txt",
+    genesets_file = "~/Files/repos/tprof/data/genesets.json",
+    out_file = NULL,
+    save_png = TRUE,
+    png_res = 500,
+    plot_height = 10
+)
+graphics.off()

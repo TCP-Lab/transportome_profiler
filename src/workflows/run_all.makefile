@@ -5,15 +5,17 @@ RANK_METHODS = fold_change deseq_shrinkage cohen_d norm_cohen_d norm_fold_change
 ALL += $(addsuffix .tar.gz,$(addprefix packaged_output_,${RANK_METHODS}))
 
 packaged_output_%.tar.gz:
+	# This sed call just takes out the ranking method string
 	RANK_METHOD=$(shell echo $@ | sed -n "s/packaged_output_\(\S*\).tar.gz/\1/p") \
 	kerblam run heatmaps -l
-	
 	RANK_METHOD=$(shell echo $@ | sed -n "s/packaged_output_\(\S*\).tar.gz/\1/p") \
 	kerblam run geo_heatmap -l
 	
+	# We can now do the summary plots...
+	kerblam run summary_plots -l
+	
 	chown $$USER -R ./data
-	tar cf $@ ./data/out
-	kerblam data clean
+	kerblam data pack --output-only $@
 
 PHONY += all
 all: $(ALL)

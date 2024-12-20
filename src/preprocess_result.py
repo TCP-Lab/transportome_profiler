@@ -4,15 +4,14 @@ This takes the .tar.gz file(s) made by running the `heatmaps` and `geo_heatmap`
 pipelines and extracts useful information from them.
 """
 
-from pathlib import Path
 import logging
-import tarfile
-import pandas as pd
-from io import StringIO
-from functools import reduce
-import re
-from typing import Callable
 import os
+import re
+from functools import reduce
+from pathlib import Path
+from typing import Callable
+
+import pandas as pd
 
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
@@ -53,13 +52,11 @@ def remove_suffixes(path: Path):
     return path.name.split(".")[0]
 
 
-def merge_deas(
-    files: list[tarfile.TarInfo], tarball: tarfile.TarFile, merge_col: str = "sample"
-) -> pd.DataFrame:
+def merge_deas(files: list[Path], merge_col: str = "sample") -> pd.DataFrame:
     data = {}
     for file in files:
-        log.info(f"Extracting {file} from target archive...")
-        data[remove_suffixes(Path(file))] = pd.read_csv(tarball.extractfile(file))
+        log.info(f"Reading in {file}...")
+        data[remove_suffixes(Path(file))] = pd.read_csv(file)
     # The files have all the same structure: a col with 'sample' and one with
     # 'ranking'. We must rename the 'ranking' col with the name of the file
     # and then do a many-way merge
@@ -71,7 +68,7 @@ def merge_deas(
 
 
 def main(args):
-    log.info(f"Reading in {args.input_tarball}")
+    log.info(f"Reading in {args.input_dir}")
 
     if args.slug == "auto":
         slug = remove_suffixes(args.input_tarball)
@@ -79,9 +76,8 @@ def main(args):
         slug = args.slug
     log.info(f"Slug is '{slug}'.")
 
-    conn = tarfile.open(args.input_tarball, "r:*")
-    log.info("Successfully opened tarball. Looking for required files")
-    files = conn.getmembers()
+    log.info("Looking for files...")
+    files = args.input_dir.iterdir()
     names = [x.name for x in files]
 
     all_found = True
@@ -100,14 +96,12 @@ def main(args):
             files_to_merge = [x for x in names if x.startswith(key) and x != key]
             for fn in value["filters"]:
                 files_to_merge = filter(fn, files_to_merge)
-            merged = merge_deas(files_to_merge, conn, value.get("id_col", "sample"))
+            merged = merge_deas(files_to_merge, value.get("id_col", "sample"))
 
             target = args.output_dir / f"{slug}_{remove_suffixes(Path(key))}.csv"
             log.info(f"Saving to {target}...")
 
             merged.to_csv(target, index=False)
-
-    conn.close()
 
 
 if __name__ == "__main__":
@@ -115,7 +109,11 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("input_tarball", type=Path, help="Path to the input tarball")
+    parser.add_argument(
+        "input_dir",
+        type=Path,
+        help="Path to the directory with all DEAs (usually data/)",
+    )
     parser.add_argument(
         "output_dir", type=Path, help="Path to a dir to save the outputs in"
     )

@@ -70,7 +70,8 @@ rexec = Rscript --no-save --no-restore --verbose
 		./data/MTPDB.sqlite \
 		$(mods)/make_genesets.py \
 		./data/in/config/gene_lists/no_experimental_ions.json
-
+	
+	# Min recurse set size is 0 otherwise pruning is aleatory!!
 	python $(mods)/make_genesets.py ./data/MTPDB.sqlite ./data/in/config/gene_lists/no_experimental_ions.json \
 		./data/genesets.json ./data/genesets_repr.txt \
 		--prune_direction $(PRUNE_DIRECTION) \
@@ -132,6 +133,52 @@ ALL +=./data/out/figures/deregulation_heatmap.png
 		--extra_title "alpha 0.20, metric $(RANK_METHOD)" \
 		--height 15 \
 		$(_heatmap_plot_flags)
+
+## --- Make the output summary plots
+data/filter_genes.txt: data/genesets.json
+	cat $< | jq -r '.[] | select(.name == "whole_transportome").data | @csv' > $@
+
+data/merged_deas.csv: ./data/deas/flag.txt
+	mkdir -p ${@D}
+	# This renames the header slot 'ranking' to the name of the file
+	# This magical $ thing is to replace the .csv to nothing
+	# the pattern is {variable/pattern/replacement}
+	for name in ./data/deas/*_deseq.csv; do \
+		replacement=$$(basename "$${name/_deseq.csv}"); \
+		sed "1s/ranking/$${replacement}/" "$${name}" > $${name/.csv/}.renames.csv; \
+	done
+	# Move one random file to be the "base" that we can reduce into
+	mv $$(find "./data/deas/" -name "*.renames.csv" -print -quit) ./data/base
+	# The xsv select is there to remove the second "sample" col that "join" retains.
+	for item in ./data/deas/*.renames.csv; do \
+		xsv join sample ./data/base sample $${item} --full | xsv select '!sample[1]' > ./data/tmp;\
+		mv ./data/tmp ./data/base; \
+	done
+	mv ./data/base $@
+	# Since the .renames files may conflict with the old pipeline, I
+	# just delete them here instead of changing the previous steps.
+	# Sorry!
+	rm ./data/deas/*.renames.csv
+
+ALL +=./data/out/figures/top_disregulation.png
+./data/out/figures/top_disregulation.png: \
+		./data/merged_deas.csv \
+		./data/filter_genes.txt \
+		${mods}/plotting/plot_shared_dysregulation.R \
+		./data/ensg_data.csv
+	mkdir -p ${@D}
+	${rexec} ${mods}/plotting/plot_shared_dysregulation.R $@ $< data/ensg_data.csv \
+		--selected_genes data/filter_genes.txt --png --res 400
+
+ALL +=./data/out/figures/upset.png
+./data/out/figures/upset.png: \
+		./data/merged_deas.csv \
+		./data/filter_genes.txt \
+		${mods}/plotting/plot_general_upset.R \
+		./data/ensg_data.csv
+	mkdir -p ${@D}
+	${rexec} ${mods}/plotting/plot_general_upset.R $@ $< \
+		--selected_genes data/filter_genes.txt --png --res 400
 
 PHONY += all
 all: $(ALL)
