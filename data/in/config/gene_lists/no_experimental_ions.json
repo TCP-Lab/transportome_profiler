@@ -29,10 +29,10 @@
         ]
     },
     "queries": {
-        "channels": "SELECT DISTINCT * FROM (SELECT DISTINCT channels.ensg, gating_mechanism, carried_solute, (pore_loops > 0) AS pore_forming FROM channels LEFT JOIN (SELECT pore_loops, role, ensg FROM structure) AS structure ON structure.ensg = channels.ensg) WHERE carried_solute NOT IN (\"Rb+\", \"Ba2+\", \"Cs+\", \"Sr2+\");",
-        "solute_carriers": "SELECT DISTINCT solute_carriers.ensg, carried_solute, port_type, is_secondary, direction FROM solute_carriers WHERE carried_solute NOT IN (\"Rb+\", \"Ba2+\", \"Cs+\", \"Sr2+\");",
-        "pumps": "SELECT DISTINCT * FROM pumps WHERE carried_solute NOT IN (\"Rb+\", \"Ba2+\", \"Cs+\", \"Sr2+\");",
-        "ABC_transporters": "SELECT DISTINCT * FROM ABC_transporters WHERE carried_solute NOT IN (\"Rb+\", \"Ba2+\", \"Cs+\", \"Sr2+\");"
+        "channels": "SELECT DISTINCT * FROM (SELECT DISTINCT channels.ensg, gating_mechanism, carried_solute, (pore_loops > 0) AS pore_forming FROM channels LEFT JOIN (SELECT pore_loops, role, ensg FROM structure) AS structure ON structure.ensg = channels.ensg) WHERE carried_solute NOT IN (\"Rb+\", \"Ba2+\", \"Cs+\", \"Sr2+\") OR carried_solute IS NULL;",
+        "solute_carriers": "SELECT DISTINCT solute_carriers.ensg, carried_solute, port_type, is_secondary, direction FROM solute_carriers WHERE carried_solute NOT IN (\"Rb+\", \"Ba2+\", \"Cs+\", \"Sr2+\") OR carried_solute IS NULL;",
+        "pumps": "SELECT DISTINCT * FROM pumps WHERE carried_solute NOT IN (\"Rb+\", \"Ba2+\", \"Cs+\", \"Sr2+\") OR carried_solute IS NULL;",
+        "ABC_transporters": "SELECT DISTINCT * FROM ABC_transporters WHERE carried_solute NOT IN (\"Rb+\", \"Ba2+\", \"Cs+\", \"Sr2+\") OR carried_solute IS NULL;"
     },
     "structure": [
         ["root", "whole_transportome"],
