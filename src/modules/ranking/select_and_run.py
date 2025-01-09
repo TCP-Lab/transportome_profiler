@@ -6,7 +6,7 @@ import os
 
 import multiprocessing as mp
 
-from gene_ranker.ranking_methods import RANKING_METHODS
+from gene_ranker.methods import RANKING_METHODS
 
 
 def replace(string, pattern, replacement):
