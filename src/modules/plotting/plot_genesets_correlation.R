@@ -5,7 +5,7 @@ if (! exists("LOCAL_DEBUG")) {
     # Parsing arguments
     requireNamespace("argparser")
     
-    parser <- argparser::arg_parser("Plot a large heatmat with relative and absolute GSEA output.")
+    parser <- argparser::arg_parser("Plot a large correlation matrix with correlations between genesets.")
     
     parser |>
         argparser::add_argument(
@@ -27,12 +27,16 @@ if (! exists("LOCAL_DEBUG")) {
             default= 400, type = "numerical"
         ) |>
         argparser::add_argument(
+            "--png", help = "Save as PNG istead of PDF.",
+            flag = TRUE
+        ) |>
+        argparser::add_argument(
             "--width", help = "Plot width, in inches.",
-            default = 10, type = "numerical"
+            default = 15, type = "numerical"
         ) |>
         argparser::add_argument(
             "--height", help = "Plot height, in inches.",
-            default = 10, type = "numerical"
+            default = 15, type = "numerical"
         ) -> parser
     
     args <- argparser::parse_args(parser)
@@ -91,19 +95,13 @@ calc_correlation <- function(set_1, set_2) {
 }
 
 gen_plot_data <- function(
-        genesets, input_tree
+        genesets, tree
 ) {
-    tree <- read_lines(input_tree)
-    labels <- parse_tree_labels(tree, genesets)
-    
     # Generate the two-way correlations of the genesets
     combinations <- expand.grid(x = names(genesets), y = names(genesets))
     combinations$value <- apply(combinations, 1, function(x) {
         calc_correlation(genesets[[x[1]]]$data, genesets[[x[2]]]$data)
     })
-    
-    combinations$fac_x <- labels[combinations$x, "rev_pretty"]
-    combinations$fac_y <- labels[combinations$y, "rev_pretty"]
     
     combinations
 }
@@ -116,6 +114,7 @@ tile_size <- function(x, min_size = 0.5,  max_size = 1) {
 
 create_correlation_heatmap <- function(
         plot_data,
+        labels,
         extra_title = NULL
 ) {
     fig_title <- if (!is.null(extra_title)) {
@@ -124,11 +123,13 @@ create_correlation_heatmap <- function(
         "Geneset Congruency"
     }
     
-    print(plot_data)
+    get_label <- function(x) {
+        sapply(x, \(x) {
+            labels$rev_pretty[labels$id == x]
+    })
+    }
     
-    new_lables <- plot_data$fac_x
-    
-    p <- ggplot(plot_data, aes(fill = value, x = x, y = y)) +
+    p <- ggplot(plot_data, aes(fill = value, x = factor(x, levels = rev(labels$id[labels$order])), y = factor(y, levels = rev(labels$id[labels$order])))) +
         geom_tile(aes(width = tile_size(value, min_size = 0.3), height = tile_size(value, min_size = 0.3))) +
         theme_minimal() +
         theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1)) +
@@ -138,8 +139,8 @@ create_correlation_heatmap <- function(
             "Congruency",
             colours = c("purple", "skyblue", "lightgoldenrod", "darkorange")
         ) +
-        scale_x_discrete(labels = plot_data$fac_x) +
-        scale_y_discrete(labels = plot_data$fac_y) +
+        scale_x_discrete(labels = get_label) +
+        scale_y_discrete(labels = get_label, limits = rev) +
         theme(
             text = element_text(family = "FiraCode Nerd Font", size = 10),
             panel.grid = element_blank(),
@@ -161,13 +162,15 @@ main <- function(
 ) {
     cat("Reading in genesets\n")
     genesets <- jsonlite::fromJSON(read_file(genesets_file))
+    tree <- read_lines(input_tree)
     
     plot_data <- gen_plot_data(
-        input_tree = input_tree,
+        tree = tree,
         genesets = genesets
     )
     
-    large_plot <- create_correlation_heatmap(plot_data, extra_title)
+    labels <- parse_tree_labels(tree, genesets)
+    large_plot <- create_correlation_heatmap(plot_data, labels, extra_title)
     
     # Save plot to output
     if (is.null(out_file)) {
@@ -195,29 +198,12 @@ if (exists("LOCAL_DEBUG")) {
     )
 } else {
     main(
-        input_dir = args$input_gsea_results,
         input_tree = args$input_tree,
         genesets_file = args$genesets,
         out_file = args$output_file,
-        input_dot_dir = args$dots_gsea_results,
-        no_cluster = args$no_cluster,
-        extra_title = args$extra_title,
-        alpha = args$alpha,
-        save_png = TRUE,
+        save_png = args$png,
         png_res = args$res,
         plot_width = args$width,
-        plot_height = args$height,
-        renames = args$renames
+        plot_height = args$height
     )
 }
-
-png("/tmp/test.pdf", width = 1600, height = 1600)
-main(
-    input_tree = "~/Files/repos/tprof/data/genesets_repr.txt",
-    genesets_file = "~/Files/repos/tprof/data/genesets.json",
-    out_file = NULL,
-    save_png = TRUE,
-    png_res = 500,
-    plot_height = 10
-)
-graphics.off()

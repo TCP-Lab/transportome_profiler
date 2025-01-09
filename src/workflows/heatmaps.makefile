@@ -180,6 +180,15 @@ ALL +=./data/out/figures/upset.png
 	${rexec} ${mods}/plotting/plot_general_upset.R $@ $< \
 		--selected_genes data/filter_genes.txt --png --res 400
 
+ALL +=./data/out/figures/correlation.png
+./data/out/figures/correlation.png: \
+		./data/genesets.json \
+		./data/genesets_repr.txt
+	mkdir -p ${@D}
+	${rexec} ${mods}/plotting/plot_genesets_correlation.R \
+		./data/genesets.json ./data/genesets_repr.txt \
+		$@ --png --res 400
+
 PHONY += all
 all: $(ALL)
 
