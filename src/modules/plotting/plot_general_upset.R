@@ -158,6 +158,12 @@ plot_dysregulation <- function(data) {
     p
 }
 
+purge_ensg_versions <- function(data, id_col = "gene_id") {
+    data |> mutate("{id_col}" := str_remove(.data[[id_col]], "\\.[0-9]+$")) -> data
+    data |> distinct(.data[[id_col]], .keep_all = TRUE) -> data
+    data
+}
+
 
 main <- function(
         input_results,
@@ -170,9 +176,9 @@ main <- function(
         save_png = FALSE
     ) {
     
-    data <- read_csv(input_results, show_col_types = FALSE)
-    selected_genes <- if (!is.null(args$selected_genes)) {
-        read_file(args$selected_genes) |>
+    data <- read_csv(input_results, show_col_types = FALSE) |> purge_ensg_versions("sample")
+    selected_genes <- if (!is.null(selected_genes)) {
+        read_file(selected_genes) |>
             str_split_1(",") |> str_remove_all("\"") |> str_remove_all("\\n")
     } else {
         NULL
@@ -211,7 +217,7 @@ if (!exists("LOCAL_DEBUG")) {
         args$res,
         args$width,
         args$height,
-        args$save_png
+        args$png
     )
 } else {
     main(
