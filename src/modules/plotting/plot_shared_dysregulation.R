@@ -41,8 +41,8 @@ prep_data <- function(data, id_col = "sample") {
 #'   all the rest.
 #'
 #' To turn off the filters, set `n` to `Inf` (the default), `gene_filter` to
-#' `NULL` (the default) and `thr` to `0`.
-extract_top_dysregulated <- function(data, thr = 1, n = Inf, gene_filter = NULL) {
+#' `NULL` (the default) and `quantile` to `100`.
+extract_top_dysregulated <- function(data, quantile = 5, n = Inf, gene_filter = NULL) {
     types <- list()
 
     if (!is.null(gene_filter)) {
@@ -50,14 +50,21 @@ extract_top_dysregulated <- function(data, thr = 1, n = Inf, gene_filter = NULL)
         data <- data[row.names(data) %in% gene_filter,]
     }
 
+    thr <- quantile(unlist(data), probs = c(quantile/100, (100-quantile)/100))
+    lower_thr <- thr[1]
+    upper_thr <- thr[2]
+
     for (id in colnames(data)) {
         types[[id]] <- list()
 
         tum_data <- data |> rownames_to_column("names") |> select(c(!!id, names)) |>
             rename(value = !!id)
 
-        tum_data <- tum_data |> filter(abs(value) >= thr)
+        # I use >= so that we at least have 1 gene.
+        tum_data <- tum_data |> filter(value >= upper_thr | value <= lower_thr)
 
+        # I filter on 0, but there are no zeroes, due to the thr applied from 
+        # before! (well, unless the thr is 0, but...)
         tum_up <- tum_data |> filter(value > 0)
         tum_down <- tum_data |> filter(value <= 0)
 
@@ -398,10 +405,10 @@ if (!exists("LOCAL_DEBUG")) {
             default = NULL,
         ) |>
         argparser::add_argument(
-            "--expr_thr",
-            help = "Expression threshold on the (absolute) measure to be considered dysregulated in a tumor type",
+            "--quantile",
+            help = "Quantile to cut the expression at to consider up- (>100-quantile) or down- (<quantile) regulated",
             type = "numerical",
-            default = 1.5,
+            default = 5,
         ) |>
         argparser::add_argument(
             "--res",
@@ -456,7 +463,7 @@ main <- function(args) {
     
     pdata <- prep_data(data)
     
-    top_dys <- extract_top_dysregulated(pdata, thr=args$expr_thr, gene_filter = selected_genes)
+    top_dys <- extract_top_dysregulated(pdata, quantile=args$quantile, gene_filter = selected_genes)
     
     #plot_dysregulation(top_dys, 3)
     
