@@ -405,6 +405,12 @@ if (!exists("LOCAL_DEBUG")) {
             default = NULL,
         ) |>
         argparser::add_argument(
+            "--id_col",
+            help = "Name of the column holding ENSG IDs",
+            type = "character",
+            default = "sample",
+        ) |>
+        argparser::add_argument(
             "--quantile",
             help = "Quantile to cut the expression at to consider up- (>100-quantile) or down- (<quantile) regulated",
             type = "numerical",
@@ -461,7 +467,7 @@ main <- function(args) {
     
     ensg_data <- read_csv(args$ensg_to_hugo)
     
-    pdata <- prep_data(data)
+    pdata <- prep_data(data, args$id_col)
     
     top_dys <- extract_top_dysregulated(pdata, quantile=args$quantile, gene_filter = selected_genes)
     

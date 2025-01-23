@@ -10,12 +10,11 @@ packaged_output_%.tar.gz:
 	kerblam run heatmaps -l
 	RANK_METHOD=$(shell echo $@ | sed -n "s/packaged_output_\(\S*\).tar.gz/\1/p") \
 	kerblam run geo_heatmap -l
-	
-	# We can now do the summary plots...
-	kerblam run summary_plots -l
-	
+		
 	chown $$USER -R ./data
 	kerblam data pack --output-only $@
+	# We're done - let's clean up so we can start fresh
+	kerblam data clean -y
 
 PHONY += all
 all: $(ALL)

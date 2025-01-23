@@ -1,4 +1,7 @@
 env/
+# Stray tarballs
+*.tar.gz
+
 # Symlinks and/or local data folders
 paper/resources/images/generated
 

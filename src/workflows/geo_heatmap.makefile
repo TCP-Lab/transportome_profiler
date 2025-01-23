@@ -29,7 +29,7 @@ rexec = Rscript --no-save --no-restore --verbose
 	xsv fmt -d '\t' $< > $@
 
 data/%: data/in/%
-	mv $< $@
+	cp $< $@
 
 data/geo/%.meta.csv: data/geo/%.rawmeta.csv
 	python src/modules/geo_data/fix_geo_metadata.py $< > $@
@@ -51,8 +51,8 @@ data/geo/%.dea.csv: data/geo/%.meta.csv data/geo/%.counts.csv
 	metasplit "$<@ena_run?status=control" $(word 2, $^) $@.control.unlogged --always_include gene_id
 	cat $@.case.unlogged | src/helper_scripts/log_values > $@.case
 	cat $@.control.unlogged | src/helper_scripts/log_values > $@.control
-	generanker --id-col gene_id $@.case $@.control $(RANK_METHOD) > $@
-	rm $@.case $@.control $@.case.unlogged $@.control.unlogged
+	generanker --output-file $@ --id-col gene_id $@.case $@.control $(RANK_METHOD)
+	#rm $@.case $@.control $@.case.unlogged $@.control.unlogged
 
 # GSE254461 is specialer: it has a bunch of different tumor types
 # This rule splits it into the two parts
@@ -127,6 +127,56 @@ ALL +=./data/out/figures/geo_deregulation_heatmap.png
 		--height 15 \
 		--renames data/in/config/geo_renames.json \
 		$(_heatmap_plot_flags)
+
+
+deas = $(addprefix data/geo/, $(addsuffix .dea.csv,$(GEO)))
+
+## --- Make the output summary plots
+data/filter_genes.txt: data/genesets.json
+	cat $< | jq -r '.[] | select(.name == "whole_transportome").data | @csv' > $@
+
+data/geo_merged_deas.csv: $(deas)
+	mkdir -p ${@D}
+	# This renames the header slot 'ranking' to the name of the file
+	# This magical $ thing is to replace the .csv to nothing
+	# the pattern is {variable/pattern/replacement}
+	for name in ./data/geo/*.dea.csv; do \
+		replacement=$$(basename "$${name/.dea.csv}"); \
+		sed "1s/ranking/$${replacement}/" "$${name}" > $${name/.csv/}.renames.csv; \
+	done
+	# Move one random file to be the "base" that we can reduce into
+	mv $$(find "./data/geo/" -name "*.renames.csv" -print -quit) ./data/base
+	# The xsv select is there to remove the second "gene_id" col that "join" retains.
+	for item in ./data/geo/*.renames.csv; do \
+		xsv join gene_id ./data/base gene_id $${item} --full | xsv select '!gene_id[1]' > ./data/tmp;\
+		mv ./data/tmp ./data/base; \
+	done
+	mv ./data/base $@
+	# Since the .renames files may conflict with the old pipeline, I
+	# just delete them here instead of changing the previous steps.
+	# Sorry!
+	rm ./data/geo/*.renames.csv
+
+ALL +=./data/out/figures/top_geo_disregulation.png
+./data/out/figures/top_geo_disregulation.png: \
+		./data/geo_merged_deas.csv \
+		./data/filter_genes.txt \
+		${mods}/plotting/plot_shared_dysregulation.R \
+		./data/ensg_data.csv
+	mkdir -p ${@D}
+	${rexec} ${mods}/plotting/plot_shared_dysregulation.R $@ $< data/ensg_data.csv \
+		--id_col gene_id \
+		--selected_genes data/filter_genes.txt --png --res 400
+
+ALL +=./data/out/figures/geo_upset.png
+./data/out/figures/geo_upset.png: \
+		./data/geo_merged_deas.csv \
+		./data/filter_genes.txt \
+		${mods}/plotting/plot_general_upset.R \
+		./data/ensg_data.csv
+	mkdir -p ${@D}
+	${rexec} ${mods}/plotting/plot_general_upset.R $@ $< \
+		--selected_genes data/filter_genes.txt --png --res 400
 
 PHONY += all
 all: $(ALL)

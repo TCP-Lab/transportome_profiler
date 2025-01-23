@@ -37,7 +37,7 @@ REQUIRED_FILES = {
     "data/deas": {"action": "merge", "filters": [strip_flags], "id_col": "sample"},
     "data/geo": {
         "action": "merge",
-        "filters": [strip_flags, find_re(".*\.dea\.csv")],
+        "filters": [strip_flags, find_re(r".*\.dea\.csv")],
         "id_col": "gene_id",
     },
 }
@@ -62,7 +62,8 @@ def merge_deas(files: list[Path], merge_col: str = "sample") -> pd.DataFrame:
     # and then do a many-way merge
     log.info("Merging data...")
     renamed = {k: v.rename(columns={"ranking": k}) for k, v in data.items()}
-    merged = reduce(lambda x, y: pd.merge(x, y, on=merge_col), renamed.values())
+    merged = reduce(lambda x, y: pd.merge(
+        x, y, on=merge_col), renamed.values())
 
     return merged
 
@@ -93,12 +94,14 @@ def main(args):
     for key, value in REQUIRED_FILES.items():
         if value["action"] == "merge":
             log.info(f"Merging contents of {key}")
-            files_to_merge = [x for x in names if x.startswith(key) and x != key]
+            files_to_merge = [
+                x for x in names if x.startswith(key) and x != key]
             for fn in value["filters"]:
                 files_to_merge = filter(fn, files_to_merge)
             merged = merge_deas(files_to_merge, value.get("id_col", "sample"))
 
-            target = args.output_dir / f"{slug}_{remove_suffixes(Path(key))}.csv"
+            target = args.output_dir / \
+                f"{slug}_{remove_suffixes(Path(key))}.csv"
             log.info(f"Saving to {target}...")
 
             merged.to_csv(target, index=False)
