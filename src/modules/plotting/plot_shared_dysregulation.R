@@ -50,7 +50,7 @@ extract_top_dysregulated <- function(data, quantile = 5, n = Inf, gene_filter = 
         data <- data[row.names(data) %in% gene_filter,]
     }
 
-    thr <- quantile(unlist(data), probs = c(quantile/100, (100-quantile)/100))
+    thr <- quantile(unlist(data), probs = c(quantile/100, (100-quantile)/100), na.rm = TRUE)
     lower_thr <- thr[1]
     upper_thr <- thr[2]
 
