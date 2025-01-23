@@ -191,7 +191,7 @@ main <- function(input_results,
 
     if (!is.null(selected_genes)) {
         # This does not work since we need to strip the ensg version!!
-        data |> filter({{ id_col }} %in% selected_genes) -> data
+        data |> filter(!!as.symbol(id_col) %in% selected_genes) -> data
     }
 
     pdata <- prep_data(data, id_col)
@@ -227,7 +227,9 @@ if (!exists("LOCAL_DEBUG")) {
     )
 } else {
     main(
-        "data/merged_deas.csv",
+        "data/geo_merged_deas.csv",
         NULL,
+        id_col = "gene_id",
+        selected_genes = "data/filter_genes.txt"
     ) |> print()
 }

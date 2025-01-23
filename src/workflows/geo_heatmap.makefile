@@ -176,6 +176,7 @@ ALL +=./data/out/figures/geo_upset.png
 		./data/ensg_data.csv
 	mkdir -p ${@D}
 	${rexec} ${mods}/plotting/plot_general_upset.R $@ $< \
+		--id_col gene_id \
 		--selected_genes data/filter_genes.txt --png --res 400
 
 PHONY += all
