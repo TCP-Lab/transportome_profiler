@@ -166,6 +166,7 @@ ALL +=./data/out/figures/top_geo_disregulation.png
 	mkdir -p ${@D}
 	${rexec} ${mods}/plotting/plot_shared_dysregulation.R $@ $< data/ensg_data.csv \
 		--id_col gene_id \
+		--renames ./data/in/config/geo_renames_top_disregulation.json \
 		--selected_genes data/filter_genes.txt --png --res 400
 
 ALL +=./data/out/figures/geo_upset.png

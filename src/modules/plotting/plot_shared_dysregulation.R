@@ -240,11 +240,11 @@ plot_dysregulation <- function(data, min_intersection_size = 5) {
 }
 
 {
-    select_initial <- function(x) {
-        str_split_1(x, "_")[1]
+    strip_tick <- function(x) {
+        str_replace_all(x, "_", " ")
     }
 
-    assert_that(are_equal(select_initial("some_nice_text"), "some"))
+    assert_that(are_equal(strip_tick("some_nice_text"), "some nice text"))
 
 
     make_tumor_type_renamer <- function(tt_map) {
@@ -252,7 +252,7 @@ plot_dysregulation <- function(data, min_intersection_size = 5) {
             if (x %in% names(tt_map)) {
                 return(tt_map[[x]])
             }
-            return(select_initial(x))
+            return(strip_tick(x))
         }
 
         wrap
@@ -268,7 +268,7 @@ plot_dysregulation <- function(data, min_intersection_size = 5) {
         make_tumor_type_renamer(
             list("original"= "new")
         )("wow_how_nice"),
-        select_initial("wow_how_nice")
+        strip_tick("wow_how_nice")
     ))
 }
 
@@ -357,8 +357,10 @@ plot_shared_genes <- function(
     dot_dt$hgnc_symbol <- factor(dot_dt$hgnc_symbol, levels=bar_x_values)
     dot_dt$variable <- factor(dot_dt$variable, levels=colnames(dot_dt_clust)[col.ord])
 
-    if (!is.null(types_renames_fn)) {
-        levels(dot_dt$variable) <- sapply(levels(dot_dt$variable), types_renames_fn)
+    renames <- if (!is.null(types_renames_fn)) {
+        sapply(levels(dot_dt$variable), types_renames_fn)
+    } else {
+        levels(dot_dt$variable)
     }
 
     max_value_color <- max(abs(dot_dt$value))
@@ -378,9 +380,10 @@ plot_shared_genes <- function(
         ) +
         geom_tile() +
         theme_minimal() +
+        scale_x_discrete(labels = renames) +
         theme(
             axis.title.y = element_blank(),
-            axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+            axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),
             #axis.text.y = element_blank(),
             axis.title.x = element_blank(),
             legend.position = "left",
@@ -457,7 +460,7 @@ if (!exists("LOCAL_DEBUG")) {
         argparser::add_argument(
             "--renames",
             help = "JSON file with renames to apply to sample names when plotting",
-            default = NULL, type = "character"
+            default = NULL
         ) -> parser
     
     args <- argparser::parse_args(parser)
@@ -468,20 +471,24 @@ main <- function(args) {
         args$input_result,
         show_col_types = FALSE
     )
+
     selected_genes <- if (!is.null(args$selected_genes)) {
         read_file(args$selected_genes) |>
             str_split_1(",") |> str_remove_all("\"") |> str_remove_all("\\n")
     } else {
         NULL
     }
-    
-    #' This list is used to rename tumor types. Syntax is "OLD" = "NEW"
-    #' regex is NOT supported.
-    #' 
-    #' This is the only hardwired variable
-    tt_renames <- list(
-        "Head_n_Neck_cancer_deseq" = "Head and Neck"
-    )
+
+    if (!is.na(args$renames)) {
+        tt_renames <- jsonlite::fromJSON(read_lines(args$renames))
+    } else {
+        # Don't judge me - it's the only rename I need for the TCGA.
+        # Just so I don't have to make a new config file just for TCGA.
+        # Don't judge me.
+        tt_renames <- list(
+            "Head_n_Neck_cancer_deseq" = "Head and Neck"
+        )
+    }
     
     ensg_data <- read_csv(args$ensg_to_hugo)
     
