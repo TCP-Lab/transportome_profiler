@@ -210,8 +210,6 @@ gen_plot_data <- function(data, values = NULL) {
 
     dt <- rbind(dt_up, dt_down)
     assert_that(are_equal(nrow(dt), nrow(dt_up) + nrow(dt_down)))
-    print("this is DT")
-    print(dt)
 
     dt
 }
@@ -286,7 +284,6 @@ plot_shared_genes <- function(
         n_genes = 50
     ) {
     dt <- gen_plot_data(data, values) |> tibble() |> arrange(name)
-    print(head(values))
     gene_order <- rowSums(abs(values)) |> sort(decreasing = TRUE)
 
     dt <- merge(
@@ -316,7 +313,6 @@ plot_shared_genes <- function(
     # Here we define the order of both plots
     # Sort first by "total", then break ties by "order"
     bar_dt <- bar_dt[order(bar_dt$total, bar_dt$order, decreasing = TRUE), ]
-    print(head(bar_dt, n=n_genes*2))
 
     # TODO: This is bad - if there are genes with =/= ensg but the same hgnc,
     # this causes a collision. But it's impossible (?) to revalue the labels
@@ -327,7 +323,6 @@ plot_shared_genes <- function(
     # can't just bar_dt[1:n_genes, ] directly
     selection <- unique(bar_dt$name)[1:n_genes]
     bar_dt <- bar_dt[bar_dt$name %in% selection, ]
-    print(length(unique(bar_dt$name)))
 
     bar_plot <- ggplot(bar_dt, aes(x=factor(hgnc_symbol, levels=rev(unique(hgnc_symbol))), y=row_value)) +
         geom_bar(stat = "identity", aes(fill = direction), position = "stack") +
@@ -367,7 +362,6 @@ plot_shared_genes <- function(
     }
 
     max_value_color <- max(abs(dot_dt$value))
-    print(max_value_color)
 
     dot_plot <- ggplot(
         dot_dt,
