@@ -199,6 +199,8 @@ gen_plot_data <- function(data, values = NULL) {
         prep_for_upset(filtered_data_up) -> dt_up
         prep_for_upset(filtered_data_down) -> dt_down
     }
+    # If some genes are in "up" but not in "down", add them in, and vice-versa
+
 
     dt_up$direction <- "up"
     dt_down$direction <- "down"
@@ -208,6 +210,8 @@ gen_plot_data <- function(data, values = NULL) {
 
     dt <- rbind(dt_up, dt_down)
     assert_that(are_equal(nrow(dt), nrow(dt_up) + nrow(dt_down)))
+    print("this is DT")
+    print(dt)
 
     dt
 }
@@ -282,6 +286,8 @@ plot_shared_genes <- function(
         n_genes = 50
     ) {
     dt <- gen_plot_data(data, values) |> tibble() |> arrange(name)
+    print(head(values))
+    gene_order <- rowSums(abs(values)) |> sort(decreasing = TRUE)
 
     dt <- merge(
         dt,
@@ -296,21 +302,34 @@ plot_shared_genes <- function(
     ))
 
     bar_dt <- binary_dt |> mutate(row_value = rowSums(select_if(binary_dt, is.numeric)))
+    
+    get_score_of <- function(name) {
+        gene_order[name]
+    }
 
-    bar_order <- bar_dt |> group_by(name) |> summarise(total = sum(row_value))
+    bar_totals <- bar_dt |> group_by(name) |> summarise(total = sum(abs(row_value)))
+    bar_sums <- bar_dt |> group_by(name) |> reframe(order = get_score_of(name))
 
-    bar_dt <- merge(bar_dt, bar_order, by="name")
+    bar_dt <- list(bar_dt, bar_sums, bar_totals) |>
+        purrr::reduce(\(x, y) {merge(x, y, by="name", all=TRUE)}) |>
+        distinct()
+    # Here we define the order of both plots
+    # Sort first by "total", then break ties by "order"
+    bar_dt <- bar_dt[order(bar_dt$total, bar_dt$order, decreasing = TRUE), ]
+    print(head(bar_dt, n=n_genes*2))
 
     # TODO: This is bad - if there are genes with =/= ensg but the same hgnc,
     # this causes a collision. But it's impossible (?) to revalue the labels
     # even with scale_x_discrete (or at least I could not get it to work).
     # I plot hgnc_symbols directly and hope for the best
+    
+    # I need to keep the first n_genes unique genes. Some may repeat, so I
+    # can't just bar_dt[1:n_genes, ] directly
+    selection <- unique(bar_dt$name)[1:n_genes]
+    bar_dt <- bar_dt[bar_dt$name %in% selection, ]
+    print(length(unique(bar_dt$name)))
 
-    # I need to double the number of genes here since there are two rows
-    # per gene in bar_dt, so this way we keep both
-    bar_dt <- bar_dt |> top_n(n_genes * 2, total)
-
-    bar_plot <- ggplot(bar_dt, aes(x=reorder(hgnc_symbol, total), y=row_value)) +
+    bar_plot <- ggplot(bar_dt, aes(x=factor(hgnc_symbol, levels=rev(unique(hgnc_symbol))), y=row_value)) +
         geom_bar(stat = "identity", aes(fill = direction), position = "stack") +
         scale_fill_manual(values = c("purple", "darkorange")) +
         theme_minimal() +
@@ -322,7 +341,7 @@ plot_shared_genes <- function(
             legend.title = element_blank()
         ) +
         #scale_y_reverse() +
-        scale_x_discrete(position = "top") +
+        scale_x_discrete(position = "top", breaks=bar_dt$hgnc_symbol) +
         coord_flip()
 
     bar_x_values <- layer_scales(bar_plot)$x$range$range
@@ -347,6 +366,9 @@ plot_shared_genes <- function(
         levels(dot_dt$variable) <- sapply(levels(dot_dt$variable), types_renames_fn)
     }
 
+    max_value_color <- max(abs(dot_dt$value))
+    print(max_value_color)
+
     dot_plot <- ggplot(
         dot_dt,
         aes(
@@ -356,7 +378,9 @@ plot_shared_genes <- function(
         )) +
         scale_fill_gradient2(
             low = "purple", mid="white", high="darkorange",
-            name = "Score"
+            name = "Score",
+            limits = c(-max_value_color, max_value_color),
+            n.breaks = 5
         ) +
         geom_tile() +
         theme_minimal() +
