@@ -89,10 +89,10 @@
     },
     "Colorectal_cancer": {
         "case": [
-            "<meta>@sample?_study=TCGA&_primary_site=[Colon]&_sample_type!=[Solid Tissue Normal,Control Analyte]"
+            "<meta>@sample?_study=TCGA&_primary_site=[Rectum,Colon]&_sample_type!=[Solid Tissue Normal,Control Analyte]"
         ],
         "control": [
-            "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Colon]&_sample_type=[Normal Tissue,Solid Tissue Normal]"
+            "<meta>@sample?_study=[TCGA,GTEX]&_primary_site=[Rectum,Colon]&_sample_type=[Normal Tissue,Solid Tissue Normal]"
         ]
     },
     "Testicular_cancer": {
