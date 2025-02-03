@@ -12,6 +12,9 @@ packaged_output_%.tar.gz:
 	kerblam run geo_heatmap -l
 		
 	chown $$USER -R ./data
+	# Copy the large tables so they get checked out
+	cp ./data/merged_deas.csv ./data/out/merged_deas.csv
+	cp ./data/geo_merged_deas.csv ./data/out/geo_merged_deas.csv
 	kerblam data pack --output-only $@
 	# We're done - let's clean up so we can start fresh
 	kerblam data clean -y
