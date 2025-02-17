@@ -157,8 +157,8 @@ data/geo_merged_deas.csv: $(deas)
 	# Sorry!
 	rm ./data/geo/*.renames.csv
 
-ALL +=./data/out/figures/top_geo_disregulation.png
-./data/out/figures/top_geo_disregulation.png: \
+ALL +=./data/out/figures/top_geo_disregulation_qq_5.png
+./data/out/figures/top_geo_disregulation_qq_5.png: \
 		./data/geo_merged_deas.csv \
 		./data/filter_genes.txt \
 		${mods}/plotting/plot_shared_dysregulation.R \
@@ -167,7 +167,19 @@ ALL +=./data/out/figures/top_geo_disregulation.png
 	${rexec} ${mods}/plotting/plot_shared_dysregulation.R $@ $< data/ensg_data.csv \
 		--id_col gene_id \
 		--renames ./data/in/config/geo_renames_top_disregulation.json \
-		--selected_genes data/filter_genes.txt --png --res 400
+		--selected_genes data/filter_genes.txt --quantile 5 --png --res 400
+
+ALL +=./data/out/figures/top_geo_disregulation_qq_10.png
+./data/out/figures/top_geo_disregulation_qq_10.png: \
+		./data/geo_merged_deas.csv \
+		./data/filter_genes.txt \
+		${mods}/plotting/plot_shared_dysregulation.R \
+		./data/ensg_data.csv
+	mkdir -p ${@D}
+	${rexec} ${mods}/plotting/plot_shared_dysregulation.R $@ $< data/ensg_data.csv \
+		--id_col gene_id \
+		--renames ./data/in/config/geo_renames_top_disregulation.json \
+		--selected_genes data/filter_genes.txt --quantile 10 --png --res 400
 
 ALL +=./data/out/figures/geo_upset.png
 ./data/out/figures/geo_upset.png: \

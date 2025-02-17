@@ -19,6 +19,11 @@ packaged_output_%.tar.gz:
 	# We're done - let's clean up so we can start fresh
 	kerblam data clean -y
 
+ALL += extra_plots.tar.gz
+extra_plots.tar.gz:
+	kerblam run expression_plot -l
+	kerblam data pack --output-only $@
+
 PHONY += all
 all: $(ALL)
 
