@@ -30,7 +30,7 @@ rexec = Rscript --no-save --no-restore --verbose
 		./data/MTPDB.sqlite \
 		$(mods)/make_genesets.py \
 		./data/in/config/gene_lists/no_experimental_ions.json
-	
+
 	# Min recurse set size is 0 otherwise pruning is aleatory!!
 	python $(mods)/make_genesets.py ./data/MTPDB.sqlite ./data/in/config/gene_lists/no_experimental_ions.json \
 		./data/genesets.json ./data/genesets_repr.txt \
@@ -82,6 +82,7 @@ ALL += ./data/out/figures/expression_means.png
 	$(rexec) ./src/modules/plotting/plot_expression_means.R $< \
 		./data/genesets.json ./data/genesets_repr.txt $@ \
 		--res 400 --height 15 --expression_threshold 0 \
+		--renames ./data/in/config/tcga_renames.json \
 		--extra_title "TCGA + GTEX data"
 
 ALL += ./data/out/figures/expression_means_TCGA_only.png
@@ -94,6 +95,7 @@ ALL += ./data/out/figures/expression_means_TCGA_only.png
 	$(rexec) ./src/modules/plotting/plot_expression_means.R $< \
 		./data/genesets.json ./data/genesets_repr.txt $@ \
 		--res 400 --height 15 --expression_threshold 0 \
+		--renames ./data/in/config/tcga_renames.json \
 		--extra_title "TCGA only"
 
 PHONY += all
