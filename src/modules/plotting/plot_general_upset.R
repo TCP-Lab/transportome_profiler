@@ -58,7 +58,6 @@ if (!exists("LOCAL_DEBUG")) {
 suppressMessages({
     options(tidyverse.quiet = TRUE)
     library(tidyverse)
-    library(archive)
     library(assertthat)
     library(ComplexUpset)
 })

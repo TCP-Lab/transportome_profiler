@@ -1,5 +1,13 @@
 #? Generate the plot with the expressed/not expressed information for genesets
 
+SHELL = /bin/bash
+
+
+OPTS=./data/in/config/heatmaps_runtime_options.json
+
+PRUNE_SIMILARITY ?= $(shell cat $(OPTS) | jq -r '.prune_similarity')
+PRUNE_DIRECTION ?= $(shell cat $(OPTS) | jq -r '.prune_direction')
+
 # Shorthands
 mods = ./src/modules
 rexec = Rscript --no-save --no-restore --verbose
@@ -68,6 +76,8 @@ ALL += ./data/out/figures/expression_means.png
 	./src/modules/plotting/plot_expression_means.R \
 	./data/genesets.json \
 	./data/genesets_repr.txt
+
+	mkdir -p $(@D)
 
 	$(rexec) ./src/modules/plotting/plot_expression_means.R $< \
 		./data/genesets.json ./data/genesets_repr.txt $@ \

@@ -7,9 +7,9 @@ ALL += $(addsuffix .tar.gz,$(addprefix packaged_output_,${RANK_METHODS}))
 packaged_output_%.tar.gz:
 	# This sed call just takes out the ranking method string
 	RANK_METHOD=$(shell echo $@ | sed -n "s/packaged_output_\(\S*\).tar.gz/\1/p") \
-	kerblam run heatmaps -l
+	kerblam run heatmap
 	RANK_METHOD=$(shell echo $@ | sed -n "s/packaged_output_\(\S*\).tar.gz/\1/p") \
-	kerblam run geo_heatmap -l
+	kerblam run geo_heatmap
 		
 	chown $$USER -R ./data
 	# Copy the large tables so they get checked out
@@ -21,7 +21,7 @@ packaged_output_%.tar.gz:
 
 ALL += extra_plots.tar.gz
 extra_plots.tar.gz:
-	kerblam run expression_plot -l
+	kerblam run expression_plot
 	kerblam data pack --output-only $@
 
 PHONY += all

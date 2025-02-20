@@ -3,6 +3,8 @@
 #? The main task of this pipeline is to preprocess the data that comes in
 #? in a bajillion different formats.
 
+SHELL = /bin/bash
+
 .ONESHELL:
 
 OPTS=./data/in/config/heatmaps_runtime_options.json

@@ -4,6 +4,8 @@
 #? against the splits, runs GSEA against the ranks with genesets from
 #? the MTP-DB and produces the large pancancer heatmaps.
 
+SHELL = /bin/bash
+
 OPTS=./data/in/config/heatmaps_runtime_options.json
 # Number of threads to use to parallelize the ranking process
 N_THREADS ?= $(shell cat $(OPTS) | jq -r '.threads')

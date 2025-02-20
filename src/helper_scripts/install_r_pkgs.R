@@ -3,7 +3,7 @@
 options(repos = "http://cloud.r-project.org/")
 
 install <- function(pkg) {
-    if (!requireNamespace(pkg, quietly=TRUE)) {
+    if (!requireNamespace(pkg, quietly = TRUE)) {
         install.packages(pkg)
     } else {
         cat(paste0("Skipping ", pkg, " as it is already installed.\n"))
@@ -30,6 +30,7 @@ install("uuid")
 install("grid")
 install("reshape2")
 install("rjson")
+install("archive")
 install_bioc("glmGamPoi")
 install("extrafont")
 install("ComplexUpset")
