@@ -70,6 +70,22 @@ rexec = Rscript --no-save --no-restore --verbose
 		$(@) \
 		--case-only
 
+## --- Calculate the expressed/not expressed matrix based on tumor type (GTEX only)
+./data/expression_means_GTEX.csv: \
+	./data/expression_matrix_tpm.csv \
+	./data/expression_matrix_metadata.csv \
+	$(mods)/calc_expression_means.py \
+	./data/in/config/DEA_queries/dea_queries.json
+
+	mkdir -p $(@D)
+
+	python $(mods)/calc_expression_means.py \
+		./data/in/config/DEA_queries/dea_queries.json \
+		./data/expression_matrix_tpm.csv \
+		./data/expression_matrix_metadata.csv \
+		$(@) \
+		--control-only
+
 ALL += ./data/out/figures/expression_means.png
 ./data/out/figures/expression_means.png: \
 	./data/expression_means.csv \
@@ -97,6 +113,16 @@ ALL += ./data/out/figures/expression_means_TCGA_only.png
 		--res 400 --height 15 --expression_threshold 0 \
 		--renames ./data/in/config/tcga_renames.json \
 		--extra_title "TCGA only"
+
+ALL += ./data/out/avg_expression.csv
+./data/out/avg_expression.csv: \
+	./data/expression_means_GTEX.csv \
+	./src/modules/get_avg_expression.R \
+	./data/ensg_data.csv
+
+	$(rexec) ./src/modules/get_avg_expression.R $< \
+		./data/ensg_data.csv \
+		$@ 0
 
 PHONY += all
 all: $(ALL)

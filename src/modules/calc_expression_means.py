@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 import tempfile
 from functools import partial, reduce
 from pathlib import Path
@@ -16,7 +17,13 @@ def replace(string, pattern, replacement):
 
 
 def run_wrapper(
-    keyvalue, input_matrix_path, input_metadata_path, output_dir, delimiter, case_only
+    keyvalue,
+    input_matrix_path,
+    input_metadata_path,
+    output_dir,
+    delimiter,
+    case_only,
+    control_only,
 ):
     key, value = keyvalue
     set_meta = partial(
@@ -26,27 +33,32 @@ def run_wrapper(
     )
     print(f"Processing {key}.")
 
+    assert not (
+        case_only and control_only
+    ), "Cannot set both case_only and control_only"
+
     # Make the "case" file
-    print(f"Making input file {key}_case")
-    args = [
-        "metasplit",
-    ]
-    args.extend([set_meta(x) for x in value["case"]])
-    args.extend(
-        [
-            input_matrix_path,
-            output_dir / f"{key}_case",
-            "--ignore_missing",
-            "--input_delimiter",
-            delimiter,
-            "--always_include",
-            "sample",
+    if not control_only:
+        print(f"Making input file {key}_case")
+        args = [
+            "metasplit",
         ]
-    )
-    args = [str(x) for x in args]
-    print(f"Executing {' '.join(args)}")
-    run(args, check=True)
-    case = pd.read_csv(output_dir / f"{key}_case")
+        args.extend([set_meta(x) for x in value["case"]])
+        args.extend(
+            [
+                input_matrix_path,
+                output_dir / f"{key}_case",
+                "--ignore_missing",
+                "--input_delimiter",
+                delimiter,
+                "--always_include",
+                "sample",
+            ]
+        )
+        args = [str(x) for x in args]
+        print(f"Executing {' '.join(args)}")
+        run(args, check=True)
+        case = pd.read_csv(output_dir / f"{key}_case")
 
     # Make the "control" file
     if not case_only:
@@ -74,6 +86,8 @@ def run_wrapper(
     # Merge case and control together, if we need to
     if case_only:
         matrix = case
+    elif control_only:
+        matrix = control
     else:
         matrix = pd.merge(case, control, on="sample", how="outer")
 
@@ -84,7 +98,8 @@ def run_wrapper(
     matrix = matrix.filter(items=["sample", key], axis="columns")
 
     # Delete the useless input files
-    os.remove(output_dir / f"{key}_case")
+    if not control_only:
+        os.remove(output_dir / f"{key}_case")
     if not case_only:
         os.remove(output_dir / f"{key}_control")
 
@@ -98,6 +113,7 @@ def main(
     output_path: Path,
     delimiter=",",
     case_only=False,
+    control_only=False,
 ):
     with tempfile.TemporaryDirectory() as tmp:
         run = partial(
@@ -107,6 +123,7 @@ def main(
             output_dir=Path(tmp),
             delimiter=delimiter,
             case_only=case_only,
+            control_only=control_only,
         )
         matrices = list(map(run, queries.items()))
 
@@ -138,8 +155,17 @@ if __name__ == "__main__":
         action="store_true",
         help="Calculate expression using only case samples?",
     )
+    parser.add_argument(
+        "--control-only",
+        action="store_true",
+        help="Calculate expression using only control samples?",
+    )
 
     args = parser.parse_args()
+
+    if args.control_only and args.case_only:
+        print("ERROR: Cannot specify both --case-only and --control-only.")
+        sys.exit(1)
 
     with args.queries_file.open("r") as stream:
         queries = json.load(stream)
@@ -151,4 +177,5 @@ if __name__ == "__main__":
         output_path=args.output_file,
         delimiter=args.delimiter,
         case_only=args.case_only,
+        control_only=args.control_only,
     )
