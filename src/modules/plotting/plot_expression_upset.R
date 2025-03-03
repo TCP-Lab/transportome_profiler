@@ -102,14 +102,34 @@ main <- function(
     extra_title = NA,
     renames = NA,
     res = 300,
-    width = 1600,
-    height = 600,
+    width = 10,
+    height = 10,
     png = FALSE
 ) {
     input_means <- read_csv(input_means_path)
     input_set <- jsonlite::read_json(input_set_path) |> unlist()
 
+    if (!is.na(renames)) {
+        renames <- jsonlite::read_json(renames)
+    } else {
+        renames <- NA
+    }
+
+    print(renames)
+
     data <- gen_plot_data(input_means, input_set, expressed_threshold = expression_threshold)
+
+    apply_renames <- function(x) {
+        if (is.na(renames)) {
+            return(x)
+        }
+
+        if (!x %in% names(renames)) {
+            return(x)
+        }
+
+        renames[[x]]
+    }
 
     p <- upset(
         data,
@@ -125,10 +145,23 @@ main <- function(
                     ')'
                 ))
             )
-        )
+        ),
+        # This should apply the renames, but it does not work.
+        # I opened a PR for this back in December with the fix in the
+        # ComplexUpset package but the maintainer did not reply.
+        # See https://github.com/krassowski/complex-upset/issues/206
+        # and https://github.com/krassowski/complex-upset/pull/207
+        matrix = intersection_matrix() +
+            scale_y_discrete(labels=apply_renames)
     ) + ggtitle(extra_title)
 
+    if (png) {
+        png(output_file_path, width = width, height = height, res = res, units = "in")
+    } else {
+        pdf(output_file_path, width = width, height = height)
+    }
     print(p)
+    dev.off()
 }
 
 
@@ -139,7 +172,7 @@ if (exists("LOCAL_DEBUG")) {
         output_file_path = "data/out/figures/whole_transportome_test_upset.png",
         expression_threshold = 0,
         extra_title = "Transporters",
-        renames = NA,
+            renames = "data/in/config/tcga_renames.json",
         res = 300,
         width = 1600,
         height = 600,
@@ -147,17 +180,15 @@ if (exists("LOCAL_DEBUG")) {
     )
 } else {
     main(
-        input_expression_means = args$input_expression_means,
-        input_tree = args$input_tree,
-        genesets_file = args$genesets,
-        out_file = args$output_file,
-        no_cluster = args$no_cluster,
+        input_means_path = args$input_expression_means,
+        input_set_path = args$set,
+        output_file_path = args$output_file,
+        expression_threshold = args$expression_threshold,
         extra_title = args$extra_title,
-        save_png = TRUE,
-        png_res = args$res,
-        plot_width = args$width,
-        plot_height = args$height,
         renames = args$renames,
-        expressed_threshold = args$expression_threshold
+        res = args$res,
+        width = args$width,
+        height = args$height,
+        png = args$png
     )
 }

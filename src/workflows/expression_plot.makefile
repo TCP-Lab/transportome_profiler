@@ -124,6 +124,26 @@ ALL += ./data/out/avg_expression.csv
 		./data/ensg_data.csv \
 		$@ 0
 
+## --- Calculate the UPSET plots
+./data/out/figures/%_expression_upset.png: \
+	./data/%_single_geneset.json \
+	./data/expression_means.csv \
+	./src/modules/plotting/plot_expression_upset.R
+
+	$(rexec) ./src/modules/plotting/plot_expression_upset.R \
+		./data/expression_means.csv $< $@ \
+		--expression_threshold 0 \
+		--renames ./data/in/config/tcga_renames.json \
+		--extra_title "Upset of expressed genes - ${*}" \
+		--png
+
+./data/%_single_geneset.json: ./data/genesets.json
+	jq 'to_entries[] | select(.value.name == "$*") | .value.data' $< > $@
+
+ALL += ./data/out/figures/whole_transportome_expression_upset.png \
+	   ./data/out/figures/channels_expression_upset.png \
+	   ./data/out/figures/transporters_expression_upset.png
+
 PHONY += all
 all: $(ALL)
 
