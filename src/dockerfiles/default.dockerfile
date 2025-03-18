@@ -67,7 +67,7 @@ RUN cargo install xsv
 RUN cargo install --git https://github.com/MrHedmad/fast-cohen.git
 
 # Install kerblam
-RUN cargo install --git https://github.com/MrHedmad/kerblam.git
+RUN cargo install --locked --git https://github.com/MrHedmad/kerblam.git
 
 # Copy the rest of the files
 COPY . .

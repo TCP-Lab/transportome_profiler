@@ -114,6 +114,19 @@ ALL += ./data/out/figures/expression_means_TCGA_only.png
 		--renames ./data/in/config/tcga_renames.json \
 		--extra_title "TCGA only"
 
+ALL += ./data/out/figures/expression_means_TCGA_only.png
+./data/out/figures/expression_means_GTEX_only.png: \
+	./data/expression_means_GTEX.csv \
+	./src/modules/plotting/plot_expression_means.R \
+	./data/genesets.json \
+	./data/genesets_repr.txt
+
+	$(rexec) ./src/modules/plotting/plot_expression_means.R $< \
+		./data/genesets.json ./data/genesets_repr.txt $@ \
+		--res 400 --height 15 --expression_threshold 0 \
+		--renames ./data/in/config/tcga_renames.json \
+		--extra_title "GTEX only"
+
 ALL += ./data/out/avg_expression.csv
 ./data/out/avg_expression.csv: \
 	./data/expression_means_GTEX.csv \
