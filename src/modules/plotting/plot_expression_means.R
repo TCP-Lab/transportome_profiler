@@ -145,6 +145,11 @@ gen_plot_data <- function(
     plot_data$pathway <- str_replace_all(plot_data$pathway, "\\.", "-") |> 
         str_replace_all("^X", "") # This is to fix R adding an X if the name starts with a number
     
+    # Add the size of the genesets
+    plot_data$size <- sapply(plot_data$pathway, \(x) {
+        length(genesets[[x]]$data)  
+    })
+    
     # Set the order of the column samples based on hclust
     # - We need to make a matrix from the input
     # - This is fine to be ran on just one type of data, based on what we want to
@@ -196,7 +201,7 @@ create_large_heatmap <- function(
         theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
         ggtitle(fig_title) +
         scale_fill_gradientn( # not a typo - it is really called gradientn
-            "value",
+            "Expression\nRate",
             colours = rev(c("purple", "violet", "lightblue", "white")),
             breaks = c(0, 0.25, 0.50, 0.75, 1),
             labels = c("0 %", "25 %", "50 %", "75 %", "100 %"),
@@ -205,6 +210,29 @@ create_large_heatmap <- function(
         ylab("Gene Set") + xlab("Cohort") +
         scale_y_discrete(breaks = plot_data$fac_pathway, labels = plot_data$label) +
         theme(text = element_text(family = "FiraCode Nerd Font", size = 10))
+    
+    p
+}
+
+create_set_size_plot <- function(plot_data) {
+    # Select just one category - they all share the same set size
+    filtered_plot_data <- plot_data |> filter(fac_id == levels(plot_data$fac_id)[1])
+    filtered_plot_data$fac_id <- "Set\nsize"
+    filtered_plot_data$fac_id <- filtered_plot_data$fac_id |> as.vector() |> as.factor()
+    
+    p <- filtered_plot_data |>
+        ggplot(aes(fill = size, x = fac_id, y = fac_pathway)) +
+        geom_tile() +
+        geom_text(aes(label = size), family = "FiraCode Nerd Font", size = 3) +
+        theme_minimal() +
+        scale_fill_gradient(low="#d7ffd4", high = "#10c400", guide = "colourbar") +
+        scale_y_discrete(breaks = filtered_plot_data$fac_pathway, labels = NULL) +
+        theme(
+            text = element_text(family = "FiraCode Nerd Font", size = 10),
+            panel.grid = element_blank()
+        ) +
+        ylab(NULL) + xlab(NULL) +
+        guides(fill = guide_legend(title = "Set size"))
     
     p
 }
@@ -249,6 +277,15 @@ main <- function(
     )
     
     large_plot <- create_large_heatmap(pdata, extra_title = extra_title)
+    
+    # Add the set size points
+    set_size_plot <- create_set_size_plot(pdata)
+    
+    large_plot <- large_plot + plot_spacer() + set_size_plot + plot_layout(
+        ncol = 3, nrow = 1,
+        widths = c(15, -1.1, 2),
+        guides = "collect"
+    ) + theme(legend.position = "right")
     
     # Save plot to output
     if (is.null(out_file)) {
