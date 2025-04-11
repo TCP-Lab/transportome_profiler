@@ -50,6 +50,11 @@ RUN set -eux; \
     rustc --version;
 # --- End Rust installation
 
+## Install fonts
+RUN sudo add-apt-repository --yes universe && \
+    apt-get update && \
+    apt-get install --yes fonts-firacode
+
 COPY ./src/requirements.txt /src/
 # Install python 3.13 and tree
 RUN add-apt-repository --yes ppa:deadsnakes/ppa && \
