@@ -97,6 +97,10 @@ parse_tree_labels <- function(tree, genesets) {
     sapply(result$id, \(id) {genesets[[id]]$name}),
     result$rev_backbone
   )
+  
+  # Add spaces around "::" to make it prettier to look at
+  result$pretty <- result$pretty |> str_replace_all("::", ": ")
+  result$rev_pretty <- result$rev_pretty |> str_replace_all("::", ": ")
 
   result
 }
