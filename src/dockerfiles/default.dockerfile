@@ -27,7 +27,7 @@ RUN Rscript --vanilla ./install_r_pkgs.R
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
     PATH=/usr/local/cargo/bin:$PATH \
-    RUST_VERSION=1.78.0
+    RUST_VERSION=1.86.0
 
 RUN set -eux; \
     dpkgArch="$(dpkg --print-architecture)"; \
@@ -62,7 +62,10 @@ RUN add-apt-repository --yes ppa:deadsnakes/ppa && \
     apt-get install --yes python3.13 jq
 
 # Install python packages
-RUN curl --proto '=https' --tlsv1.2 -sSf https://bootstrap.pypa.io/get-pip.py | python3.13 && python3.13 -m pip install -r ./src/requirements.txt
+RUN curl --proto '=https' --tlsv1.2 -sSf https://bootstrap.pypa.io/get-pip.py | python3.13 && curl --proto "=https" --tlsv1.2 -sSf https://bootstrap.pypa.io/virtualenv/virtualenv.pyz > virtualenv.pyz
+RUN python3.13 virtualenv.pyz env
+
+RUN . env/bin/activate && python -m pip install -r ./src/requirements.txt
 
 # Make sure python is findable as 'python'
 RUN ln -s "$(which python3.13)" "/usr/bin/python"
