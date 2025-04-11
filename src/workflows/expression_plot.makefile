@@ -114,7 +114,7 @@ ALL += ./data/out/figures/expression_means_TCGA_only.png
 		--renames ./data/in/config/tcga_renames.json \
 		--extra_title "TCGA only"
 
-ALL += ./data/out/figures/expression_means_TCGA_only.png
+ALL += ./data/out/figures/expression_means_GTEX_only.png
 ./data/out/figures/expression_means_GTEX_only.png: \
 	./data/expression_means_GTEX.csv \
 	./src/modules/plotting/plot_expression_means.R \
