@@ -7,6 +7,7 @@ suppressMessages({
     library(ComplexUpset)
     library(reshape2)
     library(patchwork)
+    extrafont::loadfonts()
     requireNamespace("gridExtra")
 })
 
@@ -333,6 +334,7 @@ plot_shared_genes <- function(
             axis.title.y = element_blank(),
             axis.title.x = element_blank(),
             legend.position = "none",
+            text = element_text(family = "FiraCode Nerd Font", size = 10),
             legend.title = element_blank()
         ) +
         #scale_y_reverse() +
@@ -386,6 +388,7 @@ plot_shared_genes <- function(
             axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),
             #axis.text.y = element_blank(),
             axis.title.x = element_blank(),
+            text = element_text(family = "FiraCode Nerd Font", size = 10),
             legend.position = "left",
         )
 
@@ -482,12 +485,7 @@ main <- function(args) {
     if (!is.na(args$renames)) {
         tt_renames <- jsonlite::fromJSON(read_lines(args$renames))
     } else {
-        # Don't judge me - it's the only rename I need for the TCGA.
-        # Just so I don't have to make a new config file just for TCGA.
-        # Don't judge me.
-        tt_renames <- list(
-            "Head_n_Neck_cancer_deseq" = "Head and Neck"
-        )
+        tt_renames <- NULL
     }
     
     ensg_data <- read_csv(args$ensg_to_hugo)

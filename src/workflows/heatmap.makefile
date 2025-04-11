@@ -170,7 +170,7 @@ ALL +=./data/out/figures/top_disregulation_qq_5.png
 		./data/ensg_data.csv
 	mkdir -p ${@D}
 	${rexec} ${mods}/plotting/plot_shared_dysregulation.R $@ $< data/ensg_data.csv \
-		--selected_genes data/filter_genes.txt --quantile 5 --png --res 400
+		--selected_genes data/filter_genes.txt --quantile 5 --png --res 400 --renames data/in/config/tcga_renames.json
 
 ALL +=./data/out/figures/top_disregulation_qq_10.png
 ./data/out/figures/top_disregulation_qq_10.png: \
@@ -180,7 +180,7 @@ ALL +=./data/out/figures/top_disregulation_qq_10.png
 		./data/ensg_data.csv
 	mkdir -p ${@D}
 	${rexec} ${mods}/plotting/plot_shared_dysregulation.R $@ $< data/ensg_data.csv \
-		--selected_genes data/filter_genes.txt --quantile 10 --png --res 400
+		--selected_genes data/filter_genes.txt --quantile 10 --png --res 400 --renames data/in/config/tcga_renames.json
 
 ALL +=./data/out/figures/upset.png
 ./data/out/figures/upset.png: \

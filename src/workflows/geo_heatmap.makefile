@@ -168,9 +168,8 @@ ALL +=./data/out/figures/top_geo_disregulation_qq_5.png
 	mkdir -p ${@D}
 	${rexec} ${mods}/plotting/plot_shared_dysregulation.R $@ $< data/ensg_data.csv \
 		--id_col gene_id \
-		--renames ./data/in/config/geo_renames_top_disregulation.json \
+		--renames data/in/config/geo_renames_top_disregulation.json \
 		--selected_genes data/filter_genes.txt --quantile 5 --png --res 400
-
 ALL +=./data/out/figures/top_geo_disregulation_qq_10.png
 ./data/out/figures/top_geo_disregulation_qq_10.png: \
 		./data/geo_merged_deas.csv \
