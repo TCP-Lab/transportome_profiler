@@ -57,6 +57,20 @@ if (! exists("LOCAL_DEBUG")) {
   args <- argparser::parse_args(parser)
 }
 
+# This is sloppy but I ran out of time.
+# The order is important, the match is found top-to-bottom
+METRIC_MAP <- list(
+    "norm_bws_test" = "Norm. BWS Statistic",
+    "norm_cohen_d" = "Norm. Cohen's D",
+    "norm_fold_change" = "Norm. Fold Change",
+    "norm_s2n_ratio" = "Norm. Signal-to-noise Ratio",
+    "bws_test" = "BWS Statistic",
+    "cohen_d" = "Cohen's D",
+    "deseq_shrinkage" = "DeSeq2 Shrunk FC",
+    "fold_change" = "Fold Change",
+    "s2n_ratio" = "Signal-to-noise Ratio"
+)
+
 suppressMessages({
   options(tidyverse.quiet = TRUE)
   library(tidyverse)
@@ -183,6 +197,11 @@ create_large_heatmap <- function(
   plot_data,
   extra_title = NULL
 ) {
+  # If the extra title contains a recognized metric string, replace it
+  for (string in names(METRIC_MAP)) {
+    extra_title <- extra_title |> str_replace_all(string, METRIC_MAP[[string]])
+  }
+
   fig_title <- if (!is.null(extra_title)) {
     paste0("Deregulation Overview - ", extra_title)
   } else {

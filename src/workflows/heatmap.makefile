@@ -132,7 +132,7 @@ ALL +=./data/out/figures/deregulation_heatmap.png
 		$@ \
 		--dots_gsea_results ./data/out/absolute_enrichments/ \
 		--alpha 0.20 \
-		--extra_title "alpha 0.20, metric $(RANK_METHOD)" \
+		--extra_title "alpha 0.20, $(RANK_METHOD)" \
 		--height 15 \
 		$(_heatmap_plot_flags)
 

@@ -125,7 +125,7 @@ ALL +=./data/out/figures/geo_deregulation_heatmap.png
 		$@ \
 		--dots_gsea_results ./data/out/absolute_geo_enrichments/ \
 		--alpha $(ALPHA_THRESHOLD) \
-		--extra_title "alpha $(ALPHA_THRESHOLD), metric $(RANK_METHOD)" \
+		--extra_title "alpha $(ALPHA_THRESHOLD), $(RANK_METHOD)" \
 		--height 15 \
 		--renames data/in/config/geo_renames.json \
 		$(_heatmap_plot_flags)
