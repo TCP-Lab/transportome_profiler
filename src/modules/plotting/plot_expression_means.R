@@ -244,7 +244,8 @@ main <- function(
         input_tree,
         input_expression_means,
         genesets,
-        expressed_threshold = expressed_threshold
+        expressed_threshold = expressed_threshold,
+        renames = renames
     )
     
     large_plot <- create_large_heatmap(pdata, extra_title = extra_title)
