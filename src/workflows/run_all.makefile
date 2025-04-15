@@ -6,10 +6,10 @@ ALL += $(addsuffix .tar.gz,$(addprefix packaged_output_,${RANK_METHODS}))
 
 packaged_output_%.tar.gz:
 	# This sed call just takes out the ranking method string
-	RANK_METHOD=$(shell echo $@ | sed -n "s/packaged_output_\(\S*\).tar.gz/\1/p") \
-	kerblam run heatmap
-	RANK_METHOD=$(shell echo $@ | sed -n "s/packaged_output_\(\S*\).tar.gz/\1/p") \
-	kerblam run geo_heatmap
+	kerblam run heatmap -- \
+	-e RANK_METHOD=$(shell echo $@ | sed -n "s/packaged_output_\(\S*\).tar.gz/\1/p")
+	kerblam run geo_heatmap -- \
+	-e RANK_METHOD=$(shell echo $@ | sed -n "s/packaged_output_\(\S*\).tar.gz/\1/p")
 		
 	chown $$USER -R ./data
 	# Copy the large tables so they get checked out
