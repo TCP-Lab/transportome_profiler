@@ -5,7 +5,7 @@ version = "1.2.0"
 # Pancancer data
 "https://zenodo.org/records/10944168/files/expression_matrix.tsv.gz" = "expression_matrix.tsv.gz"
 "https://zenodo.org/records/10944168/files/expression_matrix_metadata.tsv.gz" = "expression_matrix_metadata.tsv.gz"
-"https://github.com/TCP-Lab/MTP-DB/releases/download/1.25.04/MTPDB_v1.25.04.sqlite.gz" = "MTPDB.sqlite.gz"
+"https://github.com/TCP-Lab/MTP-DB/releases/download/1.25.16/MTPDB_v1.25.16.sqlite.gz" = "MTPDB.sqlite.gz"
 "https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/TcgaTargetGtex_rsem_gene_tpm.gz" = "expression_matrix_tpm.tsv.gz"
 
 # ENSG data

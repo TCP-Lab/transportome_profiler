@@ -16,7 +16,7 @@ COPY ./src/requirements.txt /src/
 RUN pacman --noconfirm -Syu ttf-fira-code
 
 # Install python and python packages
-RUN pacman --noconfirm -Syu python && python -m pip install ./src/requirements.txt
+RUN pacman --noconfirm -Syu git python python-pip && python -m pip install --break-system-packages -r ./src/requirements.txt
 
 # Install rust dependencies
 RUN cargo install xsv
@@ -24,6 +24,11 @@ RUN cargo install --git https://github.com/MrHedmad/fast-cohen.git
 
 # Install kerblam
 RUN cargo install --locked --git https://github.com/MrHedmad/kerblam.git
+
+# Install miscellaneous other packages
+RUN pacman --noconfirm -Syu jq
+
+ENV PATH="$PATH:/root/.cargo/bin"
 
 # Copy the rest of the files
 COPY . .
