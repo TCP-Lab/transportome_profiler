@@ -1,4 +1,4 @@
-FROM archlinux:base-devel
+FROM archlinux:base-devel-20250420.0.338771
 
 ## The arch maintainers suggest to do this before anything else
 RUN pacman --noconfirm -Syu

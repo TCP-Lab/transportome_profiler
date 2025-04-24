@@ -1,37 +1,30 @@
 #!/usr/bin/env Rscript
 
-options(repos = "http://cloud.r-project.org/")
+install.packages("pak", repos = sprintf(
+  "https://r-lib.github.io/p/pak/stable/%s/%s/%s",
+  .Platform$pkgType,
+  R.Version()$os,
+  R.Version()$arch
+))
 
-install <- function(pkg) {
-    if (!requireNamespace(pkg, quietly = TRUE)) {
-        install.packages(pkg)
-    } else {
-        cat(paste0("Skipping ", pkg, " as it is already installed.\n"))
-    }
-}
+packages <- c(
+    "tidyverse",
+    "BiocManager",
+    "DESeq2",
+    "fgsea",
+    "argparser",
+    "biomaRt",
+    "assertthat",
+    "uuid",
+    "grid",
+    "reshape2",
+    "rjson",
+    "archive",
+    "glmGamPoi",
+    "extrafont",
+    "ComplexUpset",
+    "devtools",
+    "TCP-Lab/compare_ranks"
+)
 
-install_bioc <- function(pkg) {
-    if (!requireNamespace(pkg, quietly = TRUE)) {
-        BiocManager::install(pkg)
-    } else {
-        cat(paste0("Skipping ", pkg, " as it is already installed.\n"))
-    }
-}
-
-install("tidyverse")
-install("BiocManager")
-install_bioc("DESeq2")
-install_bioc("fgsea")
-install("argparser")
-install_bioc("biomaRt")
-install("assertthat")
-install("uuid")
-install("grid")
-install("reshape2")
-install("rjson")
-install("archive")
-install_bioc("glmGamPoi")
-install("extrafont")
-install("ComplexUpset")
-install("devtools")
-devtools::install_github("TCP-Lab/compare_ranks")
+pak::pkg_install(packages)
