@@ -18,6 +18,7 @@ packages <- c(
     "uuid",
     "grid",
     "reshape2",
+    "UpSetR",
     "rjson",
     "archive",
     "glmGamPoi",
