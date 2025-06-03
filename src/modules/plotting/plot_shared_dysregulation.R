@@ -288,7 +288,7 @@ plot_shared_genes <- function(
         data_renames,
         values,
         types_renames_fn = NULL,
-        n_genes = 50
+        n_genes = 100
     ) {
     dt <- gen_plot_data(data, values) |> tibble() |> arrange(name)
     gene_order <- rowSums(abs(values)) |> sort(decreasing = TRUE)
