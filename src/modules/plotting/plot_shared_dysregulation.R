@@ -43,17 +43,23 @@ prep_data <- function(data, id_col = "sample") {
 #'
 #' To turn off the filters, set `n` to `Inf` (the default), `gene_filter` to
 #' `NULL` (the default) and `quantile` to `100`.
-extract_top_dysregulated <- function(data, quantile = 5, n = Inf, gene_filter = NULL) {
+extract_top_dysregulated <- function(data, threshold = 5, thr_is_quantile = FALSE, n = Inf, gene_filter = NULL) {
     types <- list()
 
     if (!is.null(gene_filter)) {
         cat("Filtering...\n")
         data <- data[row.names(data) %in% gene_filter,]
     }
-
-    thr <- quantile(unlist(data), probs = c(quantile/100, (100-quantile)/100), na.rm = TRUE)
-    lower_thr <- thr[1]
-    upper_thr <- thr[2]
+    
+    # Here we decide if we must use the quantile or just a simple threshold
+    if (thr_is_quantile) {
+        thr <- quantile(unlist(data), probs = c(threshold/100, (100-threshold)/100), na.rm = TRUE)
+        lower_thr <- thr[1]
+        upper_thr <- thr[2]
+    } else {
+        lower_thr <- -abs(threshold)
+        upper_thr <- abs(threshold)
+    }
 
     for (id in colnames(data)) {
         types[[id]] <- list()
@@ -436,9 +442,13 @@ if (!exists("LOCAL_DEBUG")) {
         ) |>
         argparser::add_argument(
             "--quantile",
-            help = "Quantile to cut the expression at to consider up- (>100-quantile) or down- (<quantile) regulated",
-            type = "numerical",
-            default = 5,
+            help = "Quantile to cut the expression at to consider up- (>100-quantile) or down- (<quantile) regulated. Cannot be set with --static_threshold",
+            default = NA,
+        ) |>
+        argparser::add_argument(
+            "--static_threshold",
+            help = "Threshold to cut the expression at to consider up- (>threshold) or down- (<threshold) regulated. Cannot be set with --quantile",
+            default = NA,
         ) |>
         argparser::add_argument(
             "--res",
@@ -470,6 +480,23 @@ if (!exists("LOCAL_DEBUG")) {
 }
 
 main <- function(args) {
+    # Check argument validity
+    if (is.na(args$quantile) && is.na(args$static_threshold)) {
+        stop("One of --quantile or --static_threshold must be set! Aborting.")
+    } else if (!is.na(args$quantile) && !is.na(args$static_threshold)) {
+        stop("Cannot set both --quantile and --static_threshold! Aborting.")
+    }
+
+    # Check if we are calculating quantiles or a simple threshold
+    # Due to the check above, just one of these IF arms will complete
+    if (!is.na(args$quantile)) {
+        thr_is_quantile <- TRUE
+        threshold <- as.numeric(args$quantile)
+    } else {
+        thr_is_quantile <- FALSE
+        threshold <- as.numeric(args$static_threshold)
+    }
+
     data <- read_csv(
         args$input_result,
         show_col_types = FALSE
@@ -492,7 +519,12 @@ main <- function(args) {
     
     pdata <- prep_data(data, args$id_col)
     
-    top_dys <- extract_top_dysregulated(pdata, quantile=args$quantile, gene_filter = selected_genes)
+    top_dys <- extract_top_dysregulated(
+        pdata,
+        threshold = threshold,
+        thr_is_quantile = thr_is_quantile,
+        gene_filter = selected_genes
+    )
     
     #plot_dysregulation(top_dys, 3)
     

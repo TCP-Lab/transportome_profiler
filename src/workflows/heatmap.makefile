@@ -162,25 +162,35 @@ data/merged_deas.csv: ./data/deas/flag.txt
 	# Sorry!
 	rm ./data/deas/*.renames.csv
 
-ALL +=./data/out/figures/top_disregulation_qq_5.png
-./data/out/figures/top_disregulation_qq_5.png: \
+ALL +=./data/out/figures/top_disregulation_thr_1.png
+./data/out/figures/top_disregulation_thr_1.png: \
 		./data/merged_deas.csv \
 		./data/filter_genes.txt \
 		${mods}/plotting/plot_shared_dysregulation.R \
 		./data/ensg_data.csv
 	mkdir -p ${@D}
 	${rexec} ${mods}/plotting/plot_shared_dysregulation.R $@ $< data/ensg_data.csv \
-		--selected_genes data/filter_genes.txt --quantile 5 --png --res 400 --renames data/in/config/tcga_renames.json
+		--selected_genes data/filter_genes.txt --static_threshold 1 --png --res 400 --renames data/in/config/tcga_renames.json
 
-ALL +=./data/out/figures/top_disregulation_qq_10.png
-./data/out/figures/top_disregulation_qq_10.png: \
+ALL +=./data/out/figures/top_disregulation_thr_15.png
+./data/out/figures/top_disregulation_thr_15.png: \
 		./data/merged_deas.csv \
 		./data/filter_genes.txt \
 		${mods}/plotting/plot_shared_dysregulation.R \
 		./data/ensg_data.csv
 	mkdir -p ${@D}
 	${rexec} ${mods}/plotting/plot_shared_dysregulation.R $@ $< data/ensg_data.csv \
-		--selected_genes data/filter_genes.txt --quantile 10 --png --res 400 --renames data/in/config/tcga_renames.json
+		--selected_genes data/filter_genes.txt --static_threshold 1.5 --png --res 400 --renames data/in/config/tcga_renames.json
+
+ALL +=./data/out/figures/top_disregulation_thr_2.png
+./data/out/figures/top_disregulation_thr_2.png: \
+		./data/merged_deas.csv \
+		./data/filter_genes.txt \
+		${mods}/plotting/plot_shared_dysregulation.R \
+		./data/ensg_data.csv
+	mkdir -p ${@D}
+	${rexec} ${mods}/plotting/plot_shared_dysregulation.R $@ $< data/ensg_data.csv \
+		--selected_genes data/filter_genes.txt --static_threshold 2 --png --res 400 --renames data/in/config/tcga_renames.json
 
 ALL +=./data/out/figures/upset.png
 ./data/out/figures/upset.png: \

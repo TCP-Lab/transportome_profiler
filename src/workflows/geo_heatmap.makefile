@@ -159,8 +159,8 @@ data/geo_merged_deas.csv: $(deas)
 	# Sorry!
 	rm ./data/geo/*.renames.csv
 
-ALL +=./data/out/figures/top_geo_disregulation_qq_5.png
-./data/out/figures/top_geo_disregulation_qq_5.png: \
+ALL +=./data/out/figures/top_geo_disregulation_thr_1.png
+./data/out/figures/top_geo_disregulation_thr_1.png: \
 		./data/geo_merged_deas.csv \
 		./data/filter_genes.txt \
 		${mods}/plotting/plot_shared_dysregulation.R \
@@ -169,9 +169,9 @@ ALL +=./data/out/figures/top_geo_disregulation_qq_5.png
 	${rexec} ${mods}/plotting/plot_shared_dysregulation.R $@ $< data/ensg_data.csv \
 		--id_col gene_id \
 		--renames data/in/config/geo_renames_top_disregulation.json \
-		--selected_genes data/filter_genes.txt --quantile 5 --png --res 400
-ALL +=./data/out/figures/top_geo_disregulation_qq_10.png
-./data/out/figures/top_geo_disregulation_qq_10.png: \
+		--selected_genes data/filter_genes.txt --static_threshold 1 --png --res 400
+ALL +=./data/out/figures/top_geo_disregulation_thr_15.png
+./data/out/figures/top_geo_disregulation_thr_15.png: \
 		./data/geo_merged_deas.csv \
 		./data/filter_genes.txt \
 		${mods}/plotting/plot_shared_dysregulation.R \
@@ -180,7 +180,18 @@ ALL +=./data/out/figures/top_geo_disregulation_qq_10.png
 	${rexec} ${mods}/plotting/plot_shared_dysregulation.R $@ $< data/ensg_data.csv \
 		--id_col gene_id \
 		--renames ./data/in/config/geo_renames_top_disregulation.json \
-		--selected_genes data/filter_genes.txt --quantile 10 --png --res 400
+		--selected_genes data/filter_genes.txt --static_threshold 1.5 --png --res 400
+ALL +=./data/out/figures/top_geo_disregulation_thr_2.png
+./data/out/figures/top_geo_disregulation_thr_2.png: \
+		./data/geo_merged_deas.csv \
+		./data/filter_genes.txt \
+		${mods}/plotting/plot_shared_dysregulation.R \
+		./data/ensg_data.csv
+	mkdir -p ${@D}
+	${rexec} ${mods}/plotting/plot_shared_dysregulation.R $@ $< data/ensg_data.csv \
+		--id_col gene_id \
+		--renames ./data/in/config/geo_renames_top_disregulation.json \
+		--selected_genes data/filter_genes.txt --static_threshold 2 --png --res 400
 
 ALL +=./data/out/figures/geo_upset.png
 ./data/out/figures/geo_upset.png: \
