@@ -68,15 +68,17 @@ extract_top_dysregulated <- function(data, threshold = 5, thr_is_quantile = FALS
             rename(value = !!id)
 
         # I use >= so that we at least have 1 gene.
-        tum_data <- tum_data |> filter(value >= upper_thr | value <= lower_thr)
+        tum_data <- tum_data |> filter((value >= upper_thr | value <= lower_thr) | is.na(value))
 
         # I filter on 0, but there are no zeroes, due to the thr applied from 
         # before! (well, unless the thr is 0, but...)
         tum_up <- tum_data |> filter(value > 0)
         tum_down <- tum_data |> filter(value <= 0)
+        tum_na <- tum_data |> filter(is.na(value))
 
         types[[id]][["down"]] <- sort_by(tum_down$names, tum_down$value) |> head(n = n)
         types[[id]][["up"]] <- sort_by(tum_up$names, decreasing=TRUE, tum_up$value) |> head(n = n)
+        types[[id]][["na"]] <- tum_na |> head(n = n)
     }
 
     types
@@ -382,6 +384,7 @@ plot_shared_genes <- function(
         )) +
         scale_fill_gradient2(
             low = "purple", mid="white", high="darkorange",
+            na.value = "grey",
             name = "Score",
             limits = c(-max_value_color, max_value_color),
             n.breaks = 5
