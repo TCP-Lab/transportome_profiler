@@ -306,7 +306,7 @@ plot_shared_genes <- function(
         n_genes = 50
     ) {
     dt <- gen_plot_data(data, values) |> tibble() |> arrange(name)
-    gene_order <- rowSums(abs(values)) |> sort(decreasing = TRUE)
+    gene_order <- rowSums(abs(values), na.rm = TRUE) |> sort(decreasing = TRUE)
 
     dt <- merge(
         dt,
@@ -325,6 +325,8 @@ plot_shared_genes <- function(
     
     bar_dt <- binary_dt |>
         mutate(row_value = rowSums(select_if(binary_dt, is.numeric), na.rm = TRUE))
+
+    print(head(bar_dt))
     
     get_score_of <- function(name) {
         gene_order[name]
@@ -411,7 +413,6 @@ plot_shared_genes <- function(
     }
 
     max_value_color <- max(abs(dot_dt$value), na.rm = TRUE)
-    print(tibble(dot_dt[!complete.cases(dot_dt), ]))
 
     dot_plot <- ggplot(
         dot_dt,
