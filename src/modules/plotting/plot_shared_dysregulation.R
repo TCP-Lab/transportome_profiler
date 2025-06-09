@@ -350,6 +350,7 @@ plot_shared_genes <- function(
     selection <- unique(bar_dt$name)[1:n_genes]
     bar_dt <- bar_dt[bar_dt$name %in% selection, ]
 
+    y_scale_max <- length(names(dt)) - 3
     bar_plot <- ggplot(bar_dt, aes(x=factor(hgnc_symbol, levels=rev(unique(hgnc_symbol))), y=row_value)) +
         geom_bar(stat = "identity", aes(fill = direction), position = "stack") +
         scale_fill_manual(values = c("purple", "darkorange")) +
@@ -362,7 +363,14 @@ plot_shared_genes <- function(
             text = element_text(family = "FiraCode Nerd Font", size = 10),
             legend.title = element_blank()
         ) +
-        #scale_y_reverse() +
+        scale_y_continuous(
+            limits=c(0, y_scale_max),
+            labels = \(x) { if (!y_scale_max %in% x) {c(x, y_scale_max)} else {x}},
+            breaks = \(x) {
+                b <- scales::breaks_extended(5)(x)
+                if (!y_scale_max %in% b) {c(b, y_scale_max)} else {b}
+            }
+        ) + # There are 3 cols with metadata
         scale_x_discrete(position = "top", breaks=bar_dt$hgnc_symbol) +
         coord_flip()
 
@@ -381,6 +389,17 @@ plot_shared_genes <- function(
 
     dot_dt <- dot_dt |> melt(id.vars = c("hgnc_symbol")) |>
         filter(value != 0 | is.na(value))
+    
+    # Make a new plot with just the NA bars to overimpose on the original ones
+    # This is needed since I want the gray bar to be on the left of the plot
+    dot_dt_na <- filter(dot_dt, is.na(value))
+    bar_plot_overlay <- ggplot(dot_dt_na) +
+        geom_bar(aes(x = hgnc_symbol), inherit.aes = FALSE) +
+        scale_x_discrete(limits = bar_x_values, drop=FALSE) +
+        scale_y_reverse(limits=c(y_scale_max, 0)) +
+        coord_flip() + theme_void()
+
+    bar_plot <- bar_plot + patchwork::inset_element(bar_plot_overlay, 0, 0, 1, 1)
 
     dot_dt$hgnc_symbol <- factor(dot_dt$hgnc_symbol, levels=bar_x_values)
     dot_dt$variable <- factor(dot_dt$variable, levels=colnames(dot_dt_clust)[col.ord])
