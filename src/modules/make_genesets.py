@@ -105,7 +105,7 @@ def prune(tree: Tree, similarity: float, direction: PruneDirection) -> Tree:
 
         # Sort them
         leaves.sort(
-            key=lambda x: f"{tree.depth_of(x.id):09}+{'/'.join(','.join(x.data))}",
+            key=lambda x: tree.depth_of(x.id),
             reverse=reverse_sort,
         )
 
@@ -270,7 +270,7 @@ def generate_gene_list_trees(
         # This is the recursive wrapper
 
         valid_cols = []
-        for current_col in list(frame.columns):
+        for current_col in sorted(list(frame.columns)):
             if sum(frame[current_col].isna()) / len(frame.index) > 1 - min_pop_score:
                 log.debug(f"Layer {layer} -- col {current_col} ... SKIPPED (too empty)")
                 continue
@@ -284,7 +284,7 @@ def generate_gene_list_trees(
                 continue
             counts = Counter(frame[current_col].dropna())
 
-            for value in set(counts.elements()):
+            for value in sorted(set(counts.elements())):
                 if counts[value] < min_set_size:
                     log.debug(
                         f"Layer {layer} -- col {current_col} -- value {value} ... SKIPPED (too small)"
