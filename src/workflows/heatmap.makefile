@@ -162,9 +162,34 @@ data/merged_deas.csv: ./data/deas/flag.txt
 	# Sorry!
 	rm ./data/deas/*.renames.csv
 
+## ---- Shared dysregulation plots ---
+
+./data/expression_means.csv: \
+	./data/expression_matrix_tpm.csv \
+	./data/expression_matrix_metadata.csv \
+	$(mods)/calc_expression_means.py \
+	./data/in/config/DEA_queries/dea_queries.json
+
+	mkdir -p $(@D)
+
+	python $(mods)/calc_expression_means.py \
+		./data/in/config/DEA_queries/dea_queries.json \
+		./data/expression_matrix_tpm.csv \
+		./data/expression_matrix_metadata.csv \
+		$(@)
+
+ALL +=./data/suppressed_merged_deas.csv
+./data/suppressed_merged_deas.csv: \
+	./data/merged_deas.csv \
+	./data/expression_means.csv \
+	${mods}/suppress_not_expressed.R
+	${rexec} ${mods}/suppress_not_expressed.R ./data/merged_deas.csv ./data/expression_means.csv $@ \
+		--expression-threshold 0
+
+
 ALL +=./data/out/figures/top_disregulation_thr_1.png
 ./data/out/figures/top_disregulation_thr_1.png: \
-		./data/merged_deas.csv \
+		./data/suppressed_merged_deas.csv \
 		./data/filter_genes.txt \
 		${mods}/plotting/plot_shared_dysregulation.R \
 		./data/ensg_data.csv
@@ -174,7 +199,7 @@ ALL +=./data/out/figures/top_disregulation_thr_1.png
 
 ALL +=./data/out/figures/top_disregulation_thr_15.png
 ./data/out/figures/top_disregulation_thr_15.png: \
-		./data/merged_deas.csv \
+		./data/suppressed_merged_deas.csv \
 		./data/filter_genes.txt \
 		${mods}/plotting/plot_shared_dysregulation.R \
 		./data/ensg_data.csv
@@ -184,7 +209,7 @@ ALL +=./data/out/figures/top_disregulation_thr_15.png
 
 ALL +=./data/out/figures/top_disregulation_thr_2.png
 ./data/out/figures/top_disregulation_thr_2.png: \
-		./data/merged_deas.csv \
+		./data/suppressed_merged_deas.csv \
 		./data/filter_genes.txt \
 		${mods}/plotting/plot_shared_dysregulation.R \
 		./data/ensg_data.csv

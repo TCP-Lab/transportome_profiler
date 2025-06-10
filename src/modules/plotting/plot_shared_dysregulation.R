@@ -35,14 +35,16 @@ prep_data <- function(data, id_col = "sample") {
 #'
 #' This can apply three types of filters:
 #' - One, it filters based on the score, keeping genes strictly above or equal `thr`
-#'   (for upregulated) or below or equal `-thr` (for downregulated)
+#'   (for upregulated) or below or equal `-thr` (for downregulated), or
+#'   using a quantile threshold.
 #' - Two, it further narrows down the number of genes keeping only the top-N
 #'   in the list, sorted by score (or |score|).
 #' - Three, it keeps only genes that are specified in `gene_filter`, discarding
 #'   all the rest.
 #'
 #' To turn off the filters, set `n` to `Inf` (the default), `gene_filter` to
-#' `NULL` (the default) and `quantile` to `100`.
+#' `NULL` (the default) and `threshold` to `0` (thr_is_quantile is FALSE) or
+#' `100` (thr_is_quantile in TRUE).
 extract_top_dysregulated <- function(data, threshold = 5, thr_is_quantile = FALSE, n = Inf, gene_filter = NULL) {
     types <- list()
 
@@ -68,15 +70,17 @@ extract_top_dysregulated <- function(data, threshold = 5, thr_is_quantile = FALS
             rename(value = !!id)
 
         # I use >= so that we at least have 1 gene.
-        tum_data <- tum_data |> filter(value >= upper_thr | value <= lower_thr)
+        tum_data <- tum_data |> filter((value >= upper_thr | value <= lower_thr) | is.na(value))
 
         # I filter on 0, but there are no zeroes, due to the thr applied from 
         # before! (well, unless the thr is 0, but...)
         tum_up <- tum_data |> filter(value > 0)
         tum_down <- tum_data |> filter(value <= 0)
+        tum_na <- tum_data |> filter(is.na(value))
 
         types[[id]][["down"]] <- sort_by(tum_down$names, tum_down$value) |> head(n = n)
         types[[id]][["up"]] <- sort_by(tum_up$names, decreasing=TRUE, tum_up$value) |> head(n = n)
+        types[[id]][["na"]] <- tum_na |> head(n = n)
     }
 
     types
@@ -130,7 +134,7 @@ extract_top_dysregulated <- function(data, threshold = 5, thr_is_quantile = FALS
         data <- unlist(lapply(input, function(x) {
             x <- as.vector(match(elements, x))
         }))
-        data[is.na(data)] <- as.integer(0)
+        data[is.na(data)] <- 0
         data[data != 0] <- as.integer(1)
         data <- data.frame(matrix(data, ncol = length(input), byrow = F))
         row.names(data) <- elements
@@ -198,7 +202,6 @@ gen_plot_data <- function(data, values = NULL) {
 
     # TODO: This should not work. It only works bc there are no genes that are up
     # in some tt and down in another.
-
     if (! is.null(values)) {
         prep_for_upset(filtered_data_up) |> update_to_real(values) -> dt_up
         prep_for_upset(filtered_data_down) |> update_to_real(values) -> dt_down
@@ -206,8 +209,20 @@ gen_plot_data <- function(data, values = NULL) {
         prep_for_upset(filtered_data_up) -> dt_up
         prep_for_upset(filtered_data_down) -> dt_down
     }
-    # If some genes are in "up" but not in "down", add them in, and vice-versa
 
+    ## Update to the NA values with the results from "data"
+    all_cols <- unique(c(colnames(dt_up), colnames(dt_down)))
+    for (col in all_cols) {
+        # I have to use na.omit here since there is one NA value in the
+        # NA gene_id list, potentially from previous steps.
+        for (gene_id in na.omit(data[[col]][["na"]][["names"]])) {
+            if (gene_id %in% row.names(dt_up)) {
+                dt_up[gene_id, col] <- NA
+            } else if (gene_id %in% row.names(dt_down)) {
+                dt_down[gene_id, col] <- NA
+            }
+        } 
+    }
 
     dt_up$direction <- "up"
     dt_down$direction <- "down"
@@ -288,10 +303,10 @@ plot_shared_genes <- function(
         data_renames,
         values,
         types_renames_fn = NULL,
-        n_genes = 100
+        n_genes = 50
     ) {
     dt <- gen_plot_data(data, values) |> tibble() |> arrange(name)
-    gene_order <- rowSums(abs(values)) |> sort(decreasing = TRUE)
+    gene_order <- rowSums(abs(values), na.rm = TRUE) |> sort(decreasing = TRUE)
 
     dt <- merge(
         dt,
@@ -302,16 +317,22 @@ plot_shared_genes <- function(
 
     binary_dt <- dt |> mutate(
         across(where(is.numeric),
-               \(x) {as.numeric(as.logical(abs(x)))}
+            \(x) {
+                x[is.na(x)] <- 0
+                as.numeric(as.logical(abs(x)))
+            }
     ))
+    
+    bar_dt <- binary_dt |>
+        mutate(row_value = rowSums(select_if(binary_dt, is.numeric), na.rm = TRUE))
 
-    bar_dt <- binary_dt |> mutate(row_value = rowSums(select_if(binary_dt, is.numeric)))
+    print(head(bar_dt))
     
     get_score_of <- function(name) {
         gene_order[name]
     }
 
-    bar_totals <- bar_dt |> group_by(name) |> summarise(total = sum(abs(row_value)))
+    bar_totals <- bar_dt |> group_by(name) |> summarise(total = sum(abs(row_value), na.rm=TRUE))
     bar_sums <- bar_dt |> group_by(name) |> reframe(order = get_score_of(name))
 
     bar_dt <- list(bar_dt, bar_sums, bar_totals) |>
@@ -331,6 +352,7 @@ plot_shared_genes <- function(
     selection <- unique(bar_dt$name)[1:n_genes]
     bar_dt <- bar_dt[bar_dt$name %in% selection, ]
 
+    y_scale_max <- length(names(dt)) - 3
     bar_plot <- ggplot(bar_dt, aes(x=factor(hgnc_symbol, levels=rev(unique(hgnc_symbol))), y=row_value)) +
         geom_bar(stat = "identity", aes(fill = direction), position = "stack") +
         scale_fill_manual(values = c("purple", "darkorange")) +
@@ -343,7 +365,14 @@ plot_shared_genes <- function(
             text = element_text(family = "FiraCode Nerd Font", size = 10),
             legend.title = element_blank()
         ) +
-        #scale_y_reverse() +
+        scale_y_continuous(
+            limits=c(0, y_scale_max),
+            labels = \(x) { if (!y_scale_max %in% x) {c(x, y_scale_max)} else {x}},
+            breaks = \(x) {
+                b <- scales::breaks_extended(5)(x)
+                if (!y_scale_max %in% b) {c(b, y_scale_max)} else {b}
+            }
+        ) + # There are 3 cols with metadata
         scale_x_discrete(position = "top", breaks=bar_dt$hgnc_symbol) +
         coord_flip()
 
@@ -352,15 +381,27 @@ plot_shared_genes <- function(
     dot_dt <- dt |> filter(hgnc_symbol %in% bar_x_values) |>
         select(!c("name", "direction"))
 
-    dot_dt_clust <- select(dot_dt, !c("hgnc_symbol"))
-
+    dot_dt_clust <- select(dot_dt, !c("hgnc_symbol")) |> mutate(across(where(is.numeric), ~replace_na(.x, 0)))
+    
+    # hclust dies if there are NAs, so for clustering I count them as 0
     dot_dt_clust.col <- as.dendrogram(hclust(dist(dot_dt_clust), method = "ward.D2"))
 
     # ordering based on clustering
     col.ord <- order.dendrogram(dot_dt_clust.col)
 
     dot_dt <- dot_dt |> melt(id.vars = c("hgnc_symbol")) |>
-        filter(value != 0)
+        filter(value != 0 | is.na(value))
+    
+    # Make a new plot with just the NA bars to overimpose on the original ones
+    # This is needed since I want the gray bar to be on the left of the plot
+    dot_dt_na <- filter(dot_dt, is.na(value))
+    bar_plot_overlay <- ggplot(dot_dt_na) +
+        geom_bar(aes(x = hgnc_symbol), inherit.aes = FALSE) +
+        scale_x_discrete(limits = bar_x_values, drop=FALSE) +
+        scale_y_reverse(limits=c(y_scale_max, 0)) +
+        coord_flip() + theme_void()
+
+    bar_plot <- bar_plot + patchwork::inset_element(bar_plot_overlay, 0, 0, 1, 1)
 
     dot_dt$hgnc_symbol <- factor(dot_dt$hgnc_symbol, levels=bar_x_values)
     dot_dt$variable <- factor(dot_dt$variable, levels=colnames(dot_dt_clust)[col.ord])
@@ -371,7 +412,7 @@ plot_shared_genes <- function(
         levels(dot_dt$variable)
     }
 
-    max_value_color <- max(abs(dot_dt$value))
+    max_value_color <- max(abs(dot_dt$value), na.rm = TRUE)
 
     dot_plot <- ggplot(
         dot_dt,
@@ -382,6 +423,7 @@ plot_shared_genes <- function(
         )) +
         scale_fill_gradient2(
             low = "purple", mid="white", high="darkorange",
+            na.value = rgb(0,0,0, alpha=0.2),
             name = "Score",
             limits = c(-max_value_color, max_value_color),
             n.breaks = 5
