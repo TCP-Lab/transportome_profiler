@@ -6,6 +6,8 @@
 
 SHELL = /bin/bash
 
+.ONESHELL:
+
 OPTS=./data/in/config/heatmaps_runtime_options.json
 # Number of threads to use to parallelize the ranking process
 N_THREADS ?= $(shell cat $(OPTS) | jq -r '.threads')
@@ -186,36 +188,33 @@ ALL +=./data/suppressed_merged_deas.csv
 	${rexec} ${mods}/suppress_not_expressed.R ./data/merged_deas.csv ./data/expression_means.csv $@ \
 		--expression-threshold 0
 
-
-ALL +=./data/out/figures/top_disregulation_thr_1.png
-./data/out/figures/top_disregulation_thr_1.png: \
+## "Top dysregulation" plots.
+# The names here need to follow a pattern, since I deconstruct the file names
+# to set variables:
+# top_disregulation_thr_{{threshold}}_set_{{geneset}}.png
+ALL +=./data/out/figures/top_disregulation_thr_1_set_whole_transportome.png
+ALL +=./data/out/figures/top_disregulation_thr_1.5_set_whole_transportome.png
+ALL +=./data/out/figures/top_disregulation_thr_2_set_whole_transportome.png
+ALL +=./data/out/figures/top_disregulation_thr_1_set_channels.png
+ALL +=./data/out/figures/top_disregulation_thr_1.5_set_channels.png
+ALL +=./data/out/figures/top_disregulation_thr_2_set_channels.png
+ALL +=./data/out/figures/top_disregulation_thr_1_set_transporters.png
+ALL +=./data/out/figures/top_disregulation_thr_1.5_set_transporters.png
+ALL +=./data/out/figures/top_disregulation_thr_2_set_transporters.png
+./data/out/figures/top_disregulation_thr_%.png: \
 		./data/suppressed_merged_deas.csv \
-		./data/filter_genes.txt \
+		./data/genesets.json \
 		${mods}/plotting/plot_shared_dysregulation.R \
 		./data/ensg_data.csv
+	THR=$$(echo '$@' | rg '.*top_disregulation_thr_([0-9,.]+)_set_(.+?).png' -or '$$1')
+	SET=$$(echo '$@' | rg '.*top_disregulation_thr_([0-9,.]+)_set_(.+?).png' -or '$$2')
+	echo "$${THR}"
+	echo "$${SET}"
 	mkdir -p ${@D}
+	cat ./data/genesets.json | jq -r ".[] | select(.name == \"$${SET}\").data | @csv" > /tmp/selected_genes.csv
 	${rexec} ${mods}/plotting/plot_shared_dysregulation.R $@ $< data/ensg_data.csv \
-		--selected_genes data/filter_genes.txt --static_threshold 1 --png --res 400 --renames data/in/config/tcga_renames.json
-
-ALL +=./data/out/figures/top_disregulation_thr_15.png
-./data/out/figures/top_disregulation_thr_15.png: \
-		./data/suppressed_merged_deas.csv \
-		./data/filter_genes.txt \
-		${mods}/plotting/plot_shared_dysregulation.R \
-		./data/ensg_data.csv
-	mkdir -p ${@D}
-	${rexec} ${mods}/plotting/plot_shared_dysregulation.R $@ $< data/ensg_data.csv \
-		--selected_genes data/filter_genes.txt --static_threshold 1.5 --png --res 400 --renames data/in/config/tcga_renames.json
-
-ALL +=./data/out/figures/top_disregulation_thr_2.png
-./data/out/figures/top_disregulation_thr_2.png: \
-		./data/suppressed_merged_deas.csv \
-		./data/filter_genes.txt \
-		${mods}/plotting/plot_shared_dysregulation.R \
-		./data/ensg_data.csv
-	mkdir -p ${@D}
-	${rexec} ${mods}/plotting/plot_shared_dysregulation.R $@ $< data/ensg_data.csv \
-		--selected_genes data/filter_genes.txt --static_threshold 2 --png --res 400 --renames data/in/config/tcga_renames.json
+		--selected_genes /tmp/selected_genes.csv --static_threshold $${THR} --renames data/in/config/tcga_renames.json \
+		--png --res 300
 
 ALL +=./data/out/figures/upset.png
 ./data/out/figures/upset.png: \
