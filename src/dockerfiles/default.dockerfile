@@ -12,10 +12,11 @@ RUN Rscript --vanilla ./install_r_pkgs.R
 ## Install Rust
 RUN pacman --noconfirm -Syu rust
 
-COPY ./src/requirements.txt /src/
-RUN pacman --noconfirm -Syu ttf-fira-code
+## Set a timezone file (for the lubridate R package)
+RUN timezonectl set-timezone UTC
 
 # Install python and python packages
+COPY ./src/requirements.txt /src/
 RUN pacman --noconfirm -Syu git python python-pip && python -m pip install --break-system-packages -r ./src/requirements.txt
 
 # Install rust dependencies
@@ -26,7 +27,7 @@ RUN cargo install --git https://github.com/MrHedmad/fast-cohen.git
 RUN cargo install --locked --git https://github.com/MrHedmad/kerblam.git
 
 # Install miscellaneous other packages
-RUN pacman --noconfirm -Syu jq
+RUN pacman --noconfirm -Syu jq ttf-fira-code
 
 ENV PATH="$PATH:/root/.cargo/bin"
 
