@@ -4,6 +4,7 @@ import logging
 import subprocess
 import tempfile
 import uuid
+from hashlib import sha256
 
 import bonsai
 from tqdm import tqdm
@@ -145,11 +146,14 @@ def test_congruency(one: bonsai.Tree, two: bonsai.Tree):
 
 def main(args, extra):
     ariadne = ft.partial(launch_ariadne, exec=args.exec, args=extra)
+    identical = 0
     with tempfile.TemporaryDirectory() as scratch:
         # We add the "out_json" and "out_repr" files
         # the latter is just redirected to be deleted
         template = f"{scratch}/{uuid.uuid4()}"
         template_tree = bonsai.Tree.from_node_json(ariadne(target_file=template))
+        with open(template, 'rb') as handle:
+            template_sha = sha256(handle.read()).hexdigest()
 
         for _ in tqdm(range(args.trials)):
             response_path = f"{scratch}/{uuid.uuid4()}"
@@ -158,6 +162,16 @@ def main(args, extra):
             )
 
             test_congruency(template_tree, response_tree)
+            ## Ok, if we get here we are congruent. But are we *indentical*?
+            with open(response_path, 'rb') as handle:
+                response_sha = sha256(handle.read()).hexdigest()
+
+            if template_sha == response_sha:
+                identical += 1
+
+    print(f"Of the tested trees, {identical}/{args.trials} ({identical/args.trials*100:02}%)) were truly identical")
+            
+
 
 
 if __name__ == "__main__":
