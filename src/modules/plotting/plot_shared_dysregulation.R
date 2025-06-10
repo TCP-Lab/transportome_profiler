@@ -325,9 +325,7 @@ plot_shared_genes <- function(
     
     bar_dt <- binary_dt |>
         mutate(row_value = rowSums(select_if(binary_dt, is.numeric), na.rm = TRUE))
-
-    print(head(bar_dt))
-    
+ 
     get_score_of <- function(name) {
         gene_order[name]
     }
