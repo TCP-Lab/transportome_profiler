@@ -92,7 +92,7 @@ parse_tree_labels <- function(tree, genesets) {
     # Remove all backbone chars from an input
     str_remove_all(x, "[└─│├]") |> str_trim()
   }
-  result$id <- remove_backbone(result$original)
+  result$id <- remove_backbone(result$original) |> as.character()
 
   result$backbone <- str_split_i(result$original, "─ ", 1) |> paste0("─ ")
   result$backbone[1] <- ""
@@ -142,7 +142,9 @@ gen_plot_data <- function(
   # Get the 'pathway' var to look like the paths in the labels
   # this means getting rid of the /whole_transportome leading bit
   enrichments <- lapply(enrichments, \(frame) {
-    frame$pathway_name <- sapply(frame$pathway, \(id) {genesets[[id]]$name}, simplify = TRUE)
+    # We need the 'as.charecter' here around the ID here since it might get
+    # cast to a number instead of kept as a string
+    frame$pathway_name <- sapply(frame$pathway, \(id) {genesets[[as.character(id)]]$name}, simplify = TRUE)
     frame$label <- sapply(frame$pathway, \(id) {labels[labels$id == id, "rev_pretty"]})
     frame
   })
