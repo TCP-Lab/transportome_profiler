@@ -13,13 +13,14 @@ from sqlite3 import Connection, connect
 
 import numpy
 import pandas as pd
-from bonsai import Node, Tree
+from bonsai import Node, Tree, IdBuilder
 from colorama import Back, Fore, Style
 from tqdm import tqdm
 
 random.seed(1)
 numpy.random.seed(1)
 
+builder = IdBuilder()
 
 ## >>>> Logging setup
 class ColorFormatter(logging.Formatter):
@@ -160,7 +161,7 @@ def main(args: dict) -> None:
 
     # 3. Make the union of the genesets following the structure
     log.info("Pasting trees together...")
-    large_tree = Tree()
+    large_tree = Tree(_id_fn=builder)
     for source, sink in tqdm(sets["structure"], desc="Merging"):
         if source == "root":
             large_tree.create_node(sink, None)
@@ -338,7 +339,7 @@ def generate_gene_list_trees(
     # Remove the ID col
     all_colnames.remove(id_col)
 
-    tree = Tree()
+    tree = Tree(_id_fn=builder)
     tree_root = tree.create_node(
         name, parent=None, data=dataframe[id_col].drop_duplicates().to_list()
     )
