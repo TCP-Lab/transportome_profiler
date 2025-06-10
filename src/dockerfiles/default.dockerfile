@@ -27,7 +27,7 @@ RUN cargo install --git https://github.com/MrHedmad/fast-cohen.git
 RUN cargo install --locked --git https://github.com/MrHedmad/kerblam.git
 
 # Install miscellaneous other packages
-RUN pacman --noconfirm -Syu jq ttf-fira-code
+RUN pacman --noconfirm -Syu jq ttf-fira-code ripgrep
 
 ENV PATH="$PATH:/root/.cargo/bin"
 
