@@ -78,12 +78,12 @@ if (!exists("LOCAL_DEBUG")) {
         argparser::add_argument(
             "--width",
             help = "Plot width, in inches.",
-            default = 9, type = "numerical"
+            default = 16, type = "numerical"
         ) |>
         argparser::add_argument(
             "--height",
             help = "Plot height, in inches.",
-            default = 6, type = "numerical"
+            default = 25, type = "numerical"
         ) -> parser
     
     args <- argparser::parse_args(parser)
@@ -92,48 +92,53 @@ if (!exists("LOCAL_DEBUG")) {
     args$input_results <- "./data/suppressed_merged_deas.csv"
     args$ensg_to_hugo <- "./data/ensg_data.csv"
     args$selected_genes <- "./data/filter_genes.txt"
-    args$absolute <- FALSE
+    args$absolute <- TRUE
     args$id_col <- "sample"
     args$extra_title <- "some_extra_title"
     args$png <- TRUE
 }
 
-smart_mean <- function(x, absolute = FALSE) {
-    new_x <- c()
-    for (i in x) {
-        if (is.na(i)) {
-            next
-        }
-        
-        if (!is.numeric(i)) {
-            next
-        }
-        
-        new_x <- c(new_x, i)
-    }
-    
-    if (length(new_x) == 0) {
-        return(NA)
-    }
-    
-    if (absolute) {
-        mean(abs(new_x))
-    } else {
-        mean(new_x)
-    }
-}
-
 generate_plot_data <- function(data, absolute = FALSE) {
     # We need a frame with ENSG, # of NA and mean of row
     
-    pdata <- data |> rowwise() |> mutate(
-        na_num = sum(is.na(across(where(is.numeric)))),
-        mean = smart_mean(across(where(is.numeric)), absolute = absolute),
-        ensg = sample,
-        .keep = "none"
-    )
+    pdata <- data
+    pdata$na_num <- pdata |> select(where(is.numeric)) |> apply(1, \(x) {sum(is.na(x))})
 
-    pdata
+    pdata |> melt(id.vars = c("sample", "na_num"))
+}
+
+create_plot <- function(plot_data, plot_y_limits, title) {
+    plot_data <- plot_data |> group_by(non_na_num) |> mutate(count = sum(!is.na(value)))
+    p <- ggplot(plot_data, aes(x = non_na_num, y = value)) +
+        geom_hline(yintercept = 0, linewidth = 1, color = "gray") +
+        geom_jitter(
+            width = 0.25,
+            alpha = 0.25,
+            color = "blue",
+            na.rm = TRUE
+        ) +
+        scale_color_gradient(low = "black", high = "red", name = "St. Dev.") +
+        geom_label(
+            aes(x = non_na_num, y = plot_y_limits[2] + 3, label = count),
+            angle = 90
+        ) +
+        geom_point(
+            aes(x = non_na_num, y = plot_y_limits[2] + 1, size = count),
+            color = "red"
+        ) +
+        theme_minimal() +
+        ggtitle(title) +
+        scale_x_continuous(
+            breaks = seq(1, 19, by = 1)
+        ) +
+        scale_y_continuous(
+            breaks = seq(plot_y_limits[1], plot_y_limits[2], by = 2),
+            limits = c(plot_y_limits[1], plot_y_limits[2] + 4)
+        ) +
+        guides(size = "none") +
+        theme(panel.grid.minor.x = element_blank(), legend.position = "right")
+    
+    p
 }
 
 
@@ -176,17 +181,20 @@ main <- function(args) {
         non_na_num = max_number_of_nas - na_num
     ) |> filter(non_na_num != 0) # Some rows have all NAs, so they make no sense to be plotted 
     
-    p <- ggplot(plot_data, aes(x = non_na_num, y = mean)) +
-        geom_boxplot(
-            aes(x = factor(non_na_num)),
-            outlier.alpha = 0.5,
-            outlier.colour = "darkred",
-            fill = "orange"
-        ) +
-        theme_minimal() +
-        xlab("Number of tissues gene is expressed in") +
-        ylab("Algebraic mean value of metric") +
+    all_plots <- list()
+
+    for (value in unique(plot_data$variable)) {
+        this_plot_data <- plot_data[plot_data$variable == value, ]
+        plot_y_limits <- c(floor(min(this_plot_data$value, na.rm = TRUE)), ceiling(max(this_plot_data$value, na.rm = TRUE)))
+        all_plots[[value]] <- create_plot(this_plot_data, plot_y_limits = plot_y_limits, title = value)
+    }
+    
+    p <- {all_plots |> reduce(\(x, y) {x + y})} + plot_layout(ncol = 3)
+    p <- p + xlab("Number of tissues gene is expressed in") +
+        ylab("Mean value of metric") +
         ggtitle(plot_title)
+    
+    print(p)
     
     if (args$png) {
         png(filename = args$output_file, width=args$width, height = args$height, units = "in", res=args$res)
@@ -198,3 +206,4 @@ main <- function(args) {
 }
 
 main(args)
+
