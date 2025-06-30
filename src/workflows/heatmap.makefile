@@ -228,7 +228,7 @@ ALL +=./data/out/figures/plot_commonality_vs_dysregulation_set_transporters.png
 	mkdir -p ${@D}
 	cat ./data/genesets.json | jq -r ".[] | select(.name == \"$*\").data | @csv" > /tmp/selected_genes.csv
 	${rexec} ${mods}/plotting/plot_commonality_vs_dysregulation.R $@ $< data/ensg_data.csv \
-		--selected_genes /tmp/selected_genes.csv --extra-title "$${RANK_METHOD} - $*" --png
+		--selected_genes /tmp/selected_genes.csv --extra-title "$${RANK_METHOD} - $*" --png --simple
 
 
 ALL +=./data/out/figures/plot_commonality_vs_dysregulation_absolute_set_whole_transportome.png
@@ -242,7 +242,7 @@ ALL +=./data/out/figures/plot_commonality_vs_dysregulation_absolute_set_transpor
 	mkdir -p ${@D}
 	cat ./data/genesets.json | jq -r ".[] | select(.name == \"$*\").data | @csv" > /tmp/selected_genes.csv
 	${rexec} ${mods}/plotting/plot_commonality_vs_dysregulation.R $@ $< data/ensg_data.csv \
-		--selected_genes /tmp/selected_genes.csv --extra-title "$$RANK_METHOD - $*" --png --absolute
+		--selected_genes /tmp/selected_genes.csv --extra-title "$$RANK_METHOD - $*" --png --absolute --simple
 
 ALL +=./data/out/figures/upset.png
 ./data/out/figures/upset.png: \
