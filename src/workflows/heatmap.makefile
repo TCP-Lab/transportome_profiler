@@ -216,33 +216,17 @@ ALL +=./data/out/figures/top_disregulation_thr_2_set_transporters.png
 		--selected_genes /tmp/selected_genes.csv --static_threshold $${THR} --renames data/in/config/tcga_renames.json \
 		--png --res 300
 
-## The expression vs dysregulation plots
 ALL +=./data/out/figures/plot_commonality_vs_dysregulation_set_whole_transportome.png
 ALL +=./data/out/figures/plot_commonality_vs_dysregulation_set_channels.png
 ALL +=./data/out/figures/plot_commonality_vs_dysregulation_set_transporters.png
 ./data/out/figures/plot_commonality_vs_dysregulation_set_%.png: \
 		./data/suppressed_merged_deas.csv \
 		./data/genesets.json \
-		${mods}/plotting/plot_commonality_vs_dysregulation.R \
-		./data/ensg_data.csv
+		${mods}/plotting/plot_commonality_vs_dysregulation.R
 	mkdir -p ${@D}
 	cat ./data/genesets.json | jq -r ".[] | select(.name == \"$*\").data | @csv" > /tmp/selected_genes.csv
-	${rexec} ${mods}/plotting/plot_commonality_vs_dysregulation.R $@ $< data/ensg_data.csv \
-		--selected_genes /tmp/selected_genes.csv --extra-title "$${RANK_METHOD} - $*" --png --simple
-
-
-ALL +=./data/out/figures/plot_commonality_vs_dysregulation_absolute_set_whole_transportome.png
-ALL +=./data/out/figures/plot_commonality_vs_dysregulation_absolute_set_channels.png
-ALL +=./data/out/figures/plot_commonality_vs_dysregulation_absolute_set_transporters.png
-./data/out/figures/plot_commonality_vs_dysregulation_absolute_set_%.png: \
-		./data/suppressed_merged_deas.csv \
-		./data/genesets.json \
-		${mods}/plotting/plot_commonality_vs_dysregulation.R \
-		./data/ensg_data.csv
-	mkdir -p ${@D}
-	cat ./data/genesets.json | jq -r ".[] | select(.name == \"$*\").data | @csv" > /tmp/selected_genes.csv
-	${rexec} ${mods}/plotting/plot_commonality_vs_dysregulation.R $@ $< data/ensg_data.csv \
-		--selected_genes /tmp/selected_genes.csv --extra-title "$$RANK_METHOD - $*" --png --absolute --simple
+	${rexec} ${mods}/plotting/plot_commonality_vs_dysregulation.R $@ $< \
+		--selected_genes /tmp/selected_genes.csv --extra-title $* --png
 
 ALL +=./data/out/figures/upset.png
 ./data/out/figures/upset.png: \
