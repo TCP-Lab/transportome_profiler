@@ -13,7 +13,7 @@ RUN Rscript --vanilla ./install_r_pkgs.R
 RUN pacman --noconfirm -Syu rust
 
 ## Set a timezone file (for the lubridate R package)
-RUN timezonectl set-timezone UTC
+RUN ln -sf /usr/share/zoneinfo/Etc/GMT /etc/localtime
 
 # Install python and python packages
 COPY ./src/requirements.txt /src/
