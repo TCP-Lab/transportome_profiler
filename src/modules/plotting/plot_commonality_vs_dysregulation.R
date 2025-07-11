@@ -156,9 +156,9 @@ main <- function(args) {
     # The # of NAs maximum to plot is -1 (for the id col)
     max_number_of_nas <- ncol(data) - 1
     plot_title <- if (!is.na(args$extra_title)) {
-        paste0("Commonality vs disregulation plot - ", args$extra_title)
+        paste0("Commonality plot - ", args$extra_title)
     } else {
-        "Commonality vs disregulation plot"
+        "Commonality plot"
     }
 
     # Drop all rows where the ID col is NA
