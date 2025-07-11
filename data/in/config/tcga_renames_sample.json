@@ -1,0 +1,21 @@
+{
+    "Adrenal_cancer": "Adrenal",
+    "Bladder_cancer": "Bladder",
+    "Brain_cancer": "Brain",
+    "Breast_cancer": "Breast",
+    "Cervix_cancer": "Cervix",
+    "Colorectal_cancer": "Colorectal",
+    "Esophagus_cancer": "Esophageal",
+    "Head_n_Neck_cancer": "Head and Neck",
+    "Kidney_cancer": "Kidney",
+    "Liver_cancer": "Liver",
+    "Lung_cancer": "Lung",
+    "Ovarian_cancer": "Ovarian",
+    "Pancreatic_cancer": "Pancreatic",
+    "Prostate_cancer": "Prostate",
+    "Skin_cancer": "Skin",
+    "Stomach_cancer": "Stomach",
+    "Testicular_cancer": "Testicular",
+    "Thyroid_cancer": "Thyroid",
+    "Uterine_cancer": "Uterine"
+}
