@@ -216,18 +216,6 @@ ALL +=./data/out/figures/top_disregulation_thr_2_set_transporters.png
 		--selected_genes /tmp/selected_genes.csv --static_threshold $${THR} --renames data/in/config/tcga_renames.json \
 		--png --res 300
 
-ALL +=./data/out/figures/plot_commonality_vs_dysregulation_set_whole_transportome.png
-ALL +=./data/out/figures/plot_commonality_vs_dysregulation_set_channels.png
-ALL +=./data/out/figures/plot_commonality_vs_dysregulation_set_transporters.png
-./data/out/figures/plot_commonality_vs_dysregulation_set_%.png: \
-		./data/suppressed_merged_deas.csv \
-		./data/genesets.json \
-		${mods}/plotting/plot_commonality_vs_dysregulation.R
-	mkdir -p ${@D}
-	cat ./data/genesets.json | jq -r ".[] | select(.name == \"$*\").data | @csv" > /tmp/selected_genes.csv
-	${rexec} ${mods}/plotting/plot_commonality_vs_dysregulation.R $@ $< \
-		--selected_genes /tmp/selected_genes.csv --extra-title $* --png
-
 ALL +=./data/out/figures/upset.png
 ./data/out/figures/upset.png: \
 		./data/merged_deas.csv \

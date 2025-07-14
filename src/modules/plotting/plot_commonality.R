@@ -5,7 +5,7 @@ if (! exists("LOCAL_DEBUG")) {
     # Parsing arguments
     requireNamespace("argparser")
 
-    parser <- argparser::arg_parser("Plot a large dotplot with number of expressed genes per genesets.")
+    parser <- argparser::arg_parser("Plot commonality plots")
 
     parser |>
         argparser::add_argument(
@@ -36,7 +36,7 @@ if (! exists("LOCAL_DEBUG")) {
         ) |>
         argparser::add_argument(
             "--width", help = "Plot width, in inches.",
-            default = 10, type = "numerical"
+            default = 7, type = "numerical"
         ) |>
         argparser::add_argument(
             "--renames", help = "JSON file with renames to apply to sample names when plotting",
@@ -44,7 +44,7 @@ if (! exists("LOCAL_DEBUG")) {
         ) |>
         argparser::add_argument(
             "--height", help = "Plot height, in inches.",
-            default = 10, type = "numerical"
+            default = 3, type = "numerical"
         ) -> parser
 
     args <- argparser::parse_args(parser)
@@ -53,7 +53,6 @@ if (! exists("LOCAL_DEBUG")) {
 suppressMessages({
     options(tidyverse.quiet = TRUE)
     library(tidyverse)
-    library(ComplexUpset)
     requireNamespace("UpSetR")
     requireNamespace("stringi")
     requireNamespace("jsonlite")
@@ -75,7 +74,7 @@ gen_plot_data <- function(
     data <- input_data |> purge_ensg_versions(id_col=id_col) |> column_to_rownames(id_col)
 
     # First, we need to bin the data
-    data <- data |> mutate(across(where(is.numeric), \(x) { x > expressed_threshold }))
+    data <- data |> mutate(across(where(is.numeric), \(x) {x > expressed_threshold}))
 
     # Now, for all the types of tumors (columns != to id_col) we need to check if the
     # genes in the geneset are expressed or not.
@@ -91,7 +90,12 @@ gen_plot_data <- function(
         }
     }
 
-    UpSetR::fromList(plot_data)
+    freqs <- UpSetR::fromList(plot_data) |> rowSums() |> table()
+    
+    tibble(
+        freq = as.vector(freqs),
+        nums = seq_along(freqs)
+    )
 }
 
 main <- function(
@@ -115,9 +119,13 @@ main <- function(
         renames <- NA
     }
 
-    print(renames)
-
-    data <- gen_plot_data(input_means, input_set, expressed_threshold = expression_threshold)
+    plot_data <- gen_plot_data(input_means, input_set, expressed_threshold = expression_threshold)
+    
+    plot_title <- if (!is.na(extra_title)) {
+        paste0("Commonality plot - ", extra_title)
+    } else {
+        "Commonality plot"
+    }
 
     apply_renames <- function(x) {
         if (is.na(renames)) {
@@ -130,31 +138,36 @@ main <- function(
 
         renames[[x]]
     }
+    
+    # Pretty dynamic labels
+    label_is_high <- plot_data$freq > max(plot_data$freq) * 0.9
+    # This is not the actual length in say, pixels, but if the labels are short,
+    # you can assume each character takes about the same space on screen,
+    # So you just multiply by some constant the number of characters in a string.
+    label_length <- str_length(plot_data$freq)
 
-    p <- upset(
-        data,
-        names(data),
-        n_intersections = 15,
-        base_annotations=list(
-            'Intersection size'=intersection_size(
-                text_mapping=aes(label=paste0(
-                    !!upset_text_percentage(),
-                    '\n',
-                    '(',
-                    !!get_size_mode('exclusive_intersection'),
-                    ')'
-                ))
-            )
-        ),
-        # This should apply the renames, but it does not work.
-        # I opened a PR for this back in December with the fix in the
-        # ComplexUpset package but the maintainer did not reply.
-        # See https://github.com/krassowski/complex-upset/issues/206
-        # and https://github.com/krassowski/complex-upset/pull/207
-        matrix = intersection_matrix() +
-            scale_y_discrete(labels=apply_renames)
-    ) + ggtitle(extra_title)
-
+    p <- ggplot(plot_data, aes(x = nums, y = freq)) +
+        geom_bar(stat = "identity", fill = "orange") +
+        geom_text(
+            aes(
+                label = freq,
+                y = freq + ifelse(label_is_high, -0.05, 0.05) * label_length * max(freq)
+            ),
+            angle = 90,
+            vjust = 0.5, # This centers the labels *horizontally* (90 angle)
+            hjust = ifelse(label_is_high, 0, 1)
+        ) +
+        scale_x_continuous(
+            breaks = seq(1, 19, by = 1),
+            labels = seq(1, 19, by = 1),
+        ) +
+        theme_minimal() +
+        ggtitle(plot_title) +
+        guides(size = "none") +
+        xlab("Number of tissue types gene is expressed in") +
+        ylab("Number of genes") +
+        theme(panel.grid.minor.x = element_blank())
+    
     if (png) {
         png(output_file_path, width = width, height = height, res = res, units = "in")
     } else {
@@ -168,14 +181,14 @@ main <- function(
 if (exists("LOCAL_DEBUG")) {
     main(
         input_means_path = "data/expression_means.csv",
-        input_set_path = "data/test_transp.json",
+        input_set_path = "data/test_channels.json",
         output_file_path = "data/out/figures/whole_transportome_test_upset.png",
         expression_threshold = 0,
         extra_title = "Transporters",
             renames = "data/in/config/tcga_renames.json",
         res = 300,
-        width = 1600,
-        height = 600,
+        width = 7,
+        height = 4,
         png = TRUE
     )
 } else {
@@ -192,3 +205,4 @@ if (exists("LOCAL_DEBUG")) {
         png = args$png
     )
 }
+

@@ -150,6 +150,22 @@ ALL += ./data/out/avg_expression.csv
 		--extra_title "Upset of expressed genes - ${*}" \
 		--png
 
+## --- Calculate the expression bar plots
+ALL +=./data/out/figures/plot_commonality_set_whole_transportome.png
+ALL +=./data/out/figures/plot_commonality_set_channels.png
+ALL +=./data/out/figures/plot_commonality_set_transporters.png
+./data/out/figures/plot_commonality_set_%.png: \
+	./data/%_single_geneset.json \
+	./data/expression_means.csv \
+	./src/modules/plotting/plot_commonality.R
+
+	$(rexec) ./src/modules/plotting/plot_commonality.R \
+		./data/expression_means.csv $< $@ \
+		--expression_threshold 1 \
+		--renames ./data/in/config/tcga_renames_sample.json \
+		--extra_title "${*} geneset" \
+		--png
+
 ./data/%_single_geneset.json: ./data/genesets.json
 	jq 'to_entries[] | select(.value.name == "$*") | .value.data' $< > $@
 
