@@ -97,7 +97,7 @@ ALL += ./data/out/figures/expression_means.png
 
 	$(rexec) ./src/modules/plotting/plot_expression_means.R $< \
 		./data/genesets.json ./data/genesets_repr.txt $@ \
-		--res 400 --height 15 --expression_threshold 1 \
+		--res 400 --height 15 --expression_threshold 0 \
 		--renames ./data/in/config/tcga_renames_sample.json \
 		--extra_title "TCGA + GTEX data"
 
@@ -110,7 +110,7 @@ ALL += ./data/out/figures/expression_means_TCGA_only.png
 
 	$(rexec) ./src/modules/plotting/plot_expression_means.R $< \
 		./data/genesets.json ./data/genesets_repr.txt $@ \
-		--res 400 --height 15 --expression_threshold 1 \
+		--res 400 --height 15 --expression_threshold 0 \
 		--renames ./data/in/config/tcga_renames_sample.json \
 		--extra_title "TCGA only"
 
@@ -123,7 +123,7 @@ ALL += ./data/out/figures/expression_means_GTEX_only.png
 
 	$(rexec) ./src/modules/plotting/plot_expression_means.R $< \
 		./data/genesets.json ./data/genesets_repr.txt $@ \
-		--res 400 --height 15 --expression_threshold 1 \
+		--res 400 --height 15 --expression_threshold 0 \
 		--renames ./data/in/config/tcga_renames_sample.json \
 		--extra_title "GTEX only"
 
@@ -145,7 +145,7 @@ ALL += ./data/out/avg_expression.csv
 
 	$(rexec) ./src/modules/plotting/plot_expression_upset.R \
 		./data/expression_means.csv $< $@ \
-		--expression_threshold 1 \
+		--expression_threshold 0 \
 		--renames ./data/in/config/tcga_renames_sample.json \
 		--extra_title "Upset of expressed genes - ${*}" \
 		--png
@@ -161,7 +161,7 @@ ALL +=./data/out/figures/plot_commonality_set_transporters.png
 
 	$(rexec) ./src/modules/plotting/plot_commonality.R \
 		./data/expression_means.csv $< $@ \
-		--expression_threshold 1 \
+		--expression_threshold 0 \
 		--renames ./data/in/config/tcga_renames_sample.json \
 		--extra_title "${*} geneset" \
 		--png
