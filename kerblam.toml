@@ -43,6 +43,57 @@ version = "1.2.0"
 # GSE201284 - Healthy samples are of blood, not tissue
 #"https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE201284&format=file&file=GSE201284%5Fprocessed%5Fcounts%2Etxt%2Egz" = "GSE201284.tsv.gz"
 
+# Proteomics and transcriptomics
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/BRCA/BRCA_RNAseq_gene_RSEM_coding_UQ_1500_log2_Tumor.txt" = "proteomics/BRCA_tumor_RSEM.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/BRCA/BRCA_proteomics_gene_abundance_log2_reference_intensity_normalized_Tumor.txt" = "proteomics/BRCA_tumor_proteomics.tsv"
+#"" = "proteomics/BRCA_normal_RSEM.tsv"
+#"" = "proteomics/BRCA_normal_proteomics.tsv"
+
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/CCRCC/CCRCC_RNAseq_gene_RSEM_coding_UQ_1500_log2_Tumor.txt" = "proteomics/CCRCC_tumor_RSEM.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/CCRCC/CCRCC_proteomics_gene_abundance_log2_reference_intensity_normalized_Tumor.txt" = "proteomics/CCRCC_tumor_proteomics.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/CCRCC/CCRCC_RNAseq_gene_RSEM_coding_UQ_1500_log2_Normal.txt" = "proteomics/CCRCC_normal_RSEM.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/CCRCC/CCRCC_proteomics_gene_abundance_log2_reference_intensity_normalized_Normal.txt" = "proteomics/CCRCC_normal_proteomics.tsv"
+
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/COAD/COAD_RNAseq_gene_RSEM_coding_UQ_1500_log2_Tumor.txt" = "proteomics/COAD_tumor_RSEM.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/COAD/COAD_proteomics_gene_abundance_log2_reference_intensity_normalized_Tumor.txt" = "proteomics/COAD_tumor_proteomics.tsv"
+#"" = "proteomics/COAD_normal_RSEM.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/COAD/COAD_proteomics_gene_abundance_log2_reference_intensity_normalized_Normal.txt" = "proteomics/COAD_normal_proteomics.tsv"
+
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/GBM/GBM_RNAseq_gene_RSEM_coding_UQ_1500_log2_Tumor.txt" = "proteomics/GBM_tumor_RSEM.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/GBM/GBM_proteomics_gene_abundance_log2_reference_intensity_normalized_Tumor.txt" = "proteomics/GBM_tumor_proteomics.tsv"
+#"" = "proteomics/GBM_normal_RSEM.tsv"
+#"" = "proteomics/GBM_normal_proteomics.tsv"
+
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/HNSCC/HNSCC_RNAseq_gene_RSEM_coding_UQ_1500_log2_Tumor.txt" = "proteomics/HNSCC_tumor_RSEM.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/HNSCC/HNSCC_proteomics_gene_abundance_log2_reference_intensity_normalized_Tumor.txt" = "proteomics/HNSCC_tumor_proteomics.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/HNSCC/HNSCC_RNAseq_gene_RSEM_coding_UQ_1500_log2_Normal.txt" = "proteomics/HNSCC_normal_RSEM.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/HNSCC/HNSCC_proteomics_gene_abundance_log2_reference_intensity_normalized_Normal.txt" = "proteomics/HNSCC_normal_proteomics.tsv"
+
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/LSCC/LSCC_RNAseq_gene_RSEM_coding_UQ_1500_log2_Tumor.txt" = "proteomics/LSCC_tumor_RSEM.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/LSCC/LSCC_proteomics_gene_abundance_log2_reference_intensity_normalized_Tumor.txt" = "proteomics/LSCC_tumor_proteomics.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/LSCC/LSCC_RNAseq_gene_RSEM_coding_UQ_1500_log2_Normal.txt" = "proteomics/LSCC_normal_RSEM.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/LSCC/LSCC_proteomics_gene_abundance_log2_reference_intensity_normalized_Normal.txt" = "proteomics/LSCC_normal_proteomics.tsv"
+
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/LUAD/LUAD_RNAseq_gene_RSEM_coding_UQ_1500_log2_Tumor.txt" = "proteomics/LUAD_tumor_RSEM.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/LUAD/LUAD_proteomics_gene_abundance_log2_reference_intensity_normalized_Tumor.txt" = "proteomics/LUAD_tumor_proteomics.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/LUAD/LUAD_RNAseq_gene_RSEM_coding_UQ_1500_log2_Normal.txt" = "proteomics/LUAD_normal_RSEM.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/LUAD/LUAD_proteomics_gene_abundance_log2_reference_intensity_normalized_Normal.txt" = "proteomics/LUAD_normal_proteomics.tsv"
+
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/OV/OV_RNAseq_gene_RSEM_coding_UQ_1500_log2_Tumor.txt" = "proteomics/OV_tumor_RSEM.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/OV/OV_proteomics_gene_abundance_log2_reference_intensity_normalized_Tumor.txt" = "proteomics/OV_tumor_proteomics.tsv"
+#"" = "proteomics/OV_normal_RSEM.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/OV/OV_proteomics_gene_abundance_log2_reference_intensity_normalized_Normal.txt" = "proteomics/OV_normal_proteomics.tsv"
+
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/PDAC/PDAC_RNAseq_gene_RSEM_coding_UQ_1500_log2_Tumor.txt" = "proteomics/PDAC_tumor_RSEM.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/PDAC/PDAC_proteomics_gene_abundance_log2_reference_intensity_normalized_Tumor.txt" = "proteomics/PDAC_tumor_proteomics.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/PDAC/PDAC_RNAseq_gene_RSEM_coding_UQ_1500_log2_Normal.txt" = "proteomics/PDAC_normal_RSEM.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/PDAC/PDAC_proteomics_gene_abundance_log2_reference_intensity_normalized_Normal.txt" = "proteomics/PDAC_normal_proteomics.tsv"
+
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/UCEC/UCEC_RNAseq_gene_RSEM_coding_UQ_1500_log2_Tumor.txt" = "proteomics/UCEC_tumor_RSEM.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/UCEC/UCEC_proteomics_gene_abundance_log2_reference_intensity_normalized_Tumor.txt" = "proteomics/UCEC_tumor_proteomics.tsv"
+#"" = "proteomics/UCEC_normal_RSEM.tsv"
+"https://cptac-pancancer-data.s3.us-west-2.amazonaws.com/data_freeze_v1.2_reorganized/UCEC/UCEC_proteomics_gene_abundance_log2_reference_intensity_normalized_Normal.txt" = "proteomics/UCEC_normal_proteomics.tsv"
+
 [data.profiles.test]
 "expression_matrix.tsv.gz" = "test_expression_matrix.tsv.gz"
 
