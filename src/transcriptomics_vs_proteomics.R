@@ -22,6 +22,11 @@ TRANSPORTOME <- get_geneset_named(GENESETS, "whole_transportome")$data |> unlist
 CHANNELS <- get_geneset_named(GENESETS, "channels")$data |> unlist()
 TRANSPORTERS <- get_geneset_named(GENESETS, "transporters")$data |> unlist()
 
+# Normalize depth of sequencing
+depth_norm <- function(seq) {
+    seq |> mutate(across(where(is.numeric), \(x) {(x / sum(x)) * 1e6 }))
+}
+
 load_data <- function(root_path) {
     data <- list()
     for (ttype in TUMOR_TYPES) {
@@ -36,7 +41,7 @@ load_data <- function(root_path) {
         
         cat(paste0("Loading ", ttype, " tumor rnaseq data\n"))
         tryCatch({
-            this_tt$tumor$rnaseq <- read_tsv(file.path(root_path, paste0(ttype, "_tumor_RSEM.tsv")), show_col_types = FALSE)
+            this_tt$tumor$rnaseq <- read_tsv(file.path(root_path, paste0(ttype, "_tumor_RSEM.tsv")), show_col_types = FALSE) |> depth_norm()
         }, error = function(e) {cat(paste0("Failed to load ", ttype, " tumor rnaseq data\n"))})
         
         cat(paste0("Loading ", ttype, " normal proteomics data\n"))
@@ -46,7 +51,7 @@ load_data <- function(root_path) {
         
         cat(paste0("Loading ", ttype, " normal rnaseq data\n"))
         tryCatch({
-            this_tt$normal$rnaseq <- read_tsv(file.path(root_path, paste0(ttype, "_normal_RSEM.tsv")), show_col_types = FALSE)
+            this_tt$normal$rnaseq <- read_tsv(file.path(root_path, paste0(ttype, "_normal_RSEM.tsv")), show_col_types = FALSE)  |> depth_norm()
         }, error = function(e) {cat(paste0("Failed to load ", ttype, " normal rnaseq data\n"))})
         
         data[[ttype]] <- this_tt
@@ -174,11 +179,6 @@ intersect_genes <- function(this, that, id_col = "idx") {
     return(list(this, that))
 }
 
-intersect_genes(
-    data$BRCA$tumor$proteomics |> purge_gene_versions() |> select_coding() |> collapse_duplicate_genes(),
-    data$BRCA$tumor$rnaseq  |> purge_gene_versions() |> select_coding() |> collapse_duplicate_genes()
-)
-
 # Calculates the correlations between all genes in two data frames
 calculate_correlations <- function(this, that, id_col = "idx") {
     if (any(is.na(this))) {
@@ -206,12 +206,54 @@ calculate_correlations <- function(this, that, id_col = "idx") {
         results[[gene]] <- result
     }
     final <- bind_rows(results)
-    final$gene <- genes
+    final[[id_col]] <- genes
     
     final
 }
 
-process_pair <- function(this, that, id_col = "idx", intersect_samples = TRUE) {
+cohen <- function(case, control) {
+    pooled_var <- ((length(case) - 1) * var(case) + (length(control) - 1) * var(control)) / (length(case) + length(control) - 2)
+    pooled_stdev <- pooled_var ^ 0.5
+    if (pooled_stdev == 0) {
+        return(0)
+    }
+    
+    (mean(case) - mean(control)) / pooled_stdev
+}
+
+stopifnot(round(cohen(c(2.2, 1.3, 3.1), c(12.6, 11.1, 12.3)), 5) == -11.54941)
+
+calculate_cohen <- function(this, that, id_col = "idx") {
+    if (any(is.na(this))) {
+        warning("First dataframe has some NAs. Weird things might happen.")
+    }
+    if (any(is.na(that))) {
+        warning("Second dataframe has some NAs. Weird things might happen.")
+    }
+    
+    genes <- intersect(this[[id_col]], that[[id_col]])
+    
+    results <- list()
+    pb <- progress_bar$new(total = length(genes))
+    for (gene in genes) {
+        this_gene <- this |> filter(idx == gene) |> select(!{{ id_col }}) |> unlist()
+        that_gene <- that |> filter(idx == gene) |> select(!{{ id_col }}) |> unlist()
+        
+        result <- list()
+        
+        result$cohen <- cohen(this_gene, that_gene)
+        
+        pb$tick()
+        
+        results[[gene]] <- result
+    }
+    final <- bind_rows(results)
+    final[[id_col]] <- genes
+    
+    final
+}
+
+process_pair <- function(this, that, id_col = "idx", intersect_samples = TRUE, fn = calculate_correlations) {
     check_samples(this, that)
     this <- this |> purge_gene_versions(id_col=id_col) |> select_coding(id_col=id_col) |> collapse_duplicate_genes(id_col=id_col)
     that <- that |> purge_gene_versions(id_col=id_col) |> select_coding(id_col=id_col) |> collapse_duplicate_genes(id_col=id_col)
@@ -224,7 +266,7 @@ process_pair <- function(this, that, id_col = "idx", intersect_samples = TRUE) {
     this <- res[[1]]
     that <- res[[2]]
     
-    return(calculate_correlations(this, that, id_col=id_col))
+    return(fn(this, that, id_col=id_col))
 }
 
 subset_with <- function(data, selected_genes, id_col = "idx") {
@@ -239,6 +281,13 @@ process_batch <- function(data) {
     # Some calls here are duplicated to be slightly more explicit, and in case
     # we need to edit only some cases.
     
+    # NOTE - A previous version of this did the calculatations again after
+    # running subset_with to each dataframe. This iS LOOOOOONG, but allows
+    # calculations to be performed on the new frames, if sample-dependent
+    # (i.e. column-wise) calculations have to be done. However, our FNs
+    # only take one gene at a time, so this is not an advantage.
+    # Now I subset the results directly.
+    
     results <- list()
     ## TUMOR DATA
     if (has_tumor_prot(data) & has_tumor_seq(data)) {
@@ -249,22 +298,13 @@ process_batch <- function(data) {
         results$tumor$all <- process_pair(data$tumor$proteomics, data$tumor$rnaseq)
         # Only whole transportome
         cat("Processing Tumors - whole transportome\n")
-        results$tumor$whole_transportome <- process_pair(
-            subset_with(data$tumor$proteomics, TRANSPORTOME),
-            subset_with(data$tumor$rnaseq, TRANSPORTOME)
-        )
+        results$tumor$whole_transportome <- subset_with(results$tumor$all, TRANSPORTOME)
         # Only channels
         cat("Processing Tumors - channels\n")
-        results$tumor$channels <- process_pair(
-            subset_with(data$tumor$proteomics, CHANNELS),
-            subset_with(data$tumor$rnaseq, CHANNELS)
-        )
+        results$tumor$channels <- subset_with(results$tumor$all, CHANNELS)
         # Only transporters
         cat("Processing Tumors - transporters\n")
-        results$tumor$transporters <- process_pair(
-            subset_with(data$tumor$proteomics, TRANSPORTERS),
-            subset_with(data$tumor$rnaseq, TRANSPORTERS)
-        )
+        results$tumor$transporters <- subset_with(results$tumor$all, TRANSPORTERS)
     }
     
     if (has_normal_prot(data) & has_normal_seq(data)) {
@@ -274,52 +314,48 @@ process_batch <- function(data) {
         results$normal$all <- process_pair(data$normal$proteomics, data$normal$rnaseq)
         # Only whole transportome
         cat("Processing Tumors - whole transportome\n")
-        results$normal$whole_transportome <- process_pair(
-            subset_with(data$normal$proteomics, TRANSPORTOME),
-            subset_with(data$normal$rnaseq, TRANSPORTOME)
-        )
+        results$normal$whole_transportome <- subset_with(results$normal$all, TRANSPORTOME)
         # Only channels
         cat("Processing Tumors - channels\n")
-        results$normal$channels <- process_pair(
-            subset_with(data$normal$proteomics, CHANNELS),
-            subset_with(data$normal$rnaseq, CHANNELS)
-        )
+        results$normal$channels <- subset_with(results$normal$all, CHANNELS)
         # Only transporters
         cat("Processing Tumors - transporters\n")
-        results$normal$transporters <- process_pair(
-            subset_with(data$normal$proteomics, TRANSPORTERS),
-            subset_with(data$normal$rnaseq, TRANSPORTERS)
-        )
+        results$normal$transporters <- subset_with(results$normal$all, TRANSPORTERS)
     }
     
-    if (all(c(has_normal_prot(data), has_normal_seq(data), has_tumor_prot(data), has_tumor_seq(data)))) {
-        results$combined <- list()
-        all_proteomics <- mmerge(data$normal$proteomics, data$tumor$proteomics)
-        all_transcriptomics <- mmerge(data$normal$rnaseq, data$tumor$rnaseq)
+    if (has_normal_prot(data) & has_normal_seq(data) & has_tumor_seq(data) & has_tumor_prot(data)) {
+        results$cohen <- list()
+        results$cohen$seq <- list()
+        results$cohen$prot <- list()
         
         # All genes
-        cat("Processing Combined - all\n")
-        results$combined$all <- process_pair(all_proteomics, all_transcriptomics)
+        cat("Processing Cohen's RNAseq - all\n")
+        results$cohen$seq$all <- process_pair(data$tumor$rnaseq, data$normal$rnaseq, fn = calculate_cohen)
         # Only whole transportome
-        cat("Processing Combined - whole transportome\n")
-        results$combined$whole_transportome <- process_pair(
-            subset_with(all_proteomics, TRANSPORTOME),
-            subset_with(all_transcriptomics, TRANSPORTOME)
-        )
+        cat("Processing Cohen's RNAseq - whole transportome\n")
+        results$cohen$seq$whole_transportome <- subset_with(results$cohen$seq$all, TRANSPORTOME)
         # Only channels
-        cat("Processing Combined - channels\n")
-        results$combined$channels <- process_pair(
-            subset_with(all_proteomics, CHANNELS),
-            subset_with(all_transcriptomics, CHANNELS)
-        )
+        cat("Processing Cohen's RNAseq - channels\n")
+        results$cohen$seq$channels <- subset_with(results$cohen$seq$all, CHANNELS)
         # Only transporters
-        cat("Processing Combined - transporters\n")
-        results$combined$transporters <- process_pair(
-            subset_with(all_proteomics, TRANSPORTERS),
-            subset_with(all_transcriptomics, TRANSPORTERS)
-        )
+        cat("Processing Cohen's RNAseq - transporters\n")
+        results$cohen$seq$transporters <- subset_with(results$cohen$seq$all, TRANSPORTERS)
+        
+        # All genes
+        cat("Processing Cohen's Proteomics - all\n")
+        results$cohen$prot$all <- process_pair(data$tumor$proteomics, data$normal$proteomics, fn = calculate_cohen)
+        # Only whole transportome
+        cat("Processing Cohen's Proteomics - whole transportome\n")
+        results$cohen$prot$whole_transportome <- subset_with(results$cohen$prot$all, TRANSPORTOME)
+        # Only channels
+        cat("Processing Cohen's Proteomics - channels\n")
+        results$cohen$prot$channels <- subset_with(results$cohen$prot$all, CHANNELS)
+        # Only transporters
+        cat("Processing Cohen's Proteomics - transporters\n")
+        results$cohen$prot$transporters <- subset_with(results$cohen$prot$all, TRANSPORTERS)
     }
     
+
     results
 }
 
@@ -345,7 +381,7 @@ prepare_plot_data <- function(corrs) {
     i <- 1
     # Add the various identifiers
     for (ttype in names(corrs)) {
-        for (status in c("tumor", "normal", "combined")) {
+        for (status in c("tumor", "normal")) {
             for (test in c("all", "whole_transportome", "channels", "transporters")) {
                 noerr({
                     corrs[[ttype]][[status]][[test]]$tumor_type <- ttype
@@ -365,17 +401,51 @@ prepare_plot_data <- function(corrs) {
 
 plot_data <- prepare_plot_data(correlation_results)
 
-x <- ggplot(plot_data, aes(x = status, fill = test, y = corr)) +
-    geom_boxplot() +
-    facet_wrap(facets = ~ tumor_type) +
+prepare_cohen_plot_data <- function(corrs) {
+    noerr <- partial(try, silent = TRUE)
+    flat_res <- list()
+    i <- 1
+    # Add the various identifiers
+    for (ttype in names(corrs)) {
+        if (is.null(corrs[[ttype]][["cohen"]])) {
+            next
+        }
+        print(ttype)
+        for (test in c("all", "whole_transportome", "channels", "transporters")) {
+            {
+                inter <- intersect_genes(corrs[[ttype]]$cohen$prot[[test]], corrs[[ttype]]$cohen$seq[[test]])
+                flat_res[[i]] <- data.frame(
+                    tumor_type = ttype,
+                    test = test,
+                    idx = inter[[1]]$idx,
+                    prot = inter[[1]]$cohen,
+                    seq = inter[[2]]$cohen
+                )
+                i <- i + 1
+            }
+        }
+    }
+    # Collapse to a single frame
+    bind_rows(flat_res)
+}
+
+cohen_plot_data <- prepare_cohen_plot_data(correlation_results)
+
+y <- ggplot(cohen_plot_data, aes(x = prot, y = seq)) +
+    geom_hline(yintercept = 0, color = "gray") +
+    geom_vline(xintercept = 0, color = "gray") +
+    geom_point(size = 0.5, alpha = 0.5) +
+    geom_abline(slope = 1, intercept = 0, color = "red", alpha = 0.5) +
+    geom_density2d() +
+    facet_wrap(facets = ~ tumor_type, ncol = 2) +
+    theme_minimal() +
     theme(legend.position = "bottom") +
-    ylab("Spearmann's Correlation") +
-    xlab("Cohort") +
-    scale_fill_discrete(name = "Geneset")
+    ylab("Cohen's D - Transcriptomics") +
+    xlab("Cohen's D - Proteomics")
 
 pdf(
-    file = file.path("data", "out", "transcriptomics_proteomics_plot.pdf"),
-    width = 16, height = 9
+    file = file.path("data", "out", "transcriptomics_proteomics_foldchanges.pdf"),
+    width = 9, height = 16
 )
-print(x)
+print(y)
 dev.off()
