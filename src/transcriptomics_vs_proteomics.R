@@ -401,6 +401,22 @@ prepare_plot_data <- function(corrs) {
 
 plot_data <- prepare_plot_data(correlation_results)
 
+
+x <- ggplot(plot_data, aes(x = status, fill = test, y = corr)) +
+    geom_boxplot() +
+    facet_wrap(facets = ~ tumor_type) +
+    theme(legend.position = "bottom") +
+    ylab("Spearmann's Correlation") +
+    xlab("Cohort") +
+    scale_fill_discrete(name = "Geneset")
+
+pdf(
+    file = file.path("data", "out", "transcriptomics_proteomics_plot.pdf"),
+    width = 16, height = 9
+)
+print(x)
+dev.off()
+
 prepare_cohen_plot_data <- function(corrs) {
     noerr <- partial(try, silent = TRUE)
     flat_res <- list()
@@ -431,21 +447,49 @@ prepare_cohen_plot_data <- function(corrs) {
 
 cohen_plot_data <- prepare_cohen_plot_data(correlation_results)
 
-y <- ggplot(cohen_plot_data, aes(x = prot, y = seq)) +
-    geom_hline(yintercept = 0, color = "gray") +
-    geom_vline(xintercept = 0, color = "gray") +
-    geom_point(size = 0.5, alpha = 0.5) +
-    geom_abline(slope = 1, intercept = 0, color = "red", alpha = 0.5) +
-    geom_density2d() +
-    facet_wrap(facets = ~ tumor_type, ncol = 2) +
-    theme_minimal() +
-    theme(legend.position = "bottom") +
-    ylab("Cohen's D - Transcriptomics") +
-    xlab("Cohen's D - Proteomics")
+plot_cohen <- function(cohen_plot_data, title = NULL) {
+    y <- ggplot(cohen_plot_data, aes(x = prot, y = seq)) +
+        geom_hline(yintercept = 0, color = "gray") +
+        geom_vline(xintercept = 0, color = "gray") +
+        geom_point(size = 0.5, alpha = 0.5) +
+        geom_abline(slope = 1, intercept = 0, color = "red", alpha = 0.5) +
+        geom_density2d() +
+        facet_wrap(facets = ~ tumor_type, ncol = 2) +
+        theme_minimal() +
+        theme(legend.position = "bottom") +
+        ylab("Cohen's D - Transcriptomics") +
+        xlab("Cohen's D - Proteomics") +
+        ggtitle(title)
+    
+    print(y)
+    
+}
+
 
 pdf(
-    file = file.path("data", "out", "transcriptomics_proteomics_foldchanges.pdf"),
+    file = file.path("data", "out", "transcriptomics_proteomics_foldchanges_all.pdf"),
     width = 9, height = 16
 )
-print(y)
+cohen_plot_data |> filter(test == "all") |> plot_cohen("Transcriptomics vs Proteomics - all genes")
+dev.off()
+
+pdf(
+    file = file.path("data", "out", "transcriptomics_proteomics_foldchanges_channels.pdf"),
+    width = 9, height = 16
+)
+cohen_plot_data |> filter(test == "channels") |> plot_cohen("Transcriptomics vs Proteomics - Channels")
+dev.off()
+
+pdf(
+    file = file.path("data", "out", "transcriptomics_proteomics_foldchanges_transporters.pdf"),
+    width = 9, height = 16
+)
+cohen_plot_data |> filter(test == "transporters") |> plot_cohen("Transcriptomics vs Proteomics - Transporters")
+dev.off()
+
+pdf(
+    file = file.path("data", "out", "transcriptomics_proteomics_foldchanges_transportome.pdf"),
+    width = 9, height = 16
+)
+cohen_plot_data |> filter(test == "whole_transportome") |> plot_cohen("Transcriptomics vs Proteomics - Whole transportome")
 dev.off()
