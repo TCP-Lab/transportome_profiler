@@ -4,12 +4,15 @@
 library(tidyverse)
 library(progress)
 
+# --- Globals ------------------------------------------------------------------
+
+DEPTH_NORM <- FALSE
+METRIC <- "paired log(FC)" # Either "paired log(FC)" or "Cohen's D"
+
 TUMOR_TYPES <- c("BRCA", "CCRCC", "COAD", "GBM", "HNSCC", "LSCC", "LUAD", "OV", "PDAC", "UCEC")
 ENSG_DATA <- read_csv(file.path("data", "in", "ensg_data.csv"))
 CODING_GENES <- ENSG_DATA |> filter(gene_biotype == "protein_coding")
 GENESETS <- jsonlite::read_json(file.path("data", "genesets.json"))
-
-DEPTH_NORM <- FALSE
 
 get_geneset_named <- function(data, x) {
     for (item in data) {
@@ -23,6 +26,8 @@ get_geneset_named <- function(data, x) {
 TRANSPORTOME <- get_geneset_named(GENESETS, "whole_transportome")$data |> unlist()
 CHANNELS <- get_geneset_named(GENESETS, "channels")$data |> unlist()
 TRANSPORTERS <- get_geneset_named(GENESETS, "transporters")$data |> unlist()
+
+# --- Functions and Main -------------------------------------------------------
 
 # Normalize depth of sequencing
 depth_norm <- function(seq, toggle = DEPTH_NORM) {
@@ -229,7 +234,7 @@ cohen <- function(case, control) {
 
 stopifnot(round(cohen(c(2.2, 1.3, 3.1), c(12.6, 11.1, 12.3)), 5) == -11.54941)
 
-calculate_cohen <- function(this, that, id_col = "idx") {
+calculate_DEmetric <- function(this, that, id_col = "idx", metric = METRIC) {
     if (any(is.na(this))) {
         warning("First dataframe has some NAs. Weird things might happen.")
     }
@@ -247,7 +252,18 @@ calculate_cohen <- function(this, that, id_col = "idx") {
         
         result <- list()
         
-        result$cohen <- cohen(this_gene, that_gene)
+        if (metric == "paired log(FC)") {
+          
+          common_samples <- intersect(names(this_gene), names(that_gene))
+          result$DEscore <- mean(this_gene[common_samples] - that_gene[common_samples], na.rm = TRUE)
+        
+        } else if (metric == "Cohen's D") {
+          
+          result$DEscore <- cohen(this_gene, that_gene)
+        
+        } else {
+          stop("Invalid metric for Differential Expression")
+        }
         
         pb$tick()
         
@@ -330,35 +346,35 @@ process_batch <- function(data) {
     }
     
     if (has_normal_prot(data) & has_normal_seq(data) & has_tumor_seq(data) & has_tumor_prot(data)) {
-        results$cohen <- list()
-        results$cohen$seq <- list()
-        results$cohen$prot <- list()
+        results$DEscore <- list()
+        results$DEscore$seq <- list()
+        results$DEscore$prot <- list()
         
         # All genes
-        cat("Processing Cohen's RNAseq - all\n")
-        results$cohen$seq$all <- process_pair(data$tumor$rnaseq, data$normal$rnaseq, fn = calculate_cohen)
+        cat("Processing DE-metric RNAseq - all\n")
+        results$DEscore$seq$all <- process_pair(data$tumor$rnaseq, data$normal$rnaseq, fn = calculate_DEmetric)
         # Only whole transportome
-        cat("Processing Cohen's RNAseq - whole transportome\n")
-        results$cohen$seq$whole_transportome <- subset_with(results$cohen$seq$all, TRANSPORTOME)
+        cat("Processing DE-metric RNAseq - whole transportome\n")
+        results$DEscore$seq$whole_transportome <- subset_with(results$DEscore$seq$all, TRANSPORTOME)
         # Only channels
-        cat("Processing Cohen's RNAseq - channels\n")
-        results$cohen$seq$channels <- subset_with(results$cohen$seq$all, CHANNELS)
+        cat("Processing DE-metric RNAseq - channels\n")
+        results$DEscore$seq$channels <- subset_with(results$DEscore$seq$all, CHANNELS)
         # Only transporters
-        cat("Processing Cohen's RNAseq - transporters\n")
-        results$cohen$seq$transporters <- subset_with(results$cohen$seq$all, TRANSPORTERS)
+        cat("Processing DE-metric RNAseq - transporters\n")
+        results$DEscore$seq$transporters <- subset_with(results$DEscore$seq$all, TRANSPORTERS)
         
         # All genes
-        cat("Processing Cohen's Proteomics - all\n")
-        results$cohen$prot$all <- process_pair(data$tumor$proteomics, data$normal$proteomics, fn = calculate_cohen)
+        cat("Processing DE-metric Proteomics - all\n")
+        results$DEscore$prot$all <- process_pair(data$tumor$proteomics, data$normal$proteomics, fn = calculate_DEmetric)
         # Only whole transportome
-        cat("Processing Cohen's Proteomics - whole transportome\n")
-        results$cohen$prot$whole_transportome <- subset_with(results$cohen$prot$all, TRANSPORTOME)
+        cat("Processing DE-metric Proteomics - whole transportome\n")
+        results$DEscore$prot$whole_transportome <- subset_with(results$DEscore$prot$all, TRANSPORTOME)
         # Only channels
-        cat("Processing Cohen's Proteomics - channels\n")
-        results$cohen$prot$channels <- subset_with(results$cohen$prot$all, CHANNELS)
+        cat("Processing DE-metric Proteomics - channels\n")
+        results$DEscore$prot$channels <- subset_with(results$DEscore$prot$all, CHANNELS)
         # Only transporters
-        cat("Processing Cohen's Proteomics - transporters\n")
-        results$cohen$prot$transporters <- subset_with(results$cohen$prot$all, TRANSPORTERS)
+        cat("Processing DE-metric Proteomics - transporters\n")
+        results$DEscore$prot$transporters <- subset_with(results$DEscore$prot$all, TRANSPORTERS)
     }
     
 
@@ -423,13 +439,13 @@ pdf(
 print(x)
 dev.off()
 
-prepare_cohen_plot_data <- function(corrs) {
+prepare_DEcorr_plot_data <- function(corrs) {
     noerr <- partial(try, silent = TRUE)
     flat_res <- list()
     i <- 1
     # Add the various identifiers
     for (ttype in names(corrs)) {
-        if (is.null(corrs[[ttype]][["cohen"]])) {
+        if (is.null(corrs[[ttype]][["DEscore"]])) {
             next
         }
         print(ttype)
@@ -440,8 +456,8 @@ prepare_cohen_plot_data <- function(corrs) {
                     tumor_type = ttype,
                     test = test,
                     idx = inter[[1]]$idx,
-                    prot = inter[[1]]$cohen,
-                    seq = inter[[2]]$cohen
+                    prot = inter[[1]]$DEscore,
+                    seq = inter[[2]]$DEscore
                 )
                 i <- i + 1
             }
@@ -451,51 +467,50 @@ prepare_cohen_plot_data <- function(corrs) {
     bind_rows(flat_res)
 }
 
-cohen_plot_data <- prepare_cohen_plot_data(correlation_results)
+DEcorr_plot_data <- prepare_DEcorr_plot_data(correlation_results)
 
-plot_cohen <- function(cohen_plot_data, title = NULL) {
-    y <- ggplot(cohen_plot_data, aes(x = prot, y = seq)) +
-        geom_hline(yintercept = 0, color = "gray") +
-        geom_vline(xintercept = 0, color = "gray") +
-        geom_point(size = 0.5, alpha = 0.5) +
-        geom_abline(slope = 1, intercept = 0, color = "red", alpha = 0.5) +
-        geom_density2d() +
-        facet_wrap(facets = ~ tumor_type, ncol = 2) +
-        theme_minimal() +
-        theme(legend.position = "bottom") +
-        ylab("Cohen's D - Transcriptomics") +
-        xlab("Cohen's D - Proteomics") +
-        ggtitle(title)
+plot_DEcorr <- function(DEcorr_plot_data, title = NULL) {
+  y <- ggplot(DEcorr_plot_data, aes(x = prot, y = seq)) +
+      geom_hline(yintercept = 0, color = "gray") +
+      geom_vline(xintercept = 0, color = "gray") +
+      geom_point(size = 0.5, alpha = 0.5) +
+      geom_abline(slope = 1, intercept = 0, color = "red", alpha = 0.5) +
+      geom_density2d() +
+      facet_wrap(facets = ~ tumor_type, ncol = 2) +
+      theme_minimal() +
+      theme(legend.position = "bottom") +
+      ylab(paste(METRIC, "Transcriptomics", sep = " - ")) +
+      xlab(paste(METRIC, "Proteomics", sep = " - ")) +
+      ggtitle(title)
     
     print(y)
-    
 }
-
 
 pdf(
     file = file.path("data", "out", "transcriptomics_proteomics_foldchanges_all.pdf"),
     width = 9, height = 16
 )
-cohen_plot_data |> filter(test == "all") |> plot_cohen("Transcriptomics vs Proteomics - all genes")
+DEcorr_plot_data |> filter(test == "all") |> plot_DEcorr("Transcriptomics vs Proteomics - all genes")
 dev.off()
 
 pdf(
     file = file.path("data", "out", "transcriptomics_proteomics_foldchanges_channels.pdf"),
     width = 9, height = 16
 )
-cohen_plot_data |> filter(test == "channels") |> plot_cohen("Transcriptomics vs Proteomics - Channels")
+DEcorr_plot_data |> filter(test == "channels") |> plot_DEcorr("Transcriptomics vs Proteomics - Channels")
 dev.off()
 
 pdf(
     file = file.path("data", "out", "transcriptomics_proteomics_foldchanges_transporters.pdf"),
     width = 9, height = 16
 )
-cohen_plot_data |> filter(test == "transporters") |> plot_cohen("Transcriptomics vs Proteomics - Transporters")
+DEcorr_plot_data |> filter(test == "transporters") |> plot_DEcorr("Transcriptomics vs Proteomics - Transporters")
 dev.off()
 
 pdf(
     file = file.path("data", "out", "transcriptomics_proteomics_foldchanges_transportome.pdf"),
     width = 9, height = 16
 )
-cohen_plot_data |> filter(test == "whole_transportome") |> plot_cohen("Transcriptomics vs Proteomics - Whole transportome")
+DEcorr_plot_data |> filter(test == "whole_transportome") |> plot_DEcorr("Transcriptomics vs Proteomics - Whole transportome")
 dev.off()
+
