@@ -9,6 +9,8 @@ ENSG_DATA <- read_csv(file.path("data", "in", "ensg_data.csv"))
 CODING_GENES <- ENSG_DATA |> filter(gene_biotype == "protein_coding")
 GENESETS <- jsonlite::read_json(file.path("data", "genesets.json"))
 
+DEPTH_NORM <- FALSE
+
 get_geneset_named <- function(data, x) {
     for (item in data) {
         if (item$name == x) {
@@ -23,8 +25,12 @@ CHANNELS <- get_geneset_named(GENESETS, "channels")$data |> unlist()
 TRANSPORTERS <- get_geneset_named(GENESETS, "transporters")$data |> unlist()
 
 # Normalize depth of sequencing
-depth_norm <- function(seq) {
+depth_norm <- function(seq, toggle = DEPTH_NORM) {
+  if(toggle) {
     seq |> mutate(across(where(is.numeric), \(x) {(x / sum(x)) * 1e6 }))
+  } else {
+    seq
+  }
 }
 
 load_data <- function(root_path) {
@@ -62,7 +68,7 @@ load_data <- function(root_path) {
 
 data <- load_data("./data/in/proteomics")
 
-# Utility to detect is some data or other is missing or present
+# Utility to detect if some data or other is missing or present
 has <- function(data, type = c("tumor", "normal"), omic = c("proteomics", "transcriptomics")) {
     layer <- data[[type]]
     if (startsWith(omic, "p")) {
