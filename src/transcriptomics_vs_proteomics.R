@@ -451,7 +451,8 @@ prepare_DEcorr_plot_data <- function(corrs) {
         print(ttype)
         for (test in c("all", "whole_transportome", "channels", "transporters")) {
             {
-                inter <- intersect_genes(corrs[[ttype]]$cohen$prot[[test]], corrs[[ttype]]$cohen$seq[[test]])
+                inter <- intersect_genes(corrs[[ttype]]$DEscore$prot[[test]],
+                                         corrs[[ttype]]$DEscore$seq[[test]])
                 flat_res[[i]] <- data.frame(
                     tumor_type = ttype,
                     test = test,
