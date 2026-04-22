@@ -395,7 +395,7 @@ calc_all_correlations <- function() {
 
 correlation_results <- calc_all_correlations()
 
-## - Plotting -
+# --- Plotting -----------------------------------------------------------------
 
 prepare_plot_data <- function(corrs) {
     noerr <- partial(try, silent = TRUE)
@@ -422,7 +422,6 @@ prepare_plot_data <- function(corrs) {
 }
 
 plot_data <- prepare_plot_data(correlation_results)
-
 
 x <- ggplot(plot_data, aes(x = status, fill = test, y = corr)) +
     geom_boxplot() +
@@ -453,12 +452,20 @@ prepare_DEcorr_plot_data <- function(corrs) {
             {
                 inter <- intersect_genes(corrs[[ttype]]$DEscore$prot[[test]],
                                          corrs[[ttype]]$DEscore$seq[[test]])
+                
+                stats <- suppressWarnings(cor.test(inter[[1]]$DEscore,
+                                                   inter[[2]]$DEscore,
+                                                   method = "spearman"))
+                
                 flat_res[[i]] <- data.frame(
                     tumor_type = ttype,
                     test = test,
                     idx = inter[[1]]$idx,
                     prot = inter[[1]]$DEscore,
-                    seq = inter[[2]]$DEscore
+                    seq = inter[[2]]$DEscore,
+                    corr = stats$estimate,
+                    pval = stats$p.value,
+                    size = nrow(inter[[1]])
                 )
                 i <- i + 1
             }
@@ -471,13 +478,23 @@ prepare_DEcorr_plot_data <- function(corrs) {
 DEcorr_plot_data <- prepare_DEcorr_plot_data(correlation_results)
 
 plot_DEcorr <- function(DEcorr_plot_data, title = NULL) {
+  
+  tmp <- DEcorr_plot_data |>
+    distinct(tumor_type, corr, pval, size) |>
+    mutate(
+      facet_label = paste0(tumor_type, " (n = ", size, ")\n",
+                           "corr = ", signif(corr, 3),
+                           ", p = ", format.pval(pval, digits = 3, eps = 1e-3)))
+  facet_labels <- setNames(tmp$facet_label, tmp$tumor_type)
+  
   y <- ggplot(DEcorr_plot_data, aes(x = prot, y = seq)) +
       geom_hline(yintercept = 0, color = "gray") +
       geom_vline(xintercept = 0, color = "gray") +
       geom_point(size = 0.5, alpha = 0.5) +
       geom_abline(slope = 1, intercept = 0, color = "red", alpha = 0.5) +
       geom_density2d() +
-      facet_wrap(facets = ~ tumor_type, ncol = 2) +
+      facet_wrap(facets = ~ tumor_type, ncol = 2,
+                 labeller = as_labeller(facet_labels)) +
       theme_minimal() +
       theme(legend.position = "bottom") +
       ylab(paste(METRIC, "Transcriptomics", sep = " - ")) +
