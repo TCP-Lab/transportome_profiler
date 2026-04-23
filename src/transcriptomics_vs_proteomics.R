@@ -275,6 +275,40 @@ calculate_DEmetric <- function(this, that, id_col = "idx", metric = METRIC) {
     final
 }
 
+# x and y can be vectors!
+accord_idx <- function(x, y, thr = 1) {
+  if (length(x) != length(y)) {
+    stop("'x' and 'y' must have the same length")
+  }
+  if (any(is.na(x))) {
+    warning("First dataframe has some NAs. Weird things might happen.")
+  }
+  if (any(is.na(y))) {
+    warning("Second dataframe has some NAs. Weird things might happen.")
+  }
+  
+  accord <- (x >= thr & y >= thr) | (x <= -thr & y <= -thr) | (x >= -thr & x <= thr & y >= -thr & y <= thr)
+  
+  sum(accord)/length(x)
+}
+
+# x and y can be vectors!
+discord_idx <- function(x, y, thr = 1) {
+  if (length(x) != length(y)) {
+    stop("'x' and 'y' must have the same length")
+  }
+  if (any(is.na(x))) {
+    warning("First dataframe has some NAs. Weird things might happen.")
+  }
+  if (any(is.na(y))) {
+    warning("Second dataframe has some NAs. Weird things might happen.")
+  }
+  
+  discord <- (x > thr & y < -thr) | (x < -thr & y > thr)
+ 
+  sum(discord)/length(x)
+}
+
 process_pair <- function(this, that, id_col = "idx", intersect_samples = TRUE, fn = calculate_correlations) {
     check_samples(this, that)
     this <- this |> purge_gene_versions(id_col=id_col) |> select_coding(id_col=id_col) |> collapse_duplicate_genes(id_col=id_col)
@@ -427,7 +461,7 @@ x <- ggplot(plot_data, aes(x = status, fill = test, y = corr)) +
     geom_boxplot() +
     facet_wrap(facets = ~ tumor_type) +
     theme(legend.position = "bottom") +
-    ylab("Spearmann's Correlation") +
+    ylab("Spearman's Correlation") +
     xlab("Cohort") +
     scale_fill_discrete(name = "Geneset")
 
@@ -456,6 +490,8 @@ prepare_DEcorr_plot_data <- function(corrs) {
                 stats <- suppressWarnings(cor.test(inter[[1]]$DEscore,
                                                    inter[[2]]$DEscore,
                                                    method = "spearman"))
+                stats$accord <- accord_idx(inter[[1]]$DEscore, inter[[2]]$DEscore, thr = 1)
+                stats$discord <- discord_idx(inter[[1]]$DEscore, inter[[2]]$DEscore, thr = 1)
                 
                 flat_res[[i]] <- data.frame(
                     tumor_type = ttype,
@@ -465,6 +501,8 @@ prepare_DEcorr_plot_data <- function(corrs) {
                     seq = inter[[2]]$DEscore,
                     corr = stats$estimate,
                     pval = stats$p.value,
+                    conc = stats$accord,
+                    disc = stats$discord,
                     size = nrow(inter[[1]])
                 )
                 i <- i + 1
@@ -480,11 +518,13 @@ DEcorr_plot_data <- prepare_DEcorr_plot_data(correlation_results)
 plot_DEcorr <- function(DEcorr_plot_data, title = NULL) {
   
   tmp <- DEcorr_plot_data |>
-    distinct(tumor_type, corr, pval, size) |>
+    distinct(tumor_type, corr, pval, conc, disc, size) |>
     mutate(
       facet_label = paste0(tumor_type, " (n = ", size, ")\n",
                            "corr = ", signif(corr, 3),
-                           ", p = ", format.pval(pval, digits = 3, eps = 1e-3)))
+                           ", p = ", format.pval(pval, digits = 3, eps = 1e-20), "\n",
+                           "C = ", signif(conc, 3),
+                           ", D = ", signif(disc, 3)))
   facet_labels <- setNames(tmp$facet_label, tmp$tumor_type)
   
   y <- ggplot(DEcorr_plot_data, aes(x = prot, y = seq)) +
