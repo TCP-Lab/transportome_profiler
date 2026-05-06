@@ -107,7 +107,7 @@ check_samples <- function(this, that, verbose = FALSE) {
     two_uni <- setdiff(two_names, inters)
     
     if (length(inters) > 0 & length(one_uni) == 0 & length(two_uni) == 0) {
-        res <- c(res, "All columns intersect. There are no unique columns.")
+        res <- c(res, "All columns intersect. There are no unique columns.\n")
         out <- TRUE
     } else if (!verbose) {
         res <- c(res, "There are", length(inters), "intersecting cols and", length(one_uni), ",", length(two_uni), "unique columns in the first and second df, respectively.\n")
@@ -143,22 +143,23 @@ strip_version <- function(x) {
     str_split_i(x, "\\.", 1)
 }
 
+purge_gene_versions <- function(data, id_col = "idx") {
+  data[[id_col]] <- strip_version(data[[id_col]])
+  data
+}
+
 collapse_duplicate_genes <- function(data, id_col = "idx", method = "drop") {
     dups <- data[[id_col]] |> duplicated()
     if (any(dups)) {
         cat(paste0("Dropping ", sum(dups), " duplicates...\n"))
     }
+    
     if (method == "drop") {
         data <- data[!dups, ]
     } else {
         stop("Unrecognized method")
     }
     
-    data
-}
-
-purge_gene_versions <- function(data, id_col = "idx") {
-    data[[id_col]] <- strip_version(data[[id_col]])
     data
 }
 
@@ -202,10 +203,10 @@ calculate_correlations <- function(this, that, id_col = "idx") {
     genes <- intersect(this[[id_col]], that[[id_col]])
 
     results <- list()
-    pb <- progress_bar$new(total = length(genes))
+    pb <- progress_bar$new(total = length(genes), clear = FALSE, width = 80)
     for (gene in genes) {
-        this_gene <- this |> filter(idx == gene) |> select(!{{ id_col }}) |> unlist()
-        that_gene <- that |> filter(idx == gene) |> select(!{{ id_col }}) |> unlist()
+        this_gene <- this |> filter(.data[[id_col]] == gene) |> select(!{{ id_col }}) |> unlist()
+        that_gene <- that |> filter(.data[[id_col]] == gene) |> select(!{{ id_col }}) |> unlist()
         
         result <- list()
         
@@ -245,7 +246,8 @@ calculate_DEmetric <- function(this, that, id_col = "idx", metric = METRIC) {
     genes <- intersect(this[[id_col]], that[[id_col]])
     
     results <- list()
-    pb <- progress_bar$new(total = length(genes))
+    pb <- progress_bar$new(total = length(genes), clear = FALSE, width = 80)
+    
     for (gene in genes) {
         this_gene <- this |> filter(idx == gene) |> select(!{{ id_col }}) |> unlist()
         that_gene <- that |> filter(idx == gene) |> select(!{{ id_col }}) |> unlist()
@@ -309,7 +311,7 @@ discord_idx <- function(x, y, thr = 1) {
   sum(discord)/length(x)
 }
 
-process_pair <- function(this, that, id_col = "idx", intersect_samples = TRUE, fn = calculate_correlations) {
+process_pair <- function(this, that, id_col = "idx", fn = calculate_correlations) {
     check_samples(this, that)
     this <- this |> purge_gene_versions(id_col=id_col) |> select_coding(id_col=id_col) |> collapse_duplicate_genes(id_col=id_col)
     that <- that |> purge_gene_versions(id_col=id_col) |> select_coding(id_col=id_col) |> collapse_duplicate_genes(id_col=id_col)
@@ -337,7 +339,7 @@ process_batch <- function(data) {
     # Some calls here are duplicated to be slightly more explicit, and in case
     # we need to edit only some cases.
     
-    # NOTE - A previous version of this did the calculatations again after
+    # NOTE - A previous version of this did the calculations again after
     # running subset_with to each dataframe. This iS LOOOOOONG, but allows
     # calculations to be performed on the new frames, if sample-dependent
     # (i.e. column-wise) calculations have to be done. However, our FNs
@@ -350,75 +352,79 @@ process_batch <- function(data) {
         results$tumor <- list()
         cat("Processing - TUMORS\n")
         # All genes
-        cat("Processing Tumors - all\n")
+        cat("Processing - TUMORS > all\n")
         results$tumor$all <- process_pair(data$tumor$proteomics, data$tumor$rnaseq)
         # Only whole transportome
-        cat("Processing Tumors - whole transportome\n")
+        cat("Processing - TUMORS > whole transportome\n")
         results$tumor$whole_transportome <- subset_with(results$tumor$all, TRANSPORTOME)
         # Only channels
-        cat("Processing Tumors - channels\n")
+        cat("Processing - TUMORS > channels\n")
         results$tumor$channels <- subset_with(results$tumor$all, CHANNELS)
         # Only transporters
-        cat("Processing Tumors - transporters\n")
+        cat("Processing - TUMORS > transporters\n")
         results$tumor$transporters <- subset_with(results$tumor$all, TRANSPORTERS)
     }
     
+    ## NORMAL DATA
     if (has_normal_prot(data) & has_normal_seq(data)) {
         results$normal <- list()
+        cat("Processing - NORMALS\n")
         # All genes
-        cat("Processing Tumors - all\n")
+        cat("Processing - NORMALS > all\n")
         results$normal$all <- process_pair(data$normal$proteomics, data$normal$rnaseq)
         # Only whole transportome
-        cat("Processing Tumors - whole transportome\n")
+        cat("Processing - NORMALS > whole transportome\n")
         results$normal$whole_transportome <- subset_with(results$normal$all, TRANSPORTOME)
         # Only channels
-        cat("Processing Tumors - channels\n")
+        cat("Processing - NORMALS > channels\n")
         results$normal$channels <- subset_with(results$normal$all, CHANNELS)
         # Only transporters
-        cat("Processing Tumors - transporters\n")
+        cat("Processing - NORMALS > transporters\n")
         results$normal$transporters <- subset_with(results$normal$all, TRANSPORTERS)
     }
     
+    ## DIFFERENTIAL DATA
     if (has_normal_prot(data) & has_normal_seq(data) & has_tumor_seq(data) & has_tumor_prot(data)) {
         results$DEscore <- list()
         results$DEscore$seq <- list()
         results$DEscore$prot <- list()
-        
+        cat("Performing DEA\n")
+        cat("Processing DE-metric RNAseq\n")
         # All genes
-        cat("Processing DE-metric RNAseq - all\n")
+        cat("Processing DE-metric RNAseq > all\n")
         results$DEscore$seq$all <- process_pair(data$tumor$rnaseq, data$normal$rnaseq, fn = calculate_DEmetric)
         # Only whole transportome
-        cat("Processing DE-metric RNAseq - whole transportome\n")
+        cat("Processing DE-metric RNAseq > whole transportome\n")
         results$DEscore$seq$whole_transportome <- subset_with(results$DEscore$seq$all, TRANSPORTOME)
         # Only channels
-        cat("Processing DE-metric RNAseq - channels\n")
+        cat("Processing DE-metric RNAseq > channels\n")
         results$DEscore$seq$channels <- subset_with(results$DEscore$seq$all, CHANNELS)
         # Only transporters
-        cat("Processing DE-metric RNAseq - transporters\n")
+        cat("Processing DE-metric RNAseq > transporters\n")
         results$DEscore$seq$transporters <- subset_with(results$DEscore$seq$all, TRANSPORTERS)
         
+        cat("Processing DE-metric Proteomics\n")
         # All genes
-        cat("Processing DE-metric Proteomics - all\n")
+        cat("Processing DE-metric Proteomics > all\n")
         results$DEscore$prot$all <- process_pair(data$tumor$proteomics, data$normal$proteomics, fn = calculate_DEmetric)
         # Only whole transportome
-        cat("Processing DE-metric Proteomics - whole transportome\n")
+        cat("Processing DE-metric Proteomics > whole transportome\n")
         results$DEscore$prot$whole_transportome <- subset_with(results$DEscore$prot$all, TRANSPORTOME)
         # Only channels
-        cat("Processing DE-metric Proteomics - channels\n")
+        cat("Processing DE-metric Proteomics > channels\n")
         results$DEscore$prot$channels <- subset_with(results$DEscore$prot$all, CHANNELS)
         # Only transporters
-        cat("Processing DE-metric Proteomics - transporters\n")
+        cat("Processing DE-metric Proteomics > transporters\n")
         results$DEscore$prot$transporters <- subset_with(results$DEscore$prot$all, TRANSPORTERS)
     }
     
-
     results
 }
 
 calc_all_correlations <- function() {
     results <- list()
     for (ttype in TUMOR_TYPES) {
-        cat(paste0("Processing batches for type ", ttype, ".\n"))
+        cat(paste0("\nProcessing batches for type ", ttype, ".\n"))
         tryCatch({
             results[[ttype]] <- process_batch(data[[ttype]])
         }, error = function(e) {print(paste0("Failed to process ", ttype, " Error: ", str(e)))})
