@@ -463,9 +463,28 @@ prepare_plot_data <- function(corrs) {
 
 plot_data <- prepare_plot_data(correlation_results)
 
-x <- ggplot(plot_data, aes(x = status, fill = test, y = corr)) +
+x_medians <- plot_data |> group_by(status, test, tumor_type) |>
+    mutate(medians = median(corr, na.rm = TRUE))
+# This here is a bad hack. In short, to have facet_wrap work nicely with
+# geom_text, we need the labels inside the original DF of the plot, so that
+# wrapping wraps them too (or else they are duplicated, as we lose one grouping
+# variable). So, I calculate them before hand, but now I got a bunch of copies
+# of the same median, which generate one label per value. They are perfectly
+# overlapping, but you still kinda see it and they make the PDF much heavier
+# solution (ish) is to NA every duplicate but one. Here's hoping that no
+# to different groups have the exact same median, or the second group gets
+# deleted and we would need a smarter `duplicated` fn.
+x_medians$medians[duplicated(x_medians$medians)] <- NA
+
+x <- ggplot(x_medians, aes(x = status, fill = test, y = corr)) +
     geom_boxplot() +
-    facet_wrap(facets = ~ tumor_type) +
+    geom_text(
+        aes(x = status, y = medians, label = round(medians, 2)),
+        position = position_dodge(width = 0.75),
+        vjust = -0.5,
+        size = 3
+    ) +
+    facet_wrap(facets = ~ tumor_type, ncol = 2) +
     theme(legend.position = "bottom") +
     ylab("Spearman's Correlation") +
     xlab("Cohort") +
@@ -473,7 +492,7 @@ x <- ggplot(plot_data, aes(x = status, fill = test, y = corr)) +
 
 pdf(
     file = file.path("data", "out", "transcriptomics_proteomics_plot.pdf"),
-    width = 16, height = 9
+    width = 9, height = 16
 )
 print(x)
 dev.off()
@@ -539,7 +558,7 @@ plot_DEcorr <- function(DEcorr_plot_data, title = NULL) {
       geom_point(size = 0.5, alpha = 0.5) +
       geom_abline(slope = 1, intercept = 0, color = "red", alpha = 0.5) +
       geom_density2d() +
-      facet_wrap(facets = ~ tumor_type, ncol = 2,
+      facet_wrap(facets = ~ tumor_type, ncol = 3,
                  labeller = as_labeller(facet_labels)) +
       theme_minimal() +
       theme(legend.position = "bottom") +
@@ -550,30 +569,33 @@ plot_DEcorr <- function(DEcorr_plot_data, title = NULL) {
     print(y)
 }
 
+FC_WIDTH <- 10
+FC_HEIGHT <- 8
+
 pdf(
     file = file.path("data", "out", "transcriptomics_proteomics_foldchanges_all.pdf"),
-    width = 9, height = 16
+    width = FC_WIDTH, height = FC_HEIGHT
 )
 DEcorr_plot_data |> filter(test == "all") |> plot_DEcorr("Transcriptomics vs Proteomics - all genes")
 dev.off()
 
 pdf(
     file = file.path("data", "out", "transcriptomics_proteomics_foldchanges_channels.pdf"),
-    width = 9, height = 16
+    width = FC_WIDTH, height = FC_HEIGHT
 )
 DEcorr_plot_data |> filter(test == "channels") |> plot_DEcorr("Transcriptomics vs Proteomics - Channels")
 dev.off()
 
 pdf(
     file = file.path("data", "out", "transcriptomics_proteomics_foldchanges_transporters.pdf"),
-    width = 9, height = 16
+    width = FC_WIDTH, height = FC_HEIGHT
 )
 DEcorr_plot_data |> filter(test == "transporters") |> plot_DEcorr("Transcriptomics vs Proteomics - Transporters")
 dev.off()
 
 pdf(
     file = file.path("data", "out", "transcriptomics_proteomics_foldchanges_transportome.pdf"),
-    width = 9, height = 16
+    width = FC_WIDTH, height = FC_HEIGHT
 )
 DEcorr_plot_data |> filter(test == "whole_transportome") |> plot_DEcorr("Transcriptomics vs Proteomics - Whole transportome")
 dev.off()
